@@ -5,13 +5,10 @@ ZFL is the ZeroMQ Function Library, a thin portability & function library
 for ZeroMQ applications in C/C++.  It is written in clear and readable C,
 portable to all ZeroMQ platforms, and licensed under the LGPL.
 
-The goals of this library are to:
-
-* Provide a home for reusable functionality that is of use to ZeroMQ
-  application developers working in C/C++.
-
-* Make it easier to write 100% portable applications by abstracting the
-  relevant differences between different operating systems.
+The principal goal is to aggressively reduce the LoC in 0MQ devices and other
+applications written in C, and leave the resulting code 100% portable.  A
+secondary goal is to recycle decades of experience from legacy iMatix C
+libraries so it can be used for new applications.
 
 ZFL is inspired by the iMatix Standard Function Library (SFL), and borrows
 liberally from it.  See http://legacy.imatix.com/html/sfl/.

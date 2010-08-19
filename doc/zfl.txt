@@ -53,6 +53,48 @@ JSON parsing class::
 Service configuration class:
     linkzfl:zfl_config[7]
 
+Portability
+~~~~~~~~~~~
+
+The file zfl_prelude.h defines a number of macros including these:
+
+----
+#define FOREVER             for (;;)            //  FOREVER { ... }
+#define until(expr)         while (!(expr))     //  do { ... } until (expr)
+#define streq(s1,s2)        (!strcmp ((s1), (s2)))
+#define strneq(s1,s2)       (strcmp ((s1), (s2)))
+#define strused(s)          (*(s) != 0)
+#define strnull(s)          (*(s) == 0)
+#define strclr(s)           (*(s) = 0)
+#define strlast(s)          ((s) [strlen (s) - 1])
+#define strterm(s)          ((s) [strlen (s)])
+
+#define tblsize(x)          (sizeof (x) / sizeof ((x) [0]))
+#define tbllast(x)          (x [tblsize (x) - 1])
+
+#define randomof(num)       (int) (((float) num) * rand () / (RAND_MAX + 1.0))
+#define randomize()         srand ((uint) apr_time_usec (apr_time_now ()))
+
+#if (!defined (MIN))
+#   define MIN(a,b)         (((a) < (b))? (a): (b))
+#   define MAX(a,b)         (((a) > (b))? (a): (b))
+#endif
+
+//- Assertion that pointer value is as expect -------------------------------
+
+#define assert_eq(value,const) \
+if ((value) != (const)) {\
+    printf ("Assertion failed, expected=%d actual=%d", (const), (value));\
+    assert ((value) == (const));\
+}
+
+//- Boolean operators and constants -----------------------------------------
+
+#if (!defined (TRUE))
+#    define TRUE        1               //  ANSI standard
+#    define FALSE       0
+#endif
+----
 
 ERROR HANDLING
 --------------
