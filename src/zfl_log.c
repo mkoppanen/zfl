@@ -65,12 +65,12 @@ int
 zfl_log_test (void)
 {
     zfl_log_t
-        *self;
+        *log;
 
-    self = zfl_log_new ();
-    assert (self);
+    log = zfl_log_new ();
+    assert (log);
 
-    zfl_log_destroy (&self);
-    assert (self == NULL);
+    zfl_log_destroy (&log);
+    assert (log == NULL);
     return 0;
 }

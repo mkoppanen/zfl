@@ -94,15 +94,15 @@ int
 zfl_base_test (void)
 {
     zfl_base_t
-        *self;
+        *base;
 
-    self = zfl_base_new ();
-    assert (self);
+    base = zfl_base_new ();
+    assert (base);
 
-    zfl_base_filler_set (self, 123);
-    assert (zfl_base_filler (self) == 123);
+    zfl_base_filler_set (base, 123);
+    assert (zfl_base_filler (base) == 123);
 
-    zfl_base_destroy (&self);
-    assert (self == NULL);
+    zfl_base_destroy (&base);
+    assert (base == NULL);
     return 0;
 }

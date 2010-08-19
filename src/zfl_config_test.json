@@ -1,0 +1,19 @@
+{
+    "verbose": true,
+    "type": "queue",
+    "iothreads": 2,
+    "frontend": {
+        "option": {
+            "hwm": 1000,
+            "subscribe": [ "coffee", "tea", "juice" ],
+            "subscribe": "milk"
+        },
+        "bind": "tcp://*:5555",
+        "bind": [ "tcp://*:5556", "inproc://mydevice" ],
+        "connect": [ ]
+    },
+    "backend": {
+        "bind": [ ],
+        "connect": [ "tcp://localhost:5556" ]
+    }
+}

@@ -32,11 +32,12 @@ typedef struct _zfl_config_t zfl_config_t;
 
 //  Constructor and destructor
 zfl_config_t *
-     zfl_config_new         (void);
+     zfl_config_new         (FILE *file);
 void zfl_config_destroy     (zfl_config_t **self_p);
 
 //  Class methods
-int  zfl_config_dummy       (zfl_config_t *self);
+void *zfl_config_socket     (zfl_config_t *self, char *name, int type);
+void *zfl_config_context    (zfl_config_t *self);
 
 //  Selftest method
 int  zfl_config_test        (void);
