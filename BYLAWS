@@ -1,0 +1,111 @@
+ZFL Bylaws
+==========
+
+Goals
+-----
+
+The principal goal is to aggressively reduce the LoC in 0MQ devices and other
+applications written in C, and leave the resulting code 100% portable.  A
+secondary goal is to recycle decades of experience from legacy iMatix C
+libraries so it can be used for new applications.
+
+Vision
+------
+
+Lightweight, class-based, minimalistic, highly efficient, aimed at making it
+faster and easier to develop realistic, secure, and portable 0MQ devices and
+applications.  Easy to learn, consistent API, and extremely thin.
+
+Packaging
+---------
+
+ZFL should use Autotools for packaging.  However that is beyond the skills of
+the current authors.
+
+Scope
+-----
+
+The primary scope of ZFL is writing robust services (devices and other headless
+applications).  Services need configuration file parsing, integration with the
+operating system, logging, remote administration, process security, etc.  ZFL is
+not intended as a general purpose C library, though it provides some basic and
+widely-used data structures such as hash tables.  Every module in ZFL is backed
+by a clear use case that justifies its inclusion in the library.  Functionality
+for "its own sake" will be removed.
+
+Overall Structure
+-----------------
+
+ZFL consists of modules, each module consisting of a .h and a .c.  Modules may
+depend on other modules.  Circular dependencies are not allowed.  Each module
+(where relevant) maps to a class.
+
+zfl.h will include all modules header files, all the time.  For the user, ZFL
+forms one single package.  All modules start by including zfl.h.  All
+applications that use ZFL start by including zfl.h.
+
+zfl.h will include all necessary system header files.  For the user, ZFL pulls
+in all system dependencies automatically and makes these available to
+applications as well as ZFL code.
+
+zfl.h defines a limited number of small, useful macros and typedefs that have
+proven useful for writing clearer C code.
+
+Git Workflow
+------------
+
+The ZFL project uses the Git workflow defined and documented by Vincent Driessen
+here:
+
+http://nvie.com/git-model
+
+Source Style
+------------
+
+We consider the ZFL source code to be valuable, and readability to be its most
+important feature.  The canonical example for ZFL style is the zfl_base module,
+which defines the template for all other modules.  We consider a module to be
+"perfect" when the reader cannot distinguish its style from that of zfl_base.
+
+The nomenclature for all modules is consistent:
+
+* Source files: zfl_base.c, zfl_base.h
+* Methods: zfl_base_test, zfl_base_print
+
+Some modules are not class based.  Class-based modules follow these rules:
+
+* Class typedef: zfl_base_t
+* Constructor: zfl_base_new
+* Destructor: zfl_base_destroy
+* Property methods: zfl_base_property_set, zfl_base_property
+* Class structures are private (defined in the .c source but not the .h)
+* Properties are accessed only via methods named as described above.
+* In the module source code the object is always called 'self'.
+* The constructor may take arbitrary arguments, and returns NULL on failure, or
+  a new object.
+* The destructor takes a pointer to an object reference and nullifies it.
+
+Return values for methods are:
+
+* For methods that return an object reference, either the reference, or NULL on
+  failure.
+* For methods that signal success/failure, a return value of 0 means sucess, -1
+  failure.
+
+Private/static functions in a class are named s_functionname and are not
+exported via the header file.
+
+All modules have a test method called zfl_classname_test.
+
+Contributions
+-------------
+
+All contributors are listed in AUTHORS.  All git committers agree in advance
+that they license their contributions under the LGPL, that they are the original
+authors of their work, or that they can certify the origin of the code.
+
+All modules are maintained by a single person, who is the responsible editor for
+that module and who is named in the header as such.  This is usually the
+originator of the module.  Whereas several people can collaborate on a module,
+one single person is always the lead maintainer and the one to blame when it
+breaks.

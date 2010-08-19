@@ -1,0 +1,295 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+AC_PREREQ(2.61)
+#
+# Change the version number below after doing a public release.
+# The version in git should reflect the *next* version planned.
+# Version must be MAJOR.MINOR.PATCH otherwise things will break.
+#
+AC_INIT([zfl],[0.1.0],[zeromq-dev@lists.zeromq.org])
+
+AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_MACRO_DIR(config)
+AM_CONFIG_HEADER(src/platform.h)
+AM_INIT_AUTOMAKE(tar-ustar)
+
+# This defines PACKAGE_VERSION_... in src/platform.h
+PV_MAJOR=`echo $PACKAGE_VERSION | cut -d . -f 1`
+PV_MINOR=`echo $PACKAGE_VERSION | cut -d . -f 2`
+PV_PATCH=`echo $PACKAGE_VERSION | cut -d . -f 3`
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_MAJOR],[$PV_MAJOR],
+    [ZFL major version])
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_MINOR],[$PV_MINOR],
+    [ZFL minor version])
+AC_DEFINE_UNQUOTED([PACKAGE_VERSION_PATCH],[$PV_PATCH],
+    [ZFL patchlevel])
+# This lets us use PACKAGE_VERSION in Makefiles
+AC_SUBST(PACKAGE_VERSION)
+
+#
+# Libtool -version-info (ABI version)
+#
+# Currently 0.0.0 ("unstable"). Don't change this unless you
+# know exactly what you're doing and have read and understand
+# http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
+#
+# libzfl -version-info
+LTVER="0:0:0"
+AC_SUBST(LTVER)
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+AM_PROG_CC_C_O
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
+AC_PROG_SED
+AC_PROG_AWK
+
+# Set a helper variable to indicate GNU C and C++ are in use
+if test "x$GCC" = "xyes" -a "x$GXX" = "xyes"; then
+    gnu_compilers="yes"
+else
+    gnu_compilers="no"
+fi
+
+# Checks for libraries.
+AC_CHECK_LIB([pthread], [pthread_create])
+
+# Extra CXXFLAGS are appended at the end of CXXFLAGS for libzfl.
+LIBZFL_EXTRA_CXXFLAGS=""
+
+# Extra LDFLAGS are appended at the end of LDFLAGS for libzfl.
+LIBZFL_EXTRA_LDFLAGS=""
+
+# By default compiling with -pedantic except QNX and OSX.
+pedantic="yes"
+
+#By default compiling with -Werror except OSX.
+werror="yes"
+
+#Whether we are on mingw or not.
+on_mingw32="no"
+
+# Host speciffic checks
+AC_CANONICAL_HOST
+
+# Determine whether or not documentation should be built and installed.
+build_doc="yes"
+install_man="yes"
+# Check for asciidoc and xmlto and don't build the docs if these are not installed.
+AC_CHECK_PROG(have_asciidoc, asciidoc, yes, no)
+AC_CHECK_PROG(have_xmlto, xmlto, yes, no)
+if test "x$have_asciidoc" = "xno" -o "x$have_xmlto" = "xno"; then
+    build_doc="no"
+    # Tarballs built with 'make dist' ship with prebuilt documentation.
+    if ! test -f doc/zfl.7; then
+        install_man="no"
+        AC_MSG_WARN([You are building an unreleased version of ZFL and asciidoc or xmlto are not installed. Documentation will not be built and manual pages will not be installed.])
+    fi
+fi
+AC_MSG_CHECKING([whether to build documentation])
+AC_MSG_RESULT([$build_doc])
+AC_MSG_CHECKING([whether to install manpages])
+AC_MSG_RESULT([$install_man])
+
+# Set some default features required by ZFL code.
+CPPFLAGS="-D_REENTRANT -D_THREAD_SAFE $CPPFLAGS"
+
+# OS-specific tests
+case "${host_os}" in
+    *linux*)
+        # Define on Linux to enable all library features
+        CPPFLAGS="-D_GNU_SOURCE $CPPFLAGS"
+        AC_DEFINE(ZFL_HAVE_LINUX, 1, [Have Linux OS])
+        AC_CHECK_LIB(uuid, main, ,
+            [AC_MSG_ERROR([cannot link with -luuid, install uuid-dev.])])
+        ;;
+    *solaris*)
+        # Define on Solaris to enable all library features
+        CPPFLAGS="-D_PTHREADS $CPPFLAGS"
+        AC_DEFINE(ZFL_HAVE_SOLARIS, 1, [Have Solaris OS])
+        AC_CHECK_LIB(socket, main)
+        AC_CHECK_LIB(nsl, main)
+        AC_CHECK_LIB(rt, main)
+        AC_CHECK_LIB(uuid, main, ,
+            [AC_MSG_ERROR([cannot link with -luuid, install uuid-dev.])])
+        AC_MSG_CHECKING([whether atomic operations can be used])
+        AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+            [[#include <atomic.h>]],
+            [[uint32_t value;
+              atomic_cas_32 (&value, 0, 0);
+              return 0;]])],
+            [solaris_has_atomic=yes],
+            [solaris_has_atomic=no])
+        AC_MSG_RESULT([$solaris_has_atomic])
+        # Solaris 8 does not have atomic operations exported to user space.
+        if test "x$solaris_has_atomic" = "xno"; then
+            AC_DEFINE(ZFL_FORCE_MUTEXES, 1, [Force to use mutexes])
+        fi
+        ;;
+    *freebsd*)
+        # Define on FreeBSD to enable all library features
+        CPPFLAGS="-D__BSD_VISIBLE $CPPFLAGS"
+        AC_DEFINE(ZFL_HAVE_FREEBSD, 1, [Have FreeBSD OS])
+        ;;
+    *darwin*)
+        # Define on Darwin to enable all library features
+        CPPFLAGS="-D_DARWIN_C_SOURCE $CPPFLAGS"
+        pedantic="no"
+        werror="no"
+        AC_DEFINE(ZFL_HAVE_OSX, 1, [Have DarwinOSX OS])
+        LIBZFL_EXTRA_CXXFLAGS+="-Wno-uninitialized"
+        ;;
+    *netbsd*)
+        # Define on NetBSD to enable all library features
+        CPPFLAGS="-D_NETBSD_SOURCE $CPPFLAGS"
+        AC_DEFINE(ZFL_HAVE_NETBSD, 1, [Have NetBSD OS])
+        # NetBSD 5.0 and newer provides atomic operations but we can
+        # only use these on systems where PR #42842 has been fixed so
+        # we must try and link a test program using C++.
+        netbsd_has_atomic=no
+        AC_MSG_CHECKING([whether atomic operations can be used])
+        AC_LANG_PUSH([C++])
+        AC_LINK_IFELSE([AC_LANG_PROGRAM(
+            [[#include <atomic.h>]],
+            [[uint32_t value;
+              atomic_cas_32 (&value, 0, 0);
+              return 0;]])],
+            [netbsd_has_atomic=yes],
+            [netbsd_has_atomic=no])
+        AC_LANG_POP([C++])
+        AC_MSG_RESULT([$netbsd_has_atomic])
+        if test "x$netbsd_has_atomic" = "xno"; then
+            AC_DEFINE(ZFL_FORCE_MUTEXES, 1, [Force to use mutexes])
+        fi
+        ;;
+    *openbsd*)
+        # Define on OpenBSD to enable all library features
+        CPPFLAGS="-D_BSD_SOURCE $CPPFLAGS"
+        AC_DEFINE(ZFL_HAVE_OPENBSD, 1, [Have OpenBSD OS])
+        ;;
+    *nto-qnx*)
+        pedantic="no"
+        AC_DEFINE(ZFL_HAVE_QNXNTO, 1, [Have QNX Neutrino OS])
+        AC_CHECK_LIB(socket,main)
+        AC_CHECK_LIB(crypto,RAND_bytes)
+        ;;
+    *aix*)
+        AC_DEFINE(ZFL_HAVE_AIX, 1, [Have AIX OS])
+        ;;
+    *hpux*)
+        # Define on HP-UX to enable all library features
+        CPPFLAGS="-D_POSIX_C_SOURCE=200112L"
+        AC_DEFINE(ZFL_HAVE_HPUX, 1, [Have HPUX OS])
+        AC_CHECK_LIB(rt, main)
+        ;;
+    *mingw32*)
+        AC_DEFINE(ZFL_HAVE_WINDOWS, 1, [Have Windows OS])
+        AC_DEFINE(ZFL_HAVE_MINGW32, 1, [Have MinGW32])
+        AC_CHECK_HEADERS(windows.h)
+        AC_CHECK_LIB(ws2_32, main, ,
+            [AC_MSG_ERROR([cannot link with ws2_32.dll.])])
+        AC_CHECK_LIB(rpcrt4, main, ,
+            [AC_MSG_ERROR([cannot link with rpcrt4.dll.])])
+        AC_CHECK_LIB(iphlpapi, main, ,
+            [AC_MSG_ERROR([cannot link with iphlpapi.dll.])])
+        CFLAGS="${CFLAGS} -std=c99"
+        on_mingw32="yes"
+        install_man="no"
+        ;;
+    *cygwin*)
+        # Define on Cygwin to enable all library features
+        CPPFLAGS="-D_GNU_SOURCE $CPPFLAGS"
+        AC_DEFINE(ZFL_HAVE_CYGWIN, 1, [Have Cygwin])
+        # Cygwin provides libuuid as part of the e2fsprogs package, and somewhat
+        # uselessly installs the library in /usr/lib/e2fsprogs
+        LDFLAGS="${LDFLAGS} -L/usr/lib/e2fsprogs"
+        AC_CHECK_LIB(uuid, uuid_generate, ,
+            [AC_MSG_ERROR([cannot link with -luuid, install the e2fsprogs package.])])
+        ;;
+    *)
+        AC_MSG_ERROR([unsupported system: ${host_os}.])
+        ;;
+esac
+
+# CPU-specific optimizations
+case "${host_cpu}" in
+    *sparc*)
+        if test "x$gnu_compilers" = "xyes"; then
+            CPPFLAGS="$CPPFLAGS -mcpu=v9"
+        fi
+    ;;
+    *)
+    ;;
+esac
+
+# Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(errno.h arpa/inet.h netinet/tcp.h netinet/in.h stddef.h \
+stdlib.h string.h sys/socket.h sys/time.h unistd.h limits.h)
+
+# Check if we have ifaddrs.h header file.
+AC_CHECK_HEADERS(ifaddrs.h, [AC_DEFINE(ZFL_HAVE_IFADDRS, 1, [Have ifaddrs.h header.])])
+
+# Use c++ in subsequent tests
+AC_LANG(C++)
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_HEADER_STDBOOL
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_HEADER_TIME
+AC_TYPE_UINT32_T
+AC_C_VOLATILE
+
+# Substs
+stdint="0"
+if test "x$HAVE_STDINT_H" = "xyes"; then
+    stdint="1"
+fi
+
+inttypes="0"
+if test "x$HAVE_INTTYPES_H" = "xyes"; then
+    inttypes="1"
+fi
+
+# These options are GNU compiler specific.
+if test "x$gnu_compilers" = "xyes"; then
+    CPPFLAGS="-Wall $CPPFLAGS -std=c99 -Wno-unused"
+    if test "x$pedantic" = "xyes"; then
+        CPPFLAGS="-pedantic $CPPFLAGS"
+    fi
+    if test "x$werror" = "xyes"; then
+        CPPFLAGS="-Werror $CPPFLAGS"
+    fi
+fi
+
+AM_CONDITIONAL(ON_MINGW, test "x$on_mingw32" = "xyes")
+AM_CONDITIONAL(INSTALL_MAN, test "x$install_man" = "xyes")
+AM_CONDITIONAL(BUILD_DOC, test "x$build_doc" = "xyes")
+
+AC_SUBST(stdint)
+AC_SUBST(inttypes)
+
+# Subst LIBZFL_EXTRA_CXXFLAGS & LDFLAGS
+AC_SUBST(LIBZFL_EXTRA_CXXFLAGS)
+AC_SUBST(LIBZFL_EXTRA_LDFLAGS)
+
+# Checks for library functions.
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(perror gettimeofday memset socket getifaddrs freeifaddrs)
+
+AC_OUTPUT(Makefile src/Makefile doc/Makefile src/libzfl.pc)
+
+#  On Linux patch libtool to delete hardcoded paths (rpath).
+case "${host_os}" in
+    *linux*)
+        sed < libtool > libtool-2 \
+        's/^hardcode_libdir_flag_spec.*$'/'hardcode_libdir_flag_spec=" "/'
+        mv libtool-2 libtool
+        chmod 755 libtool
+        ;;
+esac

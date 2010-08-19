@@ -1,0 +1,71 @@
+zfl(7)
+======
+
+
+NAME
+----
+zfl - ZeroMQ Function Library
+
+
+SYNOPSIS
+--------
+*#include <zfl.h>*
+
+*cc* ['flags'] 'files' *-lzfl* ['libraries']
+
+
+DESCRIPTION
+-----------
+
+ZFL is the ZeroMQ Function Library, a thin portability & function library
+for ZeroMQ applications in C/C++.  It is written in clear and readable C,
+portable to all ZeroMQ platforms, and licensed under the LGPL.
+
+The goals of this library are to:
+
+* Provide a home for reusable functionality that is of use to ZeroMQ
+  application developers working in C/C++.
+
+* Make it easier to write 100% portable applications by abstracting the
+  relevant differences between different operating systems.
+
+ZFL is inspired by the iMatix Standard Function Library (SFL), and borrows
+liberally from it.  See http://legacy.imatix.com/html/sfl/.
+
+
+Base Classes
+~~~~~~~~~~~~
+
+ZFL base class::
+    linkzfl:zfl_base[7]
+
+Logging
+~~~~~~~
+
+Logging and reporting class::
+    linkzfl:zfl_log[7]
+
+Configuration
+~~~~~~~~~~~~~
+
+JSON parsing class::
+    linkzfl:zfl_json[7]
+Service configuration class:
+    linkzfl:zfl_config[7]
+
+
+ERROR HANDLING
+--------------
+
+Functions that create or search objects return object references success and
+NULL on failure.  Functions that perform work return 0 on success and -1 on
+failure.  Errors are reported to the 0MQ inproc://zfl_log socket. See
+linkzfl:zfl_log[7].
+
+
+LANGUAGE BINDINGS
+-----------------
+
+The ZFL library provides interfaces suitable for calling from programs in any
+language; this documentation documents those interfaces as they would be used
+by C programmers.

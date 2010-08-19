@@ -1,0 +1,26 @@
+zfl_base(7)
+===========
+
+
+NAME
+----
+zfl_base - ZFL base class
+
+
+SYNOPSIS
+--------
+*zfl_base_t *zfl_base_new (void);*
+*int zfl_base_method (zfl_base_t *base);
+*int zfl_base_test (void);*
+*void zfl_base_destroy (zfl_base_t **base_p);*
+
+
+DESCRIPTION
+-----------
+The _zfl_base_ class acts as a base class for all ZFL class-oriented modules.  Inheritence is done at edit time using a portable text-based workflow called "cut and paste".
+
+
+SEE ALSO
+--------
+linkzfl:zfl[7]
+

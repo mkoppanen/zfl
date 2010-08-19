@@ -1,0 +1,26 @@
+zfl_json(7)
+===========
+
+
+NAME
+----
+zfl_json - parse and work with JSON data
+
+
+SYNOPSIS
+--------
+*zfl_json_t *zfl_json_new (void);*
+*int zfl_json_method (zfl_json_t *json);
+*int zfl_json_test (void);*
+*void zfl_json_destroy (zfl_json_t **json_p);*
+
+
+DESCRIPTION
+-----------
+The _zfl_json_ class provides JSON parsing.  This class is jsond on the cJSON parser.
+
+
+SEE ALSO
+--------
+linkzfl:zfl[7]
+
