@@ -26,4 +26,5 @@ src/platform.h
 src/platform.h.in
 src/platform.h.in~
 src/*.lo
-
+examples/*.o
+examples/device

@@ -18,7 +18,7 @@
             "connect": [ "tcp://eth0:5556", "inproc://mydevice" ],
         },
         "backend": {
-            "bind": "tcp://localhost:5556"
+            "bind": "tcp://eth0:5556"
         }
     }
 
@@ -317,6 +317,23 @@ zfl_config_context (zfl_config_t *self)
     return (self->context);
 }
 
+//  --------------------------------------------------------------------------
+//  Returns the type property, or "" if not defined
+//
+char *
+zfl_config_type (zfl_config_t *self)
+{
+    return (self->type? self->type: "");
+}
+
+//  --------------------------------------------------------------------------
+//  Returns the verbose property
+//
+Bool
+zfl_config_verbose (zfl_config_t *self)
+{
+    return (self->verbose);
+}
 //  --------------------------------------------------------------------------
 //  Selftest
 

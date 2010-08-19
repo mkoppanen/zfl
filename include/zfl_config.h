@@ -38,6 +38,8 @@ void zfl_config_destroy     (zfl_config_t **self_p);
 //  Class methods
 void *zfl_config_socket     (zfl_config_t *self, char *name, int type);
 void *zfl_config_context    (zfl_config_t *self);
+char *zfl_config_type       (zfl_config_t *self);
+Bool  zfl_config_verbose    (zfl_config_t *self);
 
 //  Selftest method
 int  zfl_config_test        (void);
