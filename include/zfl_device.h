@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_json.h - ZFL json class
+    zfl_device.h - ZFL device class
 
     Copyright (c) 1991-2010 iMatix Corporation and contributors
 
@@ -20,26 +20,26 @@
     =========================================================================
 */
 
-#ifndef __ZFL_JSON_H_INCLUDED__
-#define __ZFL_JSON_H_INCLUDED__
+#ifndef __ZFL_DEVICE_H_INCLUDED__
+#define __ZFL_DEVICE_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 //  Opaque class structure
-typedef struct _zfl_json_t zfl_json_t;
+typedef struct _zfl_device_t zfl_device_t;
 
-//  Constructor and destructor
-zfl_json_t *
-     zfl_json_new           (void);
-void zfl_json_destroy       (zfl_json_t **self_p);
-
-//  Class methods
-int  zfl_json_dummy         (zfl_json_t *self);
-
-//  Selftest method
-int  zfl_json_test          (void);
+zfl_device_t *
+    zfl_device_new (void);
+void
+    zfl_device_destroy (zfl_device_t **self_p);
+int
+    zfl_device_filler (zfl_device_t *self);
+void
+    zfl_device_filler_set (zfl_device_t *self, int newvalue);
+int
+    zfl_device_test (void);
 
 #ifdef __cplusplus
 }

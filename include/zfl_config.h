@@ -30,19 +30,22 @@ extern "C" {
 //  Opaque class structure
 typedef struct _zfl_config_t zfl_config_t;
 
-//  Constructor and destructor
 zfl_config_t *
-     zfl_config_new         (FILE *file);
-void zfl_config_destroy     (zfl_config_t **self_p);
-
-//  Class methods
-void *zfl_config_socket     (zfl_config_t *self, char *name, int type);
-void *zfl_config_context    (zfl_config_t *self);
-char *zfl_config_type       (zfl_config_t *self);
-Bool  zfl_config_verbose    (zfl_config_t *self);
-
-//  Selftest method
-int  zfl_config_test        (void);
+    zfl_config_new (char *data);
+void
+    zfl_config_destroy (zfl_config_t **self_p);
+char *
+    zfl_config_device (zfl_config_t *self, int index);
+char *
+    zfl_config_device_type (zfl_config_t *self, char *device);
+void *
+    zfl_config_socket (zfl_config_t *self, char *device, char *name, int type);
+void *
+    zfl_config_context (zfl_config_t *self);
+Bool
+    zfl_config_verbose (zfl_config_t *self);
+int
+    zfl_config_test (void);
 
 #ifdef __cplusplus
 }

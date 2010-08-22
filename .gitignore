@@ -28,3 +28,7 @@ src/platform.h.in~
 src/*.lo
 examples/*.o
 examples/device
+examples/.deps/
+examples/Makefile.am
+examples/core
+src/core

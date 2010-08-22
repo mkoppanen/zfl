@@ -1,0 +1,26 @@
+zfl_blob(7)
+===========
+
+
+NAME
+----
+zfl_blob - 
+
+
+SYNOPSIS
+--------
+*zfl_blob_t *zfl_blob_new (void);*
+*int zfl_blob_method (zfl_blob_t *blob);
+*int zfl_blob_test (void);*
+*void zfl_blob_destroy (zfl_blob_t **blob_p);*
+
+
+DESCRIPTION
+-----------
+The _zfl_blob_ class works with blobs.
+
+
+SEE ALSO
+--------
+linkzfl:zfl[7]
+

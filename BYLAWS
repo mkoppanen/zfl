@@ -109,3 +109,7 @@ that module and who is named in the header as such.  This is usually the
 originator of the module.  Whereas several people can collaborate on a module,
 one single person is always the lead maintainer and the one to blame when it
 breaks.
+
+The general rule is, if you contribute code to ZFL you must be willing to
+maintain it as long as there are users of it.  Code with no active maintainer
+will in general be deprecated and/or removed.

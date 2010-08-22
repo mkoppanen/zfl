@@ -1,5 +1,7 @@
 /*  =========================================================================
-    zfl_log.c - log class for ZFL
+    zfl_tests.c - run selftests
+
+    Runs all selftests.
 
     Copyright (c) 1991-2010 iMatix Corporation and contributors
 
@@ -21,59 +23,19 @@
 */
 
 #include "../include/zfl_prelude.h"
+#include "../include/zfl_base.h"
+#include "../include/zfl_blob.h"
+#include "../include/zfl_config.h"
 #include "../include/zfl_log.h"
 
-//  Structure of our class
-
-struct _zfl_log_t {
-    int
-        filler;                         //  An example property
-};
-
-
-//  --------------------------------------------------------------------------
-//  Constructor
-
-zfl_log_t *
-zfl_log_new (void)
+int main (int argc, char *argv [])
 {
-    zfl_log_t
-        *self;
+    printf ("Running ZFL self tests...\n");
+    zfl_base_test ();
+    zfl_blob_test ();
+    zfl_config_test ();
+    zfl_log_test ();
 
-    self = malloc (sizeof (zfl_log_t));
-    memset (self, 0, sizeof (zfl_log_t));
-    return (self);
-}
-
-//  --------------------------------------------------------------------------
-//  Destructor
-
-void
-zfl_log_destroy (zfl_log_t **self_p)
-{
-    assert (self_p);
-    if (*self_p) {
-        free (*self_p);
-        *self_p = NULL;
-    }
-}
-
-//  --------------------------------------------------------------------------
-//  Selftest
-
-int
-zfl_log_test (void)
-{
-    zfl_log_t
-        *log;
-
-    printf (" * zfl_log: ");
-    log = zfl_log_new ();
-    assert (log);
-
-    zfl_log_destroy (&log);
-    assert (log == NULL);
-
-    printf ("OK\n");
+    printf ("Tests passed OK\n");
     return 0;
 }

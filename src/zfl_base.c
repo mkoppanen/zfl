@@ -96,6 +96,7 @@ zfl_base_test (void)
     zfl_base_t
         *base;
 
+    printf (" * zfl_base: ");
     base = zfl_base_new ();
     assert (base);
 
@@ -104,5 +105,7 @@ zfl_base_test (void)
 
     zfl_base_destroy (&base);
     assert (base == NULL);
+
+    printf ("OK\n");
     return 0;
 }

@@ -30,16 +30,12 @@ extern "C" {
 //  Opaque class structure
 typedef struct _zfl_log_t zfl_log_t;
 
-//  Constructor and destructor
 zfl_log_t *
-     zfl_log_new            (void);
-void zfl_log_destroy        (zfl_log_t **self_p);
-
-//  Class methods
-int  zfl_log_dummy          (zfl_log_t *self);
-
-//  Selftest method
-int  zfl_log_test           (void);
+    zfl_log_new (void);
+void
+    zfl_log_destroy (zfl_log_t **self_p);
+int
+    zfl_log_test (void);
 
 #ifdef __cplusplus
 }

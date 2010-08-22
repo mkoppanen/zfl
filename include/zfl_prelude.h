@@ -266,6 +266,7 @@
 #   include <fcntl.h>
 #   include <netdb.h>
 #   include <unistd.h>
+#   include <pthread.h>
 #   include <dirent.h>
 #   include <pwd.h>
 #   include <grp.h>
@@ -307,6 +308,7 @@
 #   endif
 #   include <netdb.h>
 #   include <unistd.h>
+#   include <pthread.h>
 #   include <unixio.h>
 #   include <unixlib.h>
 #   include <types.h>
@@ -326,6 +328,7 @@
 #   include <malloc.h>
 #   include <netdb.h>
 #   include <unistd.h>
+#   include <pthread.h>
 #   include <dirent.h>
 #   include <pwd.h>
 #   include <grp.h>
