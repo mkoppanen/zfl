@@ -29,6 +29,7 @@ src/*.lo
 examples/*.o
 examples/device
 examples/.deps/
+examples/.libs/
 examples/Makefile.am
 examples/core
 src/core

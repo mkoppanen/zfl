@@ -1,9 +1,10 @@
 /*  =========================================================================
     zdevice.c
 
-    Simple device launcher that will start a queue, forwarder, or streamer
-    device from a JSON configuration file.  The config file follows the
-    format described at http://rfc.zeromq.org/spec:3.  Here is an example:
+    Device launcher that will start a queue, forwarder, or streamer device
+    from a JSON configuration file or automagically from the command line.
+    The config file follows ZDCF as at http://rfc.zeromq.org/spec:3.  Here
+    is an example:
 
     {
         "context": {
@@ -27,6 +28,10 @@
 
     Does not provide detailed error reporting.  To verify your JSON files
     use http://www.jsonlint.com.
+
+    From the command-line:
+
+    zdevice zqueue ipc://frontend ipc://backend
 
     Copyright (c) 1991-2010 iMatix Corporation and contributors
 
@@ -54,17 +59,22 @@
 
 
 static void
-    s_parse_device_type (char *type, int *device, int *frontend, int *backend);
-static void
     s_start_configured_device (char *filename);
 static void
     s_start_automagic_device (char *type, char *frontend, char *backend);
+static void
+    s_parse_device_type (char *type, int *device, int *frontend, int *backend);
 
 
 int
 main (int argc, char *argv [])
 {
-    if (argc < 2) {
+    if (argc == 2)
+        s_start_configured_device (argv [1]);
+    else
+    if (argc == 4)
+        s_start_automagic_device (argv [1], argv [2], argv [3]);
+    else {
         printf ("\nzdevice - start standard 0MQ device\n\n");
         printf ("    Copyright (c) 1991-2010 iMatix Corporation and contributors\n");
         printf ("    Part of the ZeroMQ Function Library: http://zfl.zeromq.org\n");
@@ -77,41 +87,8 @@ main (int argc, char *argv [])
         printf ("BACKEND:\n    Endpoint for device backend socket\n\n");
 
         printf ("[1] ZeroMQ Device Configuration Format - http://rfc.zeromq.org/spec:3\n");
-        exit (EXIT_FAILURE);
     }
-    char *filename = argv [1];
-
-
     return 0;
-}
-
-//  Parse device type and set device/frontend/backend values for
-//  calling zmq_device(3).
-//
-static void
-s_parse_device_type (char *type, int *device, int *frontend, int *backend)
-{
-    if (streq (type, "zqueue")) {
-        *device = ZMQ_QUEUE;
-        *frontend = ZMQ_XREP;
-        *backend = ZMQ_XREQ;
-    }
-    else
-    if (streq (type, "zforwarder")) {
-        *device = ZMQ_FORWARDER;
-        *frontend = ZMQ_SUB;
-        *backend = ZMQ_PUB;
-    }
-    else
-    if (streq (type, "zstreamer")) {
-        *device = ZMQ_STREAMER;
-        *frontend = ZMQ_PULL;
-        *backend = ZMQ_PUSH;
-    }
-    else {
-        printf ("E: Invalid device type \"%s\"\n", type);
-        exit (EXIT_FAILURE);
-    }
 }
 
 
@@ -171,6 +148,36 @@ s_start_configured_device (char *filename)
 }
 
 
+//  Parse device type and set device/frontend/backend values for
+//  calling zmq_device(3).
+//
+static void
+s_parse_device_type (char *type, int *device, int *frontend, int *backend)
+{
+    if (streq (type, "zqueue")) {
+        *device = ZMQ_QUEUE;
+        *frontend = ZMQ_XREP;
+        *backend = ZMQ_XREQ;
+    }
+    else
+    if (streq (type, "zforwarder")) {
+        *device = ZMQ_FORWARDER;
+        *frontend = ZMQ_SUB;
+        *backend = ZMQ_PUB;
+    }
+    else
+    if (streq (type, "zstreamer")) {
+        *device = ZMQ_STREAMER;
+        *frontend = ZMQ_PULL;
+        *backend = ZMQ_PUSH;
+    }
+    else {
+        printf ("E: Invalid device type \"%s\"\n", type);
+        exit (EXIT_FAILURE);
+    }
+}
+
+
 //  Starts an automagical device
 //
 //  - zqueue acts as broker, binds XREP and XREQ
@@ -195,23 +202,41 @@ s_start_automagic_device (char *type, char *frontend, char *backend)
 
     if (device == ZMQ_QUEUE) {
         printf ("I: Binding to %s for client connections\n", frontend);
-        zmq_bind (frontend_socket, frontend);
+        if (zmq_bind (frontend_socket, frontend)) {
+            printf ("E: cannot bind to '%s': %s\n", frontend, zmq_strerror (errno));
+            exit (EXIT_FAILURE);
+        }
         printf ("I: Binding to %s for service connections\n", backend);
-        zmq_bind (backend_socket, backend);
+        if (zmq_bind (backend_socket, backend)) {
+            printf ("E: cannot bind to '%s': %s\n", backend, zmq_strerror (errno));
+            exit (EXIT_FAILURE);
+        }
     }
     else
     if (device == ZMQ_FORWARDER) {
         printf ("I: Connecting to publisher at %s\n", frontend);
-        zmq_connect (frontend_socket, frontend);
+        if (zmq_connect (frontend_socket, frontend)) {
+            printf ("E: cannot connect to '%s': %s\n", frontend, zmq_strerror (errno));
+            exit (EXIT_FAILURE);
+        }
         printf ("I: Binding to %s for subscriber connections\n", backend);
-        zmq_bind (backend_socket, backend);
+        if (zmq_bind (backend_socket, backend)) {
+            printf ("E: cannot bind to '%s': %s\n", backend, zmq_strerror (errno));
+            exit (EXIT_FAILURE);
+        }
     }
     else
     if (device == ZMQ_STREAMER) {
         printf ("I: Binding to %s for upstream nodes\n", frontend);
-        zmq_bind (frontend_socket, frontend);
+        if (zmq_bind (frontend_socket, frontend)) {
+            printf ("E: cannot bind to '%s': %s\n", frontend, zmq_strerror (errno));
+            exit (EXIT_FAILURE);
+        }
         printf ("I: Connecting downstream to %s\n", backend);
-        zmq_connect (backend_socket, backend);
+        if (zmq_connect (backend_socket, backend)) {
+            printf ("E: cannot connect to '%s': %s\n", backend, zmq_strerror (errno));
+            exit (EXIT_FAILURE);
+        }
     }
     zmq_device (device, frontend_socket, backend_socket);
 }

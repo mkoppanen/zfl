@@ -4,7 +4,7 @@ zfl_blob(7)
 
 NAME
 ----
-zfl_blob - 
+zfl_blob - work with opaque blobs
 
 
 SYNOPSIS
