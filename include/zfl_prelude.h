@@ -214,6 +214,7 @@
 #   define __UTYPE_GENERIC
 #endif
 
+
 //- Standard ANSI include files ---------------------------------------------
 
 #include <ctype.h>
@@ -265,6 +266,7 @@
 #   include <fcntl.h>
 #   include <netdb.h>
 #   include <unistd.h>
+#   include <pthread.h>
 #   include <dirent.h>
 #   include <pwd.h>
 #   include <grp.h>
@@ -306,6 +308,7 @@
 #   endif
 #   include <netdb.h>
 #   include <unistd.h>
+#   include <pthread.h>
 #   include <unixio.h>
 #   include <unixlib.h>
 #   include <types.h>
@@ -325,6 +328,7 @@
 #   include <malloc.h>
 #   include <netdb.h>
 #   include <unistd.h>
+#   include <pthread.h>
 #   include <dirent.h>
 #   include <pwd.h>
 #   include <grp.h>
@@ -367,13 +371,6 @@ typedef unsigned char   byte;           //  Single unsigned byte = 8 bits
 typedef unsigned short  dbyte;          //  Double byte = 16 bits
 typedef unsigned int    qbyte;          //  Quad byte = 32 bits
 
-/*  The following structures are needed to invoke certain SFL
-    modules, and can be removed once SFL is completely replaced.
-    -- PH 2005/03/12
- */
-typedef unsigned short  word;           //  Alternative for double-byte
-typedef unsigned long   dword;          //  Double word >= 32 bits
-typedef void (*function) (void);        //  Address of simple function
 
 //- Pseudo-functions --------------------------------------------------------
 

@@ -1,5 +1,7 @@
 /*  =========================================================================
-    zfl_json.c - JSON data parsing
+    zfl_device.c - device class
+
+    Provides functionality to configure and start devices.
 
     Copyright (c) 1991-2010 iMatix Corporation and contributors
 
@@ -21,27 +23,35 @@
 */
 
 #include "../include/zfl_prelude.h"
-#include "../include/zfl_json.h"
+#include "../include/zfl_config.h"
+#include "../include/zfl_device.h"
 
 //  Structure of our class
 
-struct _zfl_json_t {
+struct _zfl_device_t {
     int
         filler;                         //  An example property
 };
 
+//  Private functions
+
+static int
+s_private_function_example (void)
+{
+    return 0;
+}
 
 //  --------------------------------------------------------------------------
 //  Constructor
 
-zfl_json_t *
-zfl_json_new (void)
+zfl_device_t *
+zfl_device_new (void)
 {
-    zfl_json_t
+    zfl_device_t
         *self;
 
-    self = malloc (sizeof (zfl_json_t));
-    memset (self, 0, sizeof (zfl_json_t));
+    self = malloc (sizeof (zfl_device_t));
+    memset (self, 0, sizeof (zfl_device_t));
     return (self);
 }
 
@@ -49,7 +59,7 @@ zfl_json_new (void)
 //  Destructor
 
 void
-zfl_json_destroy (zfl_json_t **self_p)
+zfl_device_destroy (zfl_device_t **self_p)
 {
     assert (self_p);
     if (*self_p) {
@@ -59,18 +69,43 @@ zfl_json_destroy (zfl_json_t **self_p)
 }
 
 //  --------------------------------------------------------------------------
+//  Filler property
+//  Does nothing special but if it did, we'd explain that here
+
+int
+zfl_device_filler (zfl_device_t *self)
+{
+    assert (self);
+    return (self->filler);
+}
+
+void
+zfl_device_filler_set (zfl_device_t *self, int newvalue)
+{
+    assert (self);
+    self->filler = newvalue;
+}
+
+
+//  --------------------------------------------------------------------------
 //  Selftest
 
 int
-zfl_json_test (void)
+zfl_device_test (void)
 {
-    zfl_json_t
-        *self;
+    zfl_device_t
+        *device;
 
-    self = zfl_json_new ();
-    assert (self);
+    printf (" * zfl_device: ");
+    device = zfl_device_new ();
+    assert (device);
 
-    zfl_json_destroy (&self);
-    assert (self == NULL);
+    zfl_device_filler_set (device, 123);
+    assert (zfl_device_filler (device) == 123);
+
+    zfl_device_destroy (&device);
+    assert (device == NULL);
+
+    printf ("OK\n");
     return 0;
 }

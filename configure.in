@@ -55,6 +55,7 @@ fi
 
 # Checks for libraries.
 AC_CHECK_LIB([pthread], [pthread_create])
+AC_CHECK_LIB(zmq, zmq_init, ,[AC_MSG_ERROR([can't link with -lzmq, install ZeroMQ.])])
 
 # Extra CXXFLAGS are appended at the end of CXXFLAGS for libzfl.
 LIBZFL_EXTRA_CXXFLAGS=""
@@ -282,7 +283,7 @@ AC_SUBST(LIBZFL_EXTRA_LDFLAGS)
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(perror gettimeofday memset socket getifaddrs freeifaddrs)
 
-AC_OUTPUT(Makefile src/Makefile doc/Makefile src/libzfl.pc)
+AC_OUTPUT(Makefile src/Makefile doc/Makefile src/libzfl.pc examples/Makefile)
 
 #  On Linux patch libtool to delete hardcoded paths (rpath).
 case "${host_os}" in
