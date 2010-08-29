@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_log.h - ZFL log class
+    zfl_tree_zpl.h - ZFL tree_zpl class
 
     Copyright (c) 1991-2010 iMatix Corporation and contributors
 
@@ -20,25 +20,24 @@
     =========================================================================
 */
 
-#ifndef __ZFL_LOG_H_INCLUDED__
-#define __ZFL_LOG_H_INCLUDED__
+#ifndef __ZFL_TREE_ZPL_H_INCLUDED__
+#define __ZFL_TREE_ZPL_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zfl_log_t zfl_log_t;
-
-zfl_log_t *
-    zfl_log_new (void);
-void
-    zfl_log_destroy (zfl_log_t **self_p);
+//  Load tree from ZPL string
+zfl_tree_t *
+    zfl_tree_zpl (char *zpl_string);
+zfl_tree_t *
+    zfl_tree_zpl_file (char *filename);
 int
-    zfl_log_test (void);
+    zfl_tree_zpl_test (Bool verbose);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+

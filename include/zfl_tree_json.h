@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_device.h - ZFL device class
+    zfl_tree_json.h - ZFL tree_json class
 
     Copyright (c) 1991-2010 iMatix Corporation and contributors
 
@@ -20,29 +20,24 @@
     =========================================================================
 */
 
-#ifndef __ZFL_DEVICE_H_INCLUDED__
-#define __ZFL_DEVICE_H_INCLUDED__
+#ifndef __ZFL_TREE_JSON_H_INCLUDED__
+#define __ZFL_TREE_JSON_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//  Opaque class structure
-typedef struct _zfl_device_t zfl_device_t;
-
-zfl_device_t *
-    zfl_device_new (void);
-void
-    zfl_device_destroy (zfl_device_t **self_p);
+//  Load tree from JSON string
+zfl_tree_t *
+    zfl_tree_json (char *json_string);
+zfl_tree_t *
+    zfl_tree_json_file (char *filename);
 int
-    zfl_device_filler (zfl_device_t *self);
-void
-    zfl_device_filler_set (zfl_device_t *self, int newvalue);
-int
-    zfl_device_test (void);
+    zfl_tree_json_test (Bool verbose);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
