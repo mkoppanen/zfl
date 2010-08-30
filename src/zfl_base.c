@@ -50,8 +50,7 @@ zfl_base_new (void)
     zfl_base_t
         *self;
 
-    self = malloc (sizeof (zfl_base_t));
-    memset (self, 0, sizeof (zfl_base_t));
+    self = zmalloc (sizeof (zfl_base_t));
     return (self);
 }
 
@@ -63,7 +62,8 @@ zfl_base_destroy (zfl_base_t **self_p)
 {
     assert (self_p);
     if (*self_p) {
-        free (*self_p);
+        zfl_base_t *self = *self_p;
+        free (self);
         *self_p = NULL;
     }
 }
@@ -91,7 +91,7 @@ zfl_base_filler_set (zfl_base_t *self, int newvalue)
 //  Selftest
 
 int
-zfl_base_test (void)
+zfl_base_test (Bool verbose)
 {
     zfl_base_t
         *base;

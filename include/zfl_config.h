@@ -31,7 +31,7 @@ extern "C" {
 typedef struct _zfl_config_t zfl_config_t;
 
 zfl_config_t *
-    zfl_config_new (char *data);
+    zfl_config_new (zfl_tree_t *tree);
 void
     zfl_config_destroy (zfl_config_t **self_p);
 char *
@@ -45,7 +45,7 @@ void *
 Bool
     zfl_config_verbose (zfl_config_t *self);
 int
-    zfl_config_test (void);
+    zfl_config_test (Bool verbose);
 
 #ifdef __cplusplus
 }

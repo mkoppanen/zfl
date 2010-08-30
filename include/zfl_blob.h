@@ -31,21 +31,21 @@ extern "C" {
 typedef struct _zfl_blob_t zfl_blob_t;
 
 zfl_blob_t *
-    zfl_blob_new (void);
+    zfl_blob_new (void *data, size_t size);
 void
     zfl_blob_destroy (zfl_blob_t **self_p);
 size_t
     zfl_blob_load (zfl_blob_t *self, FILE *file);
 int
-    zfl_blob_init (zfl_blob_t *self);
-size_t
-    zfl_blob_size (zfl_blob_t *self);
+    zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size);
+int
+    zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size);
 void *
     zfl_blob_data (zfl_blob_t *self);
+size_t
+    zfl_blob_size (zfl_blob_t *self);
 int
-    zfl_blob_data_set (zfl_blob_t *self, void *data, size_t size);
-int
-    zfl_blob_test (void);
+    zfl_blob_test (Bool verbose);
 
 #ifdef __cplusplus
 }

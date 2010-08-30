@@ -168,7 +168,7 @@
 #elif (defined (APPLE) || defined (__APPLE__))
 #   define __UTYPE_GENERIC
 #   define __UNIX__
-#elif (defined (linux))
+#elif (defined (LINUX) || defined (linux))
 #   define __UTYPE_LINUX
 #   define __UNIX__
 #   ifndef __NO_CTYPE
@@ -372,6 +372,17 @@ typedef unsigned short  dbyte;          //  Double byte = 16 bits
 typedef unsigned int    qbyte;          //  Quad byte = 32 bits
 
 
+//- Memory leak detection if possible ---------------------------------------
+//  Invoke by calling MALLOC_CHECK in main
+
+#if (defined (__UTYPE_LINUX))
+#   include <mcheck.h>
+#   define MALLOC_TRACE     mtrace()
+#else
+#   define MALLOC_TRACE
+#endif
+
+
 //- Pseudo-functions --------------------------------------------------------
 
 #define FOREVER             for (;;)            //  FOREVER { ... }
@@ -389,6 +400,10 @@ typedef unsigned int    qbyte;          //  Quad byte = 32 bits
 
 #define randomof(num)       (int) (((float) num) * rand () / (RAND_MAX + 1.0))
 #define randomize()         srand ((uint) apr_time_usec (apr_time_now ()))
+
+//  Free and duplicate string safely
+#define zfree(s)            if (s) { free (s); s = NULL; } else
+#define zstrdup(s)          s? strdup (s): NULL
 
 #if (!defined (MIN))
 #   define MIN(a,b)         (((a) < (b))? (a): (b))
@@ -594,7 +609,8 @@ typedef enum {
 #   define ZFL_ASSERT_SANE_FUNCTION    "<unknown>"
 #endif
 
-// Safe replacement for malloc() which asserts if we run out of heap
+//  Replacement for malloc() which asserts if we run out of heap, and
+//  which zeroes the allocated block.
 static inline void *
     safe_malloc (
     size_t size,
@@ -612,10 +628,13 @@ static inline void *
         fflush (stderr);
         abort ();
     }
+    else
+        memset (mem, 0, size);
+
     return mem;
 }
 
-#define malloc(size) safe_malloc(size, __FILE__, __LINE__, ZFL_ASSERT_SANE_FUNCTION)
+#define zmalloc(size) safe_malloc(size, __FILE__, __LINE__, ZFL_ASSERT_SANE_FUNCTION)
 
 
 //- DLL exports -------------------------------------------------------------

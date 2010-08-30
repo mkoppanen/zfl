@@ -35,7 +35,9 @@
 //
 #include <zfl_base.h>
 #include <zfl_blob.h>
+#include <zfl_tree.h>
+#include <zfl_tree_json.h>
+#include <zfl_tree_zpl.h>
 #include <zfl_config.h>
-#include <zfl_log.h>
 
 #endif

@@ -5,6 +5,7 @@
     files.  Example use case is for loading config data from stdin or file
     for processing by zfl_config.
 
+
     Copyright (c) 1991-2010 iMatix Corporation and contributors
 
     This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
@@ -33,7 +34,8 @@ struct _zfl_blob_t {
     size_t
         size;                   //  Blob data size
     byte
-        *data;                  //  Content of our blob
+        *data,                  //  Content of our blob
+        *dptr;                  //  Or, pointer to data
 };
 
 
@@ -41,14 +43,16 @@ struct _zfl_blob_t {
 //  Constructor
 //
 zfl_blob_t *
-zfl_blob_new (void)
+zfl_blob_new (void *data, size_t size)
 {
     zfl_blob_t
         *self;
 
-    self = malloc (sizeof (zfl_blob_t));
-    self->data = NULL;
-    self->size = 0;
+    assert (size >= 0);
+    self = zmalloc (sizeof (zfl_blob_t));
+    if (data)
+        zfl_blob_set_data (self, data, size);
+
     return (self);
 }
 
@@ -60,12 +64,13 @@ zfl_blob_destroy (zfl_blob_t **self_p)
 {
     assert (self_p);
     if (*self_p) {
-        if ((*self_p)->data)
-            free ((*self_p)->data);
-        free (*self_p);
+        zfl_blob_t *self = *self_p;
+        zfree (self->data);
+        free (self);
         *self_p = NULL;
     }
 }
+
 
 //  --------------------------------------------------------------------------
 //  Loads blob from file.  Always adds a binary zero to end of blob data so
@@ -77,46 +82,89 @@ size_t
 zfl_blob_load (zfl_blob_t *self, FILE *file)
 {
     long
-        cur_position,
-        end_position;
-
-    //  In any case, drop any previous data we had
-    zfl_blob_init (self);
+        posn,                   //  Current position in file
+        size;                   //  Size of file data
 
     //  Get current position in file so we can come back here afterwards
-    cur_position = ftell (file);
+    posn = ftell (file);
     if (fseek (file, 0, SEEK_END) == 0) {
         //  Now determine actual size of blob in file
-        end_position = ftell (file);
-        assert (end_position >= 0);
+        size = ftell (file);
+        assert (size >= 0);
 
-        //  Allocate new blob data with extra byte for null
-        self->size = (size_t) end_position;
-        self->data = malloc (self->size + 1);
-
-        //  Read blob data
+        //  Read file data, and then reset file position
+        char *buffer = malloc (size);
         fseek (file, 0, SEEK_SET);
-        assert (fread (self->data, 1, self->size, file) == self->size);
-        self->data [self->size] = 0;
+        assert (fread (buffer, 1, size, file) == size);
+        fseek (file, posn, SEEK_SET);
 
-        //  Restore original file position
-        fseek (file, cur_position, SEEK_SET);
+        zfl_blob_set_data (self, buffer, size);
+        free (buffer);
     }
-    return (self->size);
+    else
+        zfl_blob_set_data (self, NULL, 0);
+
+    return (zfl_blob_size (self));
 }
 
 
 //  --------------------------------------------------------------------------
-//  Initializes blob data (sets to empty)
+//  Sets blob data as specified.  Always appends a null byte to the data.
+//  Data is copied to blob. Use like this:
+//
+//      zfl_blob_set_data (blob, buffer, size);
+//      zfl_blob_set_data (blob, object, sizeof (*object));
 //
 int
-zfl_blob_init (zfl_blob_t *self)
+zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size)
 {
     assert (self);
-    if (self->data)
-        free (self->data);
-    self->size = 0;
+    assert (size >= 0);
+
+    zfree (self->data);
+    self->dptr = NULL;          //  No data reference
+    self->size = size;
+    if (data) {
+        self->data = malloc (size + 1);
+        memcpy (self->data, data, size);
+        self->data [size] = 0;
+    }
+    else {
+        assert (size == 0);
+        self->data = NULL;
+    }
     return (0);
+}
+
+
+//  --------------------------------------------------------------------------
+//  Sets blob data as specified.  Does zero-copy, original data should not be
+//  freed during lifetime of blob.
+//
+//      zfl_blob_set_dptr (blob, object, sizeof (*object));
+//
+int
+zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size)
+{
+    assert (self);
+    assert (size >= 0);
+
+    zfree (self->data);         //  Free any copied data
+    self->dptr = data;          //  Hold data reference
+    self->size = size;
+
+    return (0);
+}
+
+
+//  --------------------------------------------------------------------------
+//  Returns pointer to blob data.
+//
+void *
+zfl_blob_data (zfl_blob_t *self)
+{
+    assert (self);
+    return (self->data? self->data: self->dptr);
 }
 
 
@@ -132,45 +180,10 @@ zfl_blob_size (zfl_blob_t *self)
 
 
 //  --------------------------------------------------------------------------
-//  Returns pointer to blob data.
-//
-void *
-zfl_blob_data (zfl_blob_t *self)
-{
-    assert (self);
-    return (self->data);
-}
-
-
-//  --------------------------------------------------------------------------
-//  Sets blob data as specified.  Always appends a null byte to the data.
-//  Use like this:
-//
-//      zfl_blob_data_set (blob, intval, sizeof (intval));
-//      zfl_blob_data_set (blob, strval, strlen (strval));
-//
-int
-zfl_blob_data_set (zfl_blob_t *self, void *data, size_t size)
-{
-    assert (self);
-    assert (data);
-    assert (size >= 0);
-
-    zfl_blob_init (self);
-    self->size = size;
-    self->data = malloc (self->size + 1);
-    memcpy (self->data, data, size);
-    self->data [self->size] = 0;
-
-    return (0);
-}
-
-
-//  --------------------------------------------------------------------------
 //  Selftest
 //
 int
-zfl_blob_test (void)
+zfl_blob_test (Bool verbose)
 {
     zfl_blob_t
         *blob;
@@ -180,16 +193,17 @@ zfl_blob_test (void)
         *file;
 
     printf (" * zfl_blob: ");
-    blob = zfl_blob_new ();
+    blob = zfl_blob_new (NULL, 0);
     assert (blob);
     assert (zfl_blob_size (blob) == 0);
 
-    file = fopen ("zfl_blob.c", "rb");
+    file = fopen ("zfl_blob.c", "r");
     assert (file);
     assert (zfl_blob_load (blob, file));
-    assert (zfl_blob_size (blob) > 0);
+    fclose (file);
 
-    zfl_blob_data_set (blob, string, strlen (string));
+    assert (zfl_blob_size (blob) > 0);
+    zfl_blob_set_data (blob, string, strlen (string));
     assert (zfl_blob_size (blob) == strlen (string));
     assert (streq ((char *) (zfl_blob_data (blob)), string));
 

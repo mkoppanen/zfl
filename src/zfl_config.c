@@ -8,7 +8,6 @@
     Does not provide detailed error reporting.  To verify your JSON files
     use http://www.jsonlint.com.
 
-
     Copyright (c) 1991-2010 iMatix Corporation and contributors
 
     This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
@@ -31,17 +30,15 @@
 #include <zmq.h>
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_blob.h"
+#include "../include/zfl_tree.h"
+#include "../include/zfl_tree_zpl.h"
 #include "../include/zfl_config.h"
-
-//  Import the cJSON library
-#include "import/cJSON/cJSON.h"
-#include "import/cJSON/cJSON.c"
 
 //  Structure of our class
 
 struct _zfl_config_t {
-    cJSON
-        *json;              //  JSON tree
+    zfl_tree_t
+        *tree;              //  Property tree
     void
         *context;           //  0MQ context for our process
     int
@@ -50,6 +47,7 @@ struct _zfl_config_t {
         verbose;            //  Show configuration in progress?
 };
 
+#if 0
 //  Handlers for socket configuration; each returns zero on success
 //  or -1 on failure.
 //
@@ -133,45 +131,11 @@ static struct {
 };
 
 
-//  Private function that processes one socket config in the tree.
-//  Recurses down the tree calculating the full path and executes
-//  leafs that match known paths.  To make this easy to extend, we
-//  register all valid paths along with their handlers in a lookup
-//  table.  That's probably overkill but it separates the generic
-//  code from the 0MQ specific stuff and makes it easy to debug.
-//
-static void
-s_parse_socket_item (
-    zfl_config_t *self,         //  Config object
-    void    *socket,            //  Socket to configure
-    cJSON   *item,              //  JSON item to parse
-    char    *path)              //  Path of this item
-{
-    assert (item);
-    if (item->type == cJSON_Array) {
-        item = item->child;
-        while (item) {
-            s_parse_socket_item (self, socket, item, path);
-            item = item->next;
-        }
-    }
-    else
-    if (item->type == cJSON_Object) {
-        char subpath [255 + 1];
-        cJSON *child = item->child;
-        while (child) {
-            snprintf (subpath, 255,
-                "%s%s%s", path, *path? "/":"", child->string);
-            s_parse_socket_item (self, socket, child, subpath);
-            child = child->next;
-        }
-    }
-    else {
         //  Process elementary item
         int
             index;
         if (self->verbose) {
-            if (item->type == cJSON_String)
+            if (item->type == zfl_tree_t_String)
                 printf ("I: - %s = %s\n", path, item->valuestring);
             else
                 printf ("I: - %s = %d\n", path, item->valueint);
@@ -192,55 +156,34 @@ s_parse_socket_item (
         }
     }
 }
+#endif
 
 
 //  --------------------------------------------------------------------------
 //  Constructor
 //
-//  Creates a config object containing a 0MQ context.
-//  If the specified blob contains valid ZDCF data, loads it.
+//  Creates a config object containing a 0MQ context
 //
 zfl_config_t *
-zfl_config_new (char *data)
+zfl_config_new (zfl_tree_t *tree)
 {
     zfl_config_t
         *self = NULL;           //  New config object
-    cJSON
-        *context,               //  Context object if any
-        *item;                  //  Property of context
 
-    assert (self = malloc (sizeof (zfl_config_t)));
-    self->iothreads = 1;
-    self->verbose = 0;
+    assert (tree);
+    assert (self = zmalloc (sizeof (zfl_config_t)));
+    self->tree = tree;
 
-    //  Load JSON data and if it's NFG, load empty object
-    self->json = cJSON_Parse (data);
-    if (!self->json)
-        cJSON_Parse ("{ }");
+    self->verbose = atoi (zfl_tree_lookup (tree, "context/verbose", "0"));
+    if (self->verbose)
+        printf ("I: Configuration in progress\n");
 
-    //  Parse context object
-    context = cJSON_GetObjectItem (self->json, "context");
-    if (context) {
-        item = context->child;
-        while (item) {
-            if (streq (item->string, "iothreads")) {
-                if (item->valueint > 0)
-                    self->iothreads = item->valueint;
-                else
-                    printf ("W: ignoring illegal iothreads value %d\n", item->valueint);
-                if (self->verbose)
-                    printf ("I: - will use %d I/O thread%s\n",
-                        self->iothreads, self->iothreads > 1? "s":"");
-            }
-            else
-            if (streq (item->string, "verbose")) {
-                self->verbose = item->valueint;
-                if (self->verbose)
-                    printf ("I: Configuration in progress\n");
-            }
-            item = item->next;
-        }
+    self->iothreads = atoi (zfl_tree_lookup (tree, "context/iothreads", "1"));
+    if (self->iothreads < 1 || self->iothreads > 255) {
+        printf ("W: ignoring illegal iothreads value %d\n", self->iothreads);
+        self->iothreads = 1;
     }
+    //  Initialize 0MQ as requested
     self->context = zmq_init (self->iothreads);
     return (self);
 }
@@ -248,14 +191,17 @@ zfl_config_new (char *data)
 
 //  --------------------------------------------------------------------------
 //  Destructor
+//  Note, shuts down 0MQ
 //
 void
 zfl_config_destroy (zfl_config_t **self_p)
 {
     assert (self_p);
     if (*self_p) {
-        cJSON_Delete ((*self_p)->json);
-        free (*self_p);
+        zfl_config_t *self = *self_p;
+        zfl_tree_destroy (&self->tree);
+        zmq_term (self->context);
+        free (self);
         *self_p = NULL;
     }
 }
@@ -269,31 +215,31 @@ zfl_config_destroy (zfl_config_t **self_p)
 char *
 zfl_config_device (zfl_config_t *self, int index)
 {
-    cJSON
-        *item;                  //  Item in JSON tree
-
     assert (self);
-    item = self->json->child;
-    while (item) {
-        if (strneq (item->string, "context")) {
+
+    //  Check children of root item, skip any called "context"
+    zfl_tree_t *tree = zfl_tree_child (self->tree);
+    while (tree) {
+        if (strneq (zfl_tree_name (tree), "context")) {
             if (index)
                 index--;
             else
-                return (item->string);
+                return (zfl_tree_name (tree));
         }
-        item = item->next;
+        tree = zfl_tree_next (tree);
     }
     return (NULL);
 }
 
 
+#if 0
 //  --------------------------------------------------------------------------
 //  Returns the type of the specified device, or "" if not specified.
 //
 char *
 zfl_config_device_type (zfl_config_t *self, char *device)
 {
-    cJSON
+    zfl_tree_t
         *item;
 
     assert (self);
@@ -304,7 +250,7 @@ zfl_config_device_type (zfl_config_t *self, char *device)
     item = self->json->child;
     while (item) {
         if (streq (item->string, device)) {
-            item = cJSON_GetObjectItem (item, "type");
+            item = zfl_tree_t_GetObjectItem (item, "type");
             if (item)
                 return (item->valuestring);
             break;
@@ -325,7 +271,7 @@ zfl_config_socket (zfl_config_t *self, char *device, char *name, int type)
 {
     void
         *socket;                //  0MQ socket
-    cJSON
+    zfl_tree_t
         *item;
 
     assert (self);
@@ -346,10 +292,10 @@ zfl_config_socket (zfl_config_t *self, char *device, char *name, int type)
     if (!socket)
         return (NULL);          //  Can't create socket
 
-    if (self->verbose)
+    if (zfl_config_verbose (self))
         printf ("I: Configuring '%s' socket in '%s' device...\n", name, device);
 
-    item = cJSON_GetObjectItem (item, name);
+    item = zfl_tree_t_GetObjectItem (item, name);
     if (item)
         s_parse_socket_item (self, socket, item, "");
     else
@@ -358,7 +304,7 @@ zfl_config_socket (zfl_config_t *self, char *device, char *name, int type)
 
     return (socket);
 }
-
+#endif
 
 //  --------------------------------------------------------------------------
 //  Returns the 0MQ context associated with this config
@@ -386,52 +332,38 @@ zfl_config_verbose (zfl_config_t *self)
 //  Selftest
 
 int
-zfl_config_test (void)
+zfl_config_test (Bool verbose)
 {
-    zfl_config_t
-        *config;
-    zfl_blob_t
-        *blob;
-    char
-        *config_name = "zfl_config_test.json";
-    FILE
-        *file;
-    void
-        *frontend,
-        *backend;
-    char
-        *device;                //  Name of first device
-
     printf (" * zfl_config: ");
-    //  Load config data into blob
-    file = fopen (config_name, "rb");
-    blob = zfl_blob_new ();
-    assert (blob);
-    assert (zfl_blob_load (blob, file));
-    fclose (file);
 
-    //  Create a new config from the blob data
-    config = zfl_config_new (zfl_blob_data (blob));
+    //  Create a new config from the ZPL test file
+    zfl_config_t *config = zfl_config_new (
+        zfl_tree_zpl_file ("zfl_config_test.txt"));
     assert (config);
 
+#if 0
     //  Test unknown device
-    frontend = zfl_config_socket (config, "nosuch", "frontend", ZMQ_SUB);
+    void *frontend = zfl_config_socket (config, "nosuch", "frontend", ZMQ_SUB);
     assert (frontend == NULL);
-
+    zmq_close (frontend);
+#endif
     //  Find real device
-    device = zfl_config_device (config, 0);
+    char *device = zfl_config_device (config, 0);
     assert (*device);           //  Must not be empty
 
-    //  Configure two sockets
-    frontend = zfl_config_socket (config, device, "frontend", ZMQ_SUB);
-    assert (frontend);
-    backend = zfl_config_socket (config, device, "backend", ZMQ_PUB);
-    assert (backend);
+#if 0
 
-    zfl_blob_destroy (&blob);
+    //  Configure two sockets
+    void *frontend = zfl_config_socket (config, device, "frontend", ZMQ_SUB);
+    assert (frontend);
+    zmq_close (frontend);
+
+    void *backend = zfl_config_socket (config, device, "backend", ZMQ_PUB);
+    assert (backend);
+    zmq_close (backend);
+#endif
     zfl_config_destroy (&config);
     assert (config == NULL);
-
     printf ("OK\n");
     return 0;
 }

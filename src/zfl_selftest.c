@@ -25,16 +25,29 @@
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_base.h"
 #include "../include/zfl_blob.h"
+#include "../include/zfl_tree.h"
+#include "../include/zfl_tree_json.h"
+#include "../include/zfl_tree_zpl.h"
 #include "../include/zfl_config.h"
-#include "../include/zfl_log.h"
 
 int main (int argc, char *argv [])
 {
+    //  Enable malloc tracing if the platform supports it
+    MALLOC_TRACE;
+
+    Bool verbose;
+    if (argc == 2 && streq (argv [1], "-v"))
+        verbose = TRUE;
+    else
+        verbose = FALSE;
+
     printf ("Running ZFL self tests...\n");
-    zfl_base_test ();
-    zfl_blob_test ();
-    zfl_config_test ();
-    zfl_log_test ();
+    zfl_base_test (verbose);
+    zfl_blob_test (verbose);
+    zfl_config_test (verbose);
+    zfl_tree_test (verbose);
+    zfl_tree_json_test (verbose);
+    zfl_tree_zpl_test (verbose);
 
     printf ("Tests passed OK\n");
     return 0;
