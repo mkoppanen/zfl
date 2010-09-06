@@ -13,8 +13,6 @@ libraries so it can be used for new applications.
 ZFL is inspired by the iMatix Standard Function Library (SFL), and borrows
 liberally from it.  See http://legacy.imatix.com/html/sfl/.
 
-Note that development of ZFL is at http://github.com/imatix/zfl/tree/develop.
-
 Building and installation
 -------------------------
 
