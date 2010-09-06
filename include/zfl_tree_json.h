@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl.h - ZFL wrapper
+    zfl_tree_json.h - ZFL tree_json class
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,24 +22,24 @@
     =========================================================================
 */
 
-#ifndef __ZFL_H_INCLUDED__
-#define __ZFL_H_INCLUDED__
+#ifndef __ZFL_TREE_JSON_H_INCLUDED__
+#define __ZFL_TREE_JSON_H_INCLUDED__
 
-//  Always include ZeroMQ header file
-//
-#include <zmq.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-//  Set up environment for the application
-//
-#include <zfl_prelude.h>
+//  Load tree from JSON string
+zfl_tree_t *
+    zfl_tree_json (char *json_string);
+zfl_tree_t *
+    zfl_tree_json_file (char *filename);
+int
+    zfl_tree_json_test (Bool verbose);
 
-//  Classes listed in alphabetical order except for dependencies
-//
-#include <zfl_base.h>
-#include <zfl_blob.h>
-#include <zfl_tree.h>
-#include <zfl_tree_json.h>
-#include <zfl_tree_zpl.h>
-#include <zfl_config.h>
+#ifdef __cplusplus
+}
+#endif
 
 #endif
+

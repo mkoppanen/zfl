@@ -1,19 +1,19 @@
 {
-    "verbose": true,
-    "type": "queue",
-    "iothreads": 2,
-    "frontend": {
-        "option": {
-            "hwm": 1000,
-            "subscribe": [ "coffee", "tea", "juice" ],
-            "subscribe": "milk"
-        },
-        "bind": "tcp://*:5555",
-        "bind": [ "tcp://*:5556", "inproc://mydevice" ],
-        "connect": [ ]
+    "context": {
+        "iothreads": 1,
+        "verbose": false
     },
-    "backend": {
-        "bind": [ ],
-        "connect": [ "tcp://localhost:5556" ]
+    "main" : {
+        "type": "zqueue",
+        "frontend": {
+            "option": {
+                "hwm": 1000,
+                "swap": 25000000
+            },
+            "bind": [ "inproc://addr1", "ipc://addr3" ]
+        },
+        "backend": {
+            "bind": "inproc://addr3"
+        }
     }
 }

@@ -19,6 +19,8 @@ src/platform.hpp.in
 src/platform.hpp.in~
 src/stamp-h1
 src/*.o
+src/mtrace.txt
+src/outbin
 doc/*.7
 src/.libs/
 src/libzfl.la
@@ -27,9 +29,8 @@ src/platform.h.in
 src/platform.h.in~
 src/*.lo
 examples/*.o
-examples/device
+examples/zdevice
 examples/.deps/
 examples/.libs/
-examples/Makefile.am
 examples/core
 src/core

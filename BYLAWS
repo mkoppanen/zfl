@@ -19,8 +19,7 @@ applications.  Easy to learn, consistent API, and extremely thin.
 Packaging
 ---------
 
-ZFL should use Autotools for packaging.  However that is beyond the skills of
-the current authors.
+ZFL uses autotools for packaging.
 
 Scope
 -----
@@ -29,16 +28,15 @@ The primary scope of ZFL is writing robust services (devices and other headless
 applications).  Services need configuration file parsing, integration with the
 operating system, logging, remote administration, process security, etc.  ZFL is
 not intended as a general purpose C library, though it provides some basic and
-widely-used data structures such as hash tables.  Every module in ZFL is backed
-by a clear use case that justifies its inclusion in the library.  Functionality
-for "its own sake" will be removed.
+widely-used data structures.  Every module in ZFL is backed by a clear use case
+that justifies its inclusion in the library.  Functionality for "its own sake"
+will be removed.
 
 Overall Structure
 -----------------
 
 ZFL consists of modules, each module consisting of a .h and a .c.  Modules may
-depend on other modules.  Circular dependencies are not allowed.  Each module
-(where relevant) maps to a class.
+depend on other modules.  Each module (in general) maps to a class.
 
 zfl.h will include all modules header files, all the time.  For the user, ZFL
 forms one single package.  All modules start by including zfl.h.  All
@@ -51,13 +49,32 @@ applications as well as ZFL code.
 zfl.h defines a limited number of small, useful macros and typedefs that have
 proven useful for writing clearer C code.
 
+Memory leak testing
+-------------------
+
+To test against memory leaks we use the mtrace tool under Linux.  The
+zfl_selftest.c program calls MALLOC_TRACE, which zfl_prelude.h sets to mtrace()
+under Linux.  This is how we build and run the selftests with mtrace:
+
+----
+#  Run selftests and check memory
+gcc -g -o zfl_selftest zfl*.c -lzmq
+export MALLOC_TRACE=mtrace.txt
+zfl_selftest -v
+mtrace zfl_selftest mtrace.txt
+----
+
 Git Workflow
 ------------
 
-The ZFL project uses the Git workflow defined and documented by Vincent Driessen
-here:
+The ZFL project uses this minimalistic Git workflow:
 
-http://nvie.com/git-model
+* The 'stable' branch is the last stable release
+* The 'master' branch is the next release candidate
+* The 'unstable' branch is the leading edge
+
+All patches are submitted as issues to the Git repository, with code in the
+issue or as gists.
 
 Source Style
 ------------

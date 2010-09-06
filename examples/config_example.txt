@@ -1,0 +1,19 @@
+#   ZPL configuration file example
+#   Syntax is defined at http://rfc.zeromq.org/spec:4
+#
+context
+    iothreads = 1
+    verbose = 1
+
+#   Define the 'main' device, it's a ZMQ_QUEUE device
+#   that accepts connections from clients and services.
+#
+main
+    type = zmq_queue
+    frontend
+        option
+            hwm = 1000
+            swap = 25000000
+        bind = tcp://*:5555
+    backend
+        bind = tcp://*:5556

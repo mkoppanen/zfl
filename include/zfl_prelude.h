@@ -13,21 +13,23 @@
     - defines a set of useful macros such as streq and FOREVER
     - 'fixes' various older platforms to make them more POSIX compatible
 
-    Copyright (c) 1991-2010 iMatix Corporation and contributors
+    -------------------------------------------------------------------------
+    Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
+    Copyright other contributors as noted in the AUTHORS file.
 
     This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
 
-    This is free software; you can redistribute it and/or modify it under
-    the terms of the Lesser GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+    This is free software; you can redistribute it and/or modify it under the
+    terms of the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your option)
+    any later version.
 
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    Lesser GNU General Public License for more details.
+    This software is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABIL-
+    ITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General
+    Public License for more details.
 
-    You should have received a copy of the Lesser GNU General Public License
+    You should have received a copy of the GNU Lesser General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
     =========================================================================
 */
@@ -168,7 +170,7 @@
 #elif (defined (APPLE) || defined (__APPLE__))
 #   define __UTYPE_GENERIC
 #   define __UNIX__
-#elif (defined (linux))
+#elif (defined (LINUX) || defined (linux))
 #   define __UTYPE_LINUX
 #   define __UNIX__
 #   ifndef __NO_CTYPE
@@ -372,6 +374,17 @@ typedef unsigned short  dbyte;          //  Double byte = 16 bits
 typedef unsigned int    qbyte;          //  Quad byte = 32 bits
 
 
+//- Memory leak detection if possible ---------------------------------------
+//  Invoke by calling MALLOC_CHECK in main
+
+#if (defined (__UTYPE_LINUX))
+#   include <mcheck.h>
+#   define MALLOC_TRACE     mtrace()
+#else
+#   define MALLOC_TRACE
+#endif
+
+
 //- Pseudo-functions --------------------------------------------------------
 
 #define FOREVER             for (;;)            //  FOREVER { ... }
@@ -389,6 +402,10 @@ typedef unsigned int    qbyte;          //  Quad byte = 32 bits
 
 #define randomof(num)       (int) (((float) num) * rand () / (RAND_MAX + 1.0))
 #define randomize()         srand ((uint) apr_time_usec (apr_time_now ()))
+
+//  Free and duplicate string safely
+#define zfree(s)            if (s) { free (s); s = NULL; } else
+#define zstrdup(s)          s? strdup (s): NULL
 
 #if (!defined (MIN))
 #   define MIN(a,b)         (((a) < (b))? (a): (b))
@@ -594,7 +611,8 @@ typedef enum {
 #   define ZFL_ASSERT_SANE_FUNCTION    "<unknown>"
 #endif
 
-// Safe replacement for malloc() which asserts if we run out of heap
+//  Replacement for malloc() which asserts if we run out of heap, and
+//  which zeroes the allocated block.
 static inline void *
     safe_malloc (
     size_t size,
@@ -612,10 +630,13 @@ static inline void *
         fflush (stderr);
         abort ();
     }
+    else
+        memset (mem, 0, size);
+
     return mem;
 }
 
-#define malloc(size) safe_malloc(size, __FILE__, __LINE__, ZFL_ASSERT_SANE_FUNCTION)
+#define zmalloc(size) safe_malloc(size, __FILE__, __LINE__, ZFL_ASSERT_SANE_FUNCTION)
 
 
 //- DLL exports -------------------------------------------------------------

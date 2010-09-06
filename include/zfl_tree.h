@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_config.h - ZFL config class
+    zfl_tree.h - ZFL tree class
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,35 +22,57 @@
     =========================================================================
 */
 
-#ifndef __ZFL_CONFIG_H_INCLUDED__
-#define __ZFL_CONFIG_H_INCLUDED__
+#ifndef __ZFL_TREE_H_INCLUDED__
+#define __ZFL_TREE_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 //  Opaque class structure
-typedef struct _zfl_config_t zfl_config_t;
+typedef struct _zfl_tree_t zfl_tree_t;
 
-zfl_config_t *
-    zfl_config_new (zfl_tree_t *tree);
+//  Function that executes tree
+typedef int (zfl_tree_fct) (zfl_tree_t *self, void *context, int level);
+
+zfl_tree_t *
+    zfl_tree_new (char *name, zfl_tree_t *parent);
 void
-    zfl_config_destroy (zfl_config_t **self_p);
+    zfl_tree_destroy (zfl_tree_t **self_p);
+zfl_tree_t *
+    zfl_tree_child (zfl_tree_t *self);
+zfl_tree_t *
+    zfl_tree_next (zfl_tree_t *self);
+zfl_tree_t *
+    zfl_tree_locate (zfl_tree_t *self, char *path);
 char *
-    zfl_config_device (zfl_config_t *self, int index);
+    zfl_tree_resolve (zfl_tree_t *self, char *path, char *default_value);
+zfl_tree_t *
+    zfl_tree_at_depth (zfl_tree_t *self, int level);
 char *
-    zfl_config_device_type (zfl_config_t *self, char *device);
-void *
-    zfl_config_socket (zfl_config_t *self, char *device, char *name, int type);
-void *
-    zfl_config_context (zfl_config_t *self);
-Bool
-    zfl_config_verbose (zfl_config_t *self);
+    zfl_tree_name (zfl_tree_t *self);
 int
-    zfl_config_test (Bool verbose);
+    zfl_tree_set_name (zfl_tree_t *self, char *name);
+zfl_blob_t *
+    zfl_tree_value (zfl_tree_t *self);
+int
+    zfl_tree_set_value (zfl_tree_t *self, zfl_blob_t *blob);
+char *
+    zfl_tree_string (zfl_tree_t *self);
+int
+    zfl_tree_set_string (zfl_tree_t *self, char *string);
+int
+    zfl_tree_set_printf (zfl_tree_t *self, char *format, ...);
+int
+    zfl_tree_execute (zfl_tree_t *self, zfl_tree_fct handler, void *context);
+int
+    zfl_tree_dump (zfl_tree_t *self);
+int
+    zfl_tree_test (Bool verbose);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+

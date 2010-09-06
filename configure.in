@@ -259,7 +259,7 @@ fi
 
 # These options are GNU compiler specific.
 if test "x$gnu_compilers" = "xyes"; then
-    CPPFLAGS="-Wall $CPPFLAGS -std=c99 -Wno-unused"
+    CPPFLAGS="-Wall $CPPFLAGS -std=c99 -DLINUX -Wno-unused"
     if test "x$pedantic" = "xyes"; then
         CPPFLAGS="-pedantic $CPPFLAGS"
     fi

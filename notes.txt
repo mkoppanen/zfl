@@ -1,0 +1,15 @@
+zfl_socket class
+    - allow configuration and tuning via ZDCF
+    - allow send and receive of strings, safely:
+
+    zfl_socket_send (socket, "string");
+    string = zfl_socket_recv (socket);
+
+        char *address = "address";
+        zmq_msg_t message;
+        zmq_msg_init_data (&message, address, strlen (address) + 1, NULL, NULL);
+        zmq_send (publisher, &message, ZMQ_SNDMORE);
+
+zfl_socket_sendfmt
+zfl_socket_sendmore
+zfl_socket_send

@@ -1,0 +1,62 @@
+Welcome
+-------
+
+ZFL is the ZeroMQ Function Library, a thin portability & function library
+for ZeroMQ applications in C/C++.  It is written in clear and readable C,
+portable to all ZeroMQ platforms, and licensed under the LGPL.
+
+The principal goal is to aggressively reduce the LoC in 0MQ devices and other
+applications written in C, and leave the resulting code 100% portable.  A
+secondary goal is to recycle decades of experience from legacy iMatix C
+libraries so it can be used for new applications.
+
+ZFL is inspired by the iMatix Standard Function Library (SFL), and borrows
+liberally from it.  See http://legacy.imatix.com/html/sfl/.
+
+Note that development of ZFL is at http://github.com/imatix/zfl/tree/develop.
+
+Building and installation
+-------------------------
+
+See the INSTALL file included with the distribution.  To build from git,
+run sh autogen.sh and then follow the standard INSTALL instructions.  Here is
+the 1-liner for UNIX systems:
+----
+sh autogen.sh; ./configure; make all; sudo make install; sudo ldconfig
+----
+You will need the pkg-config, libtool, and autoreconf packages.
+
+Using ZFL
+---------
+
+Include "zfl.h" in your application and link with libzfl.  The single header
+includes the system header files that typical ZeroMQ applications will need.
+The provided 'c' shell script lets you write simple portable build scripts.
+
+Resources
+---------
+
+ZFL is developed by and for the ZeroMQ community.
+
+Websites: http://zfl.zeromq.org/, http://www.zeromq.org/
+
+Development mailing list: zeromq-dev@lists.zeromq.org
+Announcements mailing list: zeromq-announce@lists.zeromq.org
+
+Git repository: http://github.com/imatix/zfl
+
+ZFL developers can also be found on the IRC channel #zeromq, on the
+Freenode network (irc.freenode.net).
+
+Contributions
+-------------
+
+See the BYLAWS file included with the distribution.
+
+Copying
+-------
+
+Free use of this software is granted under the terms of the GNU Lesser General
+Public License (LGPL). For details see the files `COPYING` and `COPYING.LESSER`
+included with the ZeroMQ distribution.
+

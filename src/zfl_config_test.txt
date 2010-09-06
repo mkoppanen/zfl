@@ -1,0 +1,27 @@
+#   ZPL configuration file example
+#
+context
+    iothreads = 1
+    verbose = 0
+
+#   Define the 'main' device, it's a ZMQ_QUEUE device
+#   that accepts connections from clients and services.
+#
+main
+    type = zqueue
+    frontend
+        option
+            hwm = 1000
+            swap = 25000000
+        bind = inproc://addr1
+        bind = ipc://addr3
+    backend
+        bind = inproc://addr3
+
+#   These are not valid
+#notvalid/=value
+#/notvalid=value
+#some-path=value
+#name='value
+#=notvalid
+#?wtf
