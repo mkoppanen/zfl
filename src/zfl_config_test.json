@@ -4,7 +4,7 @@
         "verbose": false
     },
     "main" : {
-        "type": "queue",
+        "type": "zqueue",
         "frontend": {
             "option": {
                 "hwm": 1000,

@@ -2,27 +2,26 @@
     zfl_config.c
 
     Creates a 0MQ context and sockets, configuring them as specified by a
-    JSON configuration file.  The config file follows the format described
-    at http://rfc.zeromq.org/spec:3.
+    zfl_tree class (which is usually loaded from a config file in various
+    formats including text and JSON).
 
-    Does not provide detailed error reporting.  To verify your JSON files
-    use http://www.jsonlint.com.
-
-    Copyright (c) 1991-2010 iMatix Corporation and contributors
+    -------------------------------------------------------------------------
+    Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
+    Copyright other contributors as noted in the AUTHORS file.
 
     This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
 
-    This is free software; you can redistribute it and/or modify it under
-    the terms of the Lesser GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+    This is free software; you can redistribute it and/or modify it under the
+    terms of the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your option)
+    any later version.
 
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    Lesser GNU General Public License for more details.
+    This software is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABIL-
+    ITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General
+    Public License for more details.
 
-    You should have received a copy of the Lesser GNU General Public License
+    You should have received a copy of the GNU Lesser General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
     =========================================================================
 */
@@ -47,117 +46,6 @@ struct _zfl_config_t {
         verbose;            //  Show configuration in progress?
 };
 
-#if 0
-//  Handlers for socket configuration; each returns zero on success
-//  or -1 on failure.
-//
-static int s_do_bind (void *socket, char *strvalue, int intvalue)
-{
-    return (zmq_bind (socket, strvalue));
-}
-static int s_do_connect (void *socket, char *strvalue, int intvalue)
-{
-    return (zmq_connect (socket, strvalue));
-}
-static int s_do_option_hwm (void *socket, char *strvalue, int intvalue)
-{
-    uint64_t optvalue = intvalue;
-    return (zmq_setsockopt (socket, ZMQ_HWM, &optvalue, sizeof (optvalue)));
-}
-static int s_do_option_swap (void *socket, char *strvalue, int intvalue)
-{
-    int64_t optvalue = intvalue;
-    return (zmq_setsockopt (socket, ZMQ_SWAP, &optvalue, sizeof (optvalue)));
-}
-static int s_do_option_affinity (void *socket, char *strvalue, int intvalue)
-{
-    uint64_t optvalue = intvalue;
-    return (zmq_setsockopt (socket, ZMQ_AFFINITY, &optvalue, sizeof (optvalue)));
-}
-static int s_do_option_identity (void *socket, char *strvalue, int intvalue)
-{
-    return (zmq_setsockopt (socket, ZMQ_IDENTITY, strvalue, strlen (strvalue)));
-}
-static int s_do_option_subscribe (void *socket, char *strvalue, int intvalue)
-{
-    return (zmq_setsockopt (socket, ZMQ_SUBSCRIBE, strvalue, strlen (strvalue)));
-}
-static int s_do_option_rate (void *socket, char *strvalue, int intvalue)
-{
-    int64_t optvalue = intvalue;
-    return (zmq_setsockopt (socket, ZMQ_RATE, &optvalue, sizeof (optvalue)));
-}
-static int s_do_option_recovery_ivl (void *socket, char *strvalue, int intvalue)
-{
-    int64_t optvalue = intvalue;
-    return (zmq_setsockopt (socket, ZMQ_RECOVERY_IVL, &optvalue, sizeof (optvalue)));
-}
-static int s_do_option_mcast_loop (void *socket, char *strvalue, int intvalue)
-{
-    int64_t optvalue = intvalue;
-    return (zmq_setsockopt (socket, ZMQ_MCAST_LOOP, &optvalue, sizeof (optvalue)));
-}
-static int s_do_option_sndbuf (void *socket, char *strvalue, int intvalue)
-{
-    uint64_t optvalue = intvalue;
-    return (zmq_setsockopt (socket, ZMQ_SNDBUF, &optvalue, sizeof (optvalue)));
-}
-static int s_do_option_rcvbuf (void *socket, char *strvalue, int intvalue)
-{
-    uint64_t optvalue = intvalue;
-    return (zmq_setsockopt (socket, ZMQ_RCVBUF, &optvalue, sizeof (optvalue)));
-}
-
-typedef int (helper_fct) (void *socket, char *strvalue, int intvalue);
-
-static struct {
-    char *path;
-    helper_fct *helper;
-} s_helpers [] = {
-    { "bind", s_do_bind },
-    { "connect", s_do_connect },
-    { "option/hwm", s_do_option_hwm },
-    { "option/swap", s_do_option_swap },
-    { "option/affinity", s_do_option_affinity },
-    { "option/identity", s_do_option_identity },
-    { "option/subscribe", s_do_option_subscribe },
-    { "option/rate", s_do_option_rate },
-    { "option/recovery_ivl", s_do_option_recovery_ivl },
-    { "option/mcast_loop", s_do_option_mcast_loop },
-    { "option/sndbuf", s_do_option_sndbuf },
-    { "option/rcvbuf", s_do_option_rcvbuf },
-    //  Sentinel marks end of list
-    { NULL, NULL }
-};
-
-
-        //  Process elementary item
-        int
-            index;
-        if (self->verbose) {
-            if (item->type == zfl_tree_t_String)
-                printf ("I: - %s = %s\n", path, item->valuestring);
-            else
-                printf ("I: - %s = %d\n", path, item->valueint);
-        }
-        for (index = 0;; index++) {
-            if (!s_helpers [index].path) {
-                if (self->verbose)
-                    printf ("W: Unknown path '%s'\n", path);
-                break;          //  Unknown path, ignore
-            }
-            if (streq (s_helpers [index].path, path)) {
-                if ((s_helpers [index].helper)
-                    (socket, item->valuestring, item->valueint))
-                    printf ("E: could not do '%s': %s\n",
-                        path, zmq_strerror (errno));
-                break;          //  Path found, processed
-            }
-        }
-    }
-}
-#endif
-
 
 //  --------------------------------------------------------------------------
 //  Constructor
@@ -174,11 +62,11 @@ zfl_config_new (zfl_tree_t *tree)
     assert (self = zmalloc (sizeof (zfl_config_t)));
     self->tree = tree;
 
-    self->verbose = atoi (zfl_tree_lookup (tree, "context/verbose", "0"));
+    self->verbose = atoi (zfl_tree_resolve (tree, "context/verbose", "0"));
     if (self->verbose)
         printf ("I: Configuration in progress\n");
 
-    self->iothreads = atoi (zfl_tree_lookup (tree, "context/iothreads", "1"));
+    self->iothreads = atoi (zfl_tree_resolve (tree, "context/iothreads", "1"));
     if (self->iothreads < 1 || self->iothreads > 255) {
         printf ("W: ignoring illegal iothreads value %d\n", self->iothreads);
         self->iothreads = 1;
@@ -232,79 +120,145 @@ zfl_config_device (zfl_config_t *self, int index)
 }
 
 
-#if 0
 //  --------------------------------------------------------------------------
 //  Returns the type of the specified device, or "" if not specified.
 //
 char *
 zfl_config_device_type (zfl_config_t *self, char *device)
 {
-    zfl_tree_t
-        *item;
-
     assert (self);
     assert (device);
-    assert (strneq (device, "context"));
 
-    //  Find named device
-    item = self->json->child;
-    while (item) {
-        if (streq (item->string, device)) {
-            item = zfl_tree_t_GetObjectItem (item, "type");
-            if (item)
-                return (item->valuestring);
-            break;
-        }
-        item = item->next;
-    }
-    return ("");                //  No such device or property
+    zfl_tree_t *tree = zfl_tree_locate (self->tree, device);
+    if (tree)
+        return (zfl_tree_resolve (tree, "type", ""));
+    else
+        return ("");
 }
 
 
+//  Process options settings
+//
+int
+s_setsockopt (zfl_config_t *self, void *socket, zfl_tree_t *tree)
+{
+    int rc = 0;
+    tree = zfl_tree_child (tree);
+    while (tree && rc == 0) {
+        char *name = zfl_tree_name (tree);
+        char *value = zfl_tree_string (tree);
+        if (streq (name, "hwm")) {
+            uint64_t optvalue = atoi (value);
+            rc = zmq_setsockopt (socket, ZMQ_HWM, &optvalue, sizeof (optvalue));
+        }
+        else
+        if (streq (name, "swap")) {
+            int64_t optvalue = atoi (value);
+            rc = zmq_setsockopt (socket, ZMQ_SWAP, &optvalue, sizeof (optvalue));
+        }
+        else
+        if (streq (name, "affinity")) {
+            uint64_t optvalue = atoi (value);
+            rc = zmq_setsockopt (socket, ZMQ_AFFINITY, &optvalue, sizeof (optvalue));
+        }
+        else
+        if (streq (name, "identity"))
+            rc = zmq_setsockopt (socket, ZMQ_IDENTITY, value, strlen (value));
+        else
+        if (streq (name, "subscribe"))
+            rc = zmq_setsockopt (socket, ZMQ_SUBSCRIBE, value, strlen (value));
+        else
+        if (streq (name, "rate")) {
+            int64_t optvalue = atoi (value);
+            rc = zmq_setsockopt (socket, ZMQ_RATE, &optvalue, sizeof (optvalue));
+        }
+        else
+        if (streq (name, "recovery_ivl")) {
+            int64_t optvalue = atoi (value);
+            rc = zmq_setsockopt (socket, ZMQ_RECOVERY_IVL, &optvalue, sizeof (optvalue));
+        }
+        else
+        if (streq (name, "mcast_loop")) {
+            int64_t optvalue = atoi (value);
+            rc = zmq_setsockopt (socket, ZMQ_MCAST_LOOP, &optvalue, sizeof (optvalue));
+        }
+        else
+        if (streq (name, "sndbuf")) {
+            uint64_t optvalue = atoi (value);
+            rc = zmq_setsockopt (socket, ZMQ_SNDBUF, &optvalue, sizeof (optvalue));
+        }
+        else
+        if (streq (name, "rcvbuf")) {
+            uint64_t optvalue = atoi (value);
+            rc = zmq_setsockopt (socket, ZMQ_RCVBUF, &optvalue, sizeof (optvalue));
+        }
+        else
+        if (self->verbose)
+            printf ("W: ignoring socket option '%s'\n", name);
+
+        tree = zfl_tree_next (tree);
+    }
+    return rc;
+}
+
 //  --------------------------------------------------------------------------
 //  Creates a named 0MQ socket within a named device, and configures the
-//  socket as specified in the configuration data.  Returns NULL if the device
-//  or socket do not exist.
+//  socket as specified in the configuration data.  Returns NULL if the
+//  device or socket do not exist, or if there was an error configuring the
+//  socket.
 //
 void *
 zfl_config_socket (zfl_config_t *self, char *device, char *name, int type)
 {
-    void
-        *socket;                //  0MQ socket
-    zfl_tree_t
-        *item;
-
     assert (self);
     assert (device);
     assert (strneq (device, "context"));
 
-    //  Find named device
-    item = self->json->child;
-    while (item) {
-        if (streq (item->string, device))
-            break;
-        item = item->next;
-    }
-    if (!item)
+    zfl_tree_t *tree = zfl_tree_locate (self->tree, device);
+    if (!tree)
         return (NULL);          //  No such device
 
-    socket = zmq_socket (self->context, type);
+    void *socket = zmq_socket (self->context, type);
     if (!socket)
         return (NULL);          //  Can't create socket
 
     if (zfl_config_verbose (self))
         printf ("I: Configuring '%s' socket in '%s' device...\n", name, device);
 
-    item = zfl_tree_t_GetObjectItem (item, name);
-    if (item)
-        s_parse_socket_item (self, socket, item, "");
+    //  Find socket in device
+    int rc = 0;
+    tree = zfl_tree_locate (tree, name);
+    if (tree) {
+        tree = zfl_tree_child (tree);
+        while (tree && rc == 0) {
+            char *name = zfl_tree_name (tree);
+            if (streq (name, "bind"))
+                rc = zmq_bind (socket, zfl_tree_string (tree));
+            else
+            if (streq (name, "connect"))
+                rc = zmq_connect (socket, zfl_tree_string (tree));
+            else
+            if (streq (name, "option"))
+                rc = s_setsockopt (self, socket, tree);
+            else
+            if (self->verbose)
+                printf ("W: ignoring socket setting '%s'\n", name);
+
+            tree = zfl_tree_next (tree);
+        }
+    }
     else
     if (self->verbose)
         printf ("W: No configuration found for '%s'\n", name);
 
+    if (rc) {
+        printf ("E: configuration failed - %s\n", zmq_strerror (errno));
+        zmq_close (socket);
+        socket = NULL;
+    }
     return (socket);
 }
-#endif
+
 
 //  --------------------------------------------------------------------------
 //  Returns the 0MQ context associated with this config
@@ -341,17 +295,19 @@ zfl_config_test (Bool verbose)
         zfl_tree_zpl_file ("zfl_config_test.txt"));
     assert (config);
 
-#if 0
     //  Test unknown device
-    void *frontend = zfl_config_socket (config, "nosuch", "frontend", ZMQ_SUB);
-    assert (frontend == NULL);
-    zmq_close (frontend);
-#endif
+    void *socket = zfl_config_socket (config, "nosuch", "socket", ZMQ_SUB);
+    assert (socket == NULL);
+    zmq_close (socket);
+
     //  Find real device
     char *device = zfl_config_device (config, 0);
-    assert (*device);           //  Must not be empty
+    assert (*device);
+    assert (streq (device, "main"));
 
-#if 0
+    char *type = zfl_config_device_type (config, device);
+    assert (*type);
+    assert (streq (type, "zqueue"));
 
     //  Configure two sockets
     void *frontend = zfl_config_socket (config, device, "frontend", ZMQ_SUB);
@@ -361,7 +317,7 @@ zfl_config_test (Bool verbose)
     void *backend = zfl_config_socket (config, device, "backend", ZMQ_PUB);
     assert (backend);
     zmq_close (backend);
-#endif
+
     zfl_config_destroy (&config);
     assert (config == NULL);
     printf ("OK\n");

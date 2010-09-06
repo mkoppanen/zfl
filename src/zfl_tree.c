@@ -3,22 +3,23 @@
 
     It's a sideways binary tree that represents children and siblings.
 
-
-    Copynext (c) 1991-2010 iMatix Corporation and contributors
+    -------------------------------------------------------------------------
+    Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
+    Copyright other contributors as noted in the AUTHORS file.
 
     This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
 
-    This is free software; you can redistribute it and/or modify it under
-    the terms of the Lesser GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+    This is free software; you can redistribute it and/or modify it under the
+    terms of the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your option)
+    any later version.
 
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    Lesser GNU General Public License for more details.
+    This software is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABIL-
+    ITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General
+    Public License for more details.
 
-    You should have received a copy of the Lesser GNU General Public License
+    You should have received a copy of the GNU Lesser General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
     =========================================================================
 */
@@ -140,10 +141,10 @@ zfl_tree_at_depth (zfl_tree_t *self, int level)
 
 //  --------------------------------------------------------------------------
 //  Finds a node specified by path, consisting of name/name/...  If the node
-//  exists, returns its value as a string, else returns default_value.
+//  exists, returns node, else returns NULL.
 //
-char *
-zfl_tree_lookup (zfl_tree_t *self, char *path, char *default_value)
+zfl_tree_t *
+zfl_tree_locate (zfl_tree_t *self, char *path)
 {
     //  Calculate significant length of name
     char *slash = strchr (path, '/');
@@ -156,14 +157,29 @@ zfl_tree_lookup (zfl_tree_t *self, char *path, char *default_value)
     while (child) {
         if (strlen (child->name) == length
         &&  memcmp (child->name, path, length) == 0) {
-            if (slash)
-                return (zfl_tree_lookup (child, slash + 1, default_value));
+            if (slash)          //  Look deeper
+                return (zfl_tree_locate (child, slash + 1));
             else
-                return (zfl_tree_string (child));
+                return (child);
         }
         child = child->next;
     }
-    return (default_value);
+    return (NULL);
+}
+
+
+//  --------------------------------------------------------------------------
+//  Finds a node specified by path, consisting of name/name/...  If the node
+//  exists, returns its value as a string, else returns default_value.
+//
+char *
+zfl_tree_resolve (zfl_tree_t *self, char *path, char *default_value)
+{
+    zfl_tree_t *tree = zfl_tree_locate (self, path);
+    if (tree)
+        return (zfl_tree_string (tree));
+    else
+        return (default_value);
 }
 
 

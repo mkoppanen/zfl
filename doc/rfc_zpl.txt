@@ -56,7 +56,7 @@ context
     verbose = 1      #   Ask for a trace
 
 main
-    type = zqueue
+    type = zmq_queue
     frontend
         option
             hwm = 1000
@@ -71,11 +71,12 @@ Notes:
 
 * Whitespace is significant before property names and inside values, but not elsewhere.  Text starting with '#' is discarded as a comment.
 * Each non-empty line defines a property consisting of a name and an optional value.
-* Names are alphanumeric and may have embedded slashes.
+* Names are alphanumeric ([A-Za-z0-9]) and may have embedded slashes.
 * Values are untyped strings that can contain embedded spaces.
 * Values can be enclosed with single or double quotes.
 * The only special characters in ZPL are: whitespace, '#', '=', and single and double quotes.
 * Hierarchy is signalled by indentation, where a child is indented 4 spaces more than its parent.
+* The first non-whitespace character in a ZPL file is always either '#' or an alphanumeric character.
 
 ++ Justification and Design
 

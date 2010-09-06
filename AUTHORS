@@ -7,6 +7,6 @@ Credits
 =======
 
 Martin Lucina <mato@kotelna.sk>
-    Wrote autotools wrapping that formed basis for autotooling this project.
+    Wrote 0MQ core autotools, reused in parts for ZFL.
 Dave Gamble (cJSON)
-    Wrote cJSON which forms basis for zfl_config class.
+    Wrote cJSON parser, imported by zfl_tree_json class.

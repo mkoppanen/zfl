@@ -1,21 +1,23 @@
 /*  =========================================================================
     zfl_tree.h - ZFL tree class
 
-    Copyright (c) 1991-2010 iMatix Corporation and contributors
+    -------------------------------------------------------------------------
+    Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
+    Copyright other contributors as noted in the AUTHORS file.
 
     This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
 
-    This is free software; you can redistribute it and/or modify it under
-    the terms of the Lesser GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
+    This is free software; you can redistribute it and/or modify it under the
+    terms of the GNU Lesser General Public License as published by the Free
+    Software Foundation; either version 3 of the License, or (at your option)
+    any later version.
 
-    This software is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-    Lesser GNU General Public License for more details.
+    This software is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABIL-
+    ITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General
+    Public License for more details.
 
-    You should have received a copy of the Lesser GNU General Public License
+    You should have received a copy of the GNU Lesser General Public License
     along with this program. If not, see <http://www.gnu.org/licenses/>.
     =========================================================================
 */
@@ -41,8 +43,10 @@ zfl_tree_t *
     zfl_tree_child (zfl_tree_t *self);
 zfl_tree_t *
     zfl_tree_next (zfl_tree_t *self);
+zfl_tree_t *
+    zfl_tree_locate (zfl_tree_t *self, char *path);
 char *
-    zfl_tree_lookup (zfl_tree_t *self, char *path, char *default_value);
+    zfl_tree_resolve (zfl_tree_t *self, char *path, char *default_value);
 zfl_tree_t *
     zfl_tree_at_depth (zfl_tree_t *self, int level);
 char *

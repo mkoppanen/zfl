@@ -47,8 +47,9 @@ Here is a typical example of a ZDCF file:
         "verbose": true
     },
     "main" : {
-        "type": "queue",
+        "type": "zqueue",
         "frontend": {
+            "type": "SUB",
             "option": {
                 "hwm": 1000,
                 "swap": 25000000
@@ -85,14 +86,37 @@ Device objects can occur zero or more times and have these properties:
 * "type" - (string) - specifies the device type.  Types starting with "z" are reserved for built-in 0MQ devices.  Other device types may be defined by the application as needed.
 * Zero or more socket objects.
 
+The built-in device types that exist at time of writing are:
+
+* "zqueue" - ZMQ_QUEUE
+* "zforwarder" - ZMQ_FORWARDER
+* "zstreamer" - ZMQ_STREAMER
+
+See [http://api.zeromq.org/zmq_device.html zmq_device(3)] for details.
+
 +++ The Socket Object
 
 Socket objects can occur zero or more times within a device object, and have these properties:
 
 * The name is any value except "type".
+* "type" - (string) - specifies the type of the socket.
 * "bind" - (string) - specifies zero or more endpoints to bind the socket to.
 * "connect" - (string) - specifies zero or more endpoints to connect the socket to.
 * "option" - (object) - specifies configuration of the socket.
+
+The socket types that exist at time of writing are:
+
+* "sub" - ZMQ_SUB
+* "pub" - ZMQ_PUB
+* "req" - ZMQ_REQ
+* "rep" - ZMQ_REP
+* "xreq" - ZMQ_XREQ
+* "xrep" - ZMQ_XREP
+* "push" - ZMQ_PUSH
+* "pull" - ZMQ_PULL
+* "pair" - ZMQ_PAIR
+
+See [http://api.zeromq.org/zmq_socket.html zmq_socket(3)] for details.
 
 +++ The Option Object
 
@@ -130,16 +154,6 @@ For example:
         "bind": [ "tcp://eth0:5555", "inproc://device" ]
     }
 [[/code]]
-
-+++ Built-in Device Types
-
-The built-in device types that exist at time of writing are:
-
-* "zqueue" - ZMQ_QUEUE
-* "zforwarder" - ZMQ_FORWARDER
-* "zstreamer" - ZMQ_STREAMER
-
-See [http://api.zeromq.org/zmq_device.html zmq_device(3)] for details.
 
 ++ References
 
