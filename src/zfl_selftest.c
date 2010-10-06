@@ -31,6 +31,7 @@
 #include "../include/zfl_tree_json.h"
 #include "../include/zfl_tree_zpl.h"
 #include "../include/zfl_config.h"
+#include "../include/zfl_msg.h"
 
 int main (int argc, char *argv [])
 {
@@ -50,6 +51,7 @@ int main (int argc, char *argv [])
     zfl_tree_test (verbose);
     zfl_tree_json_test (verbose);
     zfl_tree_zpl_test (verbose);
+    zfl_msg_test (verbose);
 
     printf ("Tests passed OK\n");
     return 0;
