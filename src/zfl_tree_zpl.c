@@ -40,11 +40,11 @@ s_have_element (zfl_tree_t *root, int level, char *name, char *value, int lineno
         zfl_tree_t *tree = zfl_tree_new (name, parent);
         if (*value)
             zfl_tree_set_string (tree, value);
-        return (0);
+        return 0;
     }
     else {
         fprintf (stderr, "E: (%d) indentation error\n", lineno);
-        return (-1);
+        return -1;
     }
 }
 
@@ -63,7 +63,7 @@ s_collect_level (char **start, int lineno)
         level = -1;
     }
     *start = readptr;
-    return (level);
+    return level;
 }
 
 //  Collect property name
@@ -83,7 +83,7 @@ s_collect_name (char **start, int lineno)
         fprintf (stderr, "E: (%d) '/' not valid at name start or end\n", lineno);
         zfree (name);
     }
-    return (name);
+    return name;
 }
 
 
@@ -101,11 +101,11 @@ s_verify_eoln (char *readptr, int lineno)
         else {
             fprintf (stderr, "E: (%d) invalid syntax '%s'\n",
                 lineno, readptr);
-            return (-1);
+            return -1;
             break;
         }
     }
-    return (0);
+    return 0;
 }
 
 
@@ -160,7 +160,7 @@ s_collect_value (char **start, int lineno)
     if (rc) {
         zfree (value);
     }
-    return (value);
+    return value;
 }
 
 
@@ -200,7 +200,7 @@ s_process_line (zfl_tree_t *root, char *start, int lineno)
         rc = s_verify_eoln (start, lineno);
 
     zfree (name);
-    return (rc);
+    return rc;
 }
 
 
@@ -275,7 +275,7 @@ zfl_tree_zpl (char *zpl_string)
         zfl_tree_destroy (&self);
         self = zfl_tree_new ("root", NULL);
     }
-    return (self);
+    return self;
 }
 
 
@@ -294,10 +294,10 @@ zfl_tree_zpl_file (char *filename)
         fclose (file);
         zfl_tree_t *tree = zfl_tree_zpl (zfl_blob_data (blob));
         zfl_blob_destroy (&blob);
-        return (tree);
+        return tree;
     }
     else
-        return (NULL);
+        return NULL;
 }
 
 

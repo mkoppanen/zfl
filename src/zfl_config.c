@@ -73,7 +73,7 @@ zfl_config_new (zfl_tree_t *tree)
     }
     //  Initialize 0MQ as requested
     self->context = zmq_init (self->iothreads);
-    return (self);
+    return self;
 }
 
 
@@ -112,11 +112,11 @@ zfl_config_device (zfl_config_t *self, int index)
             if (index)
                 index--;
             else
-                return (zfl_tree_name (tree));
+                return zfl_tree_name (tree);
         }
         tree = zfl_tree_next (tree);
     }
-    return (NULL);
+    return NULL;
 }
 
 
@@ -131,9 +131,9 @@ zfl_config_device_type (zfl_config_t *self, char *device)
 
     zfl_tree_t *tree = zfl_tree_locate (self->tree, device);
     if (tree)
-        return (zfl_tree_resolve (tree, "type", ""));
+        return zfl_tree_resolve (tree, "type", "");
     else
-        return ("");
+        return "";
 }
 
 
@@ -216,11 +216,11 @@ zfl_config_socket (zfl_config_t *self, char *device, char *name, int type)
 
     zfl_tree_t *tree = zfl_tree_locate (self->tree, device);
     if (!tree)
-        return (NULL);          //  No such device
+        return NULL;            //  No such device
 
     void *socket = zmq_socket (self->context, type);
     if (!socket)
-        return (NULL);          //  Can't create socket
+        return NULL;            //  Can't create socket
 
     if (zfl_config_verbose (self))
         printf ("I: Configuring '%s' socket in '%s' device...\n", name, device);
@@ -256,7 +256,7 @@ zfl_config_socket (zfl_config_t *self, char *device, char *name, int type)
         zmq_close (socket);
         socket = NULL;
     }
-    return (socket);
+    return socket;
 }
 
 
@@ -267,7 +267,7 @@ void *
 zfl_config_context (zfl_config_t *self)
 {
     assert (self);
-    return (self->context);
+    return self->context;
 }
 
 
@@ -278,7 +278,7 @@ Bool
 zfl_config_verbose (zfl_config_t *self)
 {
     assert (self);
-    return (self->verbose);
+    return self->verbose;
 }
 
 

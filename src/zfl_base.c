@@ -53,7 +53,7 @@ zfl_base_new (void)
         *self;
 
     self = zmalloc (sizeof (zfl_base_t));
-    return (self);
+    return self;
 }
 
 //  --------------------------------------------------------------------------
@@ -78,7 +78,7 @@ int
 zfl_base_filler (zfl_base_t *self)
 {
     assert (self);
-    return (self->filler);
+    return self->filler;
 }
 
 void

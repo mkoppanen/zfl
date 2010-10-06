@@ -68,7 +68,7 @@ zfl_tree_new (char *name, zfl_tree_t *parent)
             parent->child = self;
     }
     self->parent = parent;
-    return (self);
+    return self;
 }
 
 
@@ -103,7 +103,7 @@ zfl_tree_t *
 zfl_tree_child (zfl_tree_t *self)
 {
     assert (self);
-    return (self->child);
+    return self->child;
 }
 
 
@@ -114,7 +114,7 @@ zfl_tree_t *
 zfl_tree_next (zfl_tree_t *self)
 {
     assert (self);
-    return (self->next);
+    return self->next;
 }
 
 
@@ -133,9 +133,9 @@ zfl_tree_at_depth (zfl_tree_t *self, int level)
             level--;
         }
         else
-            return (NULL);
+            return NULL;
     }
-    return (self);
+    return self;
 }
 
 
@@ -158,13 +158,13 @@ zfl_tree_locate (zfl_tree_t *self, char *path)
         if (strlen (child->name) == length
         &&  memcmp (child->name, path, length) == 0) {
             if (slash)          //  Look deeper
-                return (zfl_tree_locate (child, slash + 1));
+                return zfl_tree_locate (child, slash + 1);
             else
-                return (child);
+                return child;
         }
         child = child->next;
     }
-    return (NULL);
+    return NULL;
 }
 
 
@@ -177,9 +177,9 @@ zfl_tree_resolve (zfl_tree_t *self, char *path, char *default_value)
 {
     zfl_tree_t *tree = zfl_tree_locate (self, path);
     if (tree)
-        return (zfl_tree_string (tree));
+        return zfl_tree_string (tree);
     else
-        return (default_value);
+        return default_value;
 }
 
 
@@ -190,7 +190,7 @@ char *
 zfl_tree_name (zfl_tree_t *self)
 {
     assert (self);
-    return (self->name);
+    return self->name;
 }
 
 
@@ -204,7 +204,7 @@ zfl_tree_set_name (zfl_tree_t *self, char *name)
     assert (self);
     zfree (self->name);
     self->name = zstrdup (name);
-    return (0);
+    return 0;
 }
 
 
@@ -215,7 +215,7 @@ zfl_blob_t *
 zfl_tree_value (zfl_tree_t *self)
 {
     assert (self);
-    return (self->blob);
+    return self->blob;
 }
 
 
@@ -229,7 +229,7 @@ zfl_tree_set_value (zfl_tree_t *self, zfl_blob_t *blob)
     zfl_blob_destroy (&self->blob);
     if (blob)
         self->blob = zfl_blob_new (zfl_blob_data (blob), zfl_blob_size (blob));
-    return (0);
+    return 0;
 }
 
 
@@ -241,9 +241,9 @@ zfl_tree_string (zfl_tree_t *self)
 {
     assert (self);
     if (self->blob)
-        return (zfl_blob_data (self->blob));
+        return zfl_blob_data (self->blob);
     else
-        return ("");
+        return "";
 }
 
 
@@ -259,7 +259,7 @@ zfl_tree_set_string (zfl_tree_t *self, char *string)
     zfl_blob_set_dptr (blob, string, string? strlen (string) + 1: 0);
     zfl_tree_set_value (self, blob);
     zfl_blob_destroy (&blob);
-    return (0);
+    return 0;
 }
 
 
@@ -281,7 +281,7 @@ zfl_tree_set_printf (zfl_tree_t *self, char *format, ...)
     zfl_blob_set_dptr (blob, value, strlen (value) + 1);
     zfl_tree_set_value (self, blob);
     zfl_blob_destroy (&blob);
-    return (0);
+    return 0;
 }
 
 
@@ -302,7 +302,7 @@ s_tree_execute (zfl_tree_t *self, zfl_tree_fct handler, void *context, int level
         rc = s_tree_execute (child, handler, context, level + 1);
         child = child->next;
     }
-    return (rc);
+    return rc;
 }
 
 int
@@ -310,7 +310,7 @@ zfl_tree_execute (zfl_tree_t *self, zfl_tree_fct handler, void *context)
 {
     //  Execute top level tree at level zero
     assert (self);
-    return (s_tree_execute (self, handler, context, 0));
+    return s_tree_execute (self, handler, context, 0);
 }
 
 
@@ -330,7 +330,7 @@ s_tree_dump (zfl_tree_t *self, void *context, int level)
             printf ("%*s%s\n", (level - 1) * 4, "",
                 self->name? self->name: "(Unnamed)");
     }
-    return (0);
+    return 0;
 }
 
 

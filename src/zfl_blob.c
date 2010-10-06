@@ -54,7 +54,7 @@ zfl_blob_new (void *data, size_t size)
     if (data)
         zfl_blob_set_data (self, data, size);
 
-    return (self);
+    return self;
 }
 
 //  --------------------------------------------------------------------------
@@ -105,7 +105,7 @@ zfl_blob_load (zfl_blob_t *self, FILE *file)
     else
         zfl_blob_set_data (self, NULL, 0);
 
-    return (zfl_blob_size (self));
+    return zfl_blob_size (self);
 }
 
 
@@ -134,7 +134,7 @@ zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size)
         assert (size == 0);
         self->data = NULL;
     }
-    return (0);
+    return 0;
 }
 
 
@@ -154,7 +154,7 @@ zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size)
     self->dptr = data;          //  Hold data reference
     self->size = size;
 
-    return (0);
+    return 0;
 }
 
 
@@ -165,7 +165,7 @@ void *
 zfl_blob_data (zfl_blob_t *self)
 {
     assert (self);
-    return (self->data? self->data: self->dptr);
+    return self->data? self->data: self->dptr;
 }
 
 
@@ -176,7 +176,7 @@ size_t
 zfl_blob_size (zfl_blob_t *self)
 {
     assert (self);
-    return (self->size);
+    return self->size;
 }
 
 

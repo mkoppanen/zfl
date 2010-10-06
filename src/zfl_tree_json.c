@@ -139,7 +139,7 @@ zfl_tree_json (char *json_string)
     }
     //  Delete JSON tree
     cJSON_Delete (json);
-    return (self);
+    return self;
 }
 
 
@@ -158,10 +158,10 @@ zfl_tree_json_file (char *filename)
         fclose (file);
         zfl_tree_t *tree = zfl_tree_json (zfl_blob_data (blob));
         zfl_blob_destroy (&blob);
-        return (tree);
+        return tree;
     }
     else
-        return (NULL);
+        return NULL;
 }
 
 
