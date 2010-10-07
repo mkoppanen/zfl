@@ -96,7 +96,8 @@ zfl_blob_load (zfl_blob_t *self, FILE *file)
         //  Read file data, and then reset file position
         char *buffer = malloc (size);
         fseek (file, 0, SEEK_SET);
-        assert (fread (buffer, 1, size, file) == size);
+        size_t rc = fread (buffer, 1, size, file);
+        assert (rc == size);
         fseek (file, posn, SEEK_SET);
 
         zfl_blob_set_data (self, buffer, size);

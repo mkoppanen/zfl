@@ -228,8 +228,9 @@ zfl_msg_send (zfl_msg_t **self_p, void *socket)
             zmq_msg_init_size (&message, size);
             memcpy (zmq_msg_data (&message), data, size);
         }
-        assert (zmq_send (socket, &message,
-            part_nbr < self->_part_count - 1? ZMQ_SNDMORE: 0) == 0);
+        int rc = zmq_send (socket, &message,
+            part_nbr < self->_part_count - 1? ZMQ_SNDMORE: 0);
+        assert (rc == 0);
         zmq_msg_close (&message);
     }
     zfl_msg_destroy (self_p);
