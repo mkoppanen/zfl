@@ -53,6 +53,7 @@ zfl_base_new (void)
         *self;
 
     self = zmalloc (sizeof (zfl_base_t));
+    s_private_function_example();
     return self;
 }
 

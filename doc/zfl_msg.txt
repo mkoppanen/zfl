@@ -4,17 +4,19 @@ zfl_msg(7)
 
 NAME
 ----
-zfl_msg
+zfl_msg - placeholder
 
 
 SYNOPSIS
 --------
+placeholder
 
 
 DESCRIPTION
 -----------
-
+placeholder
 
 SEE ALSO
 --------
+placeholder
 
