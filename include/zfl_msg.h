@@ -38,6 +38,10 @@ zfl_msg_t *
 void
     zfl_msg_destroy (zfl_msg_t **self_p);
 
+//  Duplicate message
+zfl_msg_t *
+    zfl_msg_dup (zfl_msg_t *self);
+
 //  Receive and send message, wrapping new/destroy
 zfl_msg_t *
     zfl_msg_recv (void *socket);

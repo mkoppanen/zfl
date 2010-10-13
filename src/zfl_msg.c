@@ -151,6 +151,26 @@ s_set_part (zfl_msg_t *self, int part_nbr, unsigned char *data, size_t size)
 
 
 //  --------------------------------------------------------------------------
+//  Duplicate message
+
+zfl_msg_t *
+zfl_msg_dup (zfl_msg_t *self)
+{
+    assert (self);
+    zfl_msg_t *dup = zfl_msg_new ();
+    assert (dup);
+
+    int part_nbr;
+    for (part_nbr = 0; part_nbr < self->_part_count; part_nbr++)
+	s_set_part (dup, part_nbr,
+	    self->_part_data [part_nbr], self->_part_size [part_nbr]);
+    dup->_part_count = self->_part_count;
+
+    return dup;
+}
+
+
+//  --------------------------------------------------------------------------
 //  Receive message from socket
 //  Creates a new message and returns it
 //  Blocks on recv if socket is not ready for input
