@@ -1,7 +1,7 @@
 /*  =========================================================================
-    zfl_msg.h - multipart message
+    zfl_msg.h - multipart 0MQ message
 
-    Multipart message class for example applications.
+    Multipart message class for 0MQ applications.
 
     Follows the ZFL class conventions and is further developed as the ZFL
     zfl_msg class.  See http://zfl.zeromq.org for more details.
@@ -162,8 +162,8 @@ zfl_msg_dup (zfl_msg_t *self)
 
     int part_nbr;
     for (part_nbr = 0; part_nbr < self->_part_count; part_nbr++)
-	s_set_part (dup, part_nbr,
-	    self->_part_data [part_nbr], self->_part_size [part_nbr]);
+        s_set_part (dup, part_nbr,
+            self->_part_data [part_nbr], self->_part_size [part_nbr]);
     dup->_part_count = self->_part_count;
 
     return dup;
@@ -182,7 +182,7 @@ zfl_msg_recv (void *socket)
 
     zfl_msg_t *self = zfl_msg_new ();
     while (1) {
-	assert (self->_part_count < ZFL_MSG_MAX_PARTS);
+        assert (self->_part_count < ZFL_MSG_MAX_PARTS);
 
         zmq_msg_t message;
         zmq_msg_init (&message);

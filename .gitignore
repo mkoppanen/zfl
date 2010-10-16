@@ -21,6 +21,7 @@ src/stamp-h1
 src/*.o
 src/mtrace.txt
 src/outbin
+src/zfl_selftest
 doc/*.7
 src/.libs/
 src/libzfl.la
