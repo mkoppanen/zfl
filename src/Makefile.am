@@ -12,7 +12,8 @@ include_HEADERS = \
     ../include/zfl_tree.h \
     ../include/zfl_tree_json.h \
     ../include/zfl_tree_zpl.h \
-    ../include/zfl_msg.h
+    ../include/zfl_msg.h \
+    ../include/zfl_list.h
 
 libzfl_la_SOURCES = \
     zfl_base.c \
@@ -21,7 +22,8 @@ libzfl_la_SOURCES = \
     zfl_tree.c \
     zfl_tree_json.c \
     zfl_tree_zpl.c \
-    zfl_msg.c
+    zfl_msg.c \
+    zfl_list.c
 
 INCLUDES = -I$(top_srcdir)/include
 bin_PROGRAMS = zfl_selftest

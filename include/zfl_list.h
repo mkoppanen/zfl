@@ -1,7 +1,5 @@
 /*  =========================================================================
-    zfl_tests.c - run selftests
-
-    Runs all selftests.
+    zfl_msg.h - ZFL singly-linked list class
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -24,37 +22,48 @@
     =========================================================================
 */
 
-#include "../include/zfl_prelude.h"
-#include "../include/zfl_base.h"
-#include "../include/zfl_blob.h"
-#include "../include/zfl_tree.h"
-#include "../include/zfl_tree_json.h"
-#include "../include/zfl_tree_zpl.h"
-#include "../include/zfl_config.h"
-#include "../include/zfl_msg.h"
-#include "../include/zfl_list.h"
+#ifndef __ZFL_LIST_H_INCLUDED__
+#define __ZFL_LIST_H_INCLUDED__
 
-int main (int argc, char *argv [])
-{
-    //  Enable malloc tracing if the platform supports it
-    MALLOC_TRACE;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    Bool verbose;
-    if (argc == 2 && streq (argv [1], "-v"))
-        verbose = TRUE;
-    else
-        verbose = FALSE;
+//  Opaque class structure
+typedef struct _zfl_list zfl_list_t;
 
-    printf ("Running ZFL self tests...\n");
-    zfl_base_test (verbose);
-    zfl_blob_test (verbose);
-    zfl_config_test (verbose);
-    zfl_tree_test (verbose);
-    zfl_tree_json_test (verbose);
-    zfl_tree_zpl_test (verbose);
-    zfl_msg_test (verbose);
-    zfl_list_test (verbose);
+//  Create a new linked list.
+zfl_list_t *
+    zfl_list_new ();
 
-    printf ("Tests passed OK\n");
-    return 0;
+//  Destroy the list and deallocate memory pointed to by pointers kept in list.
+void
+    zfl_list_destroy (zfl_list_t **self_p);
+
+//  Return the first item.
+//  Note that this function does not removes the value from the list.
+//  The list must contain at list one value.
+void *
+    zfl_list_front (zfl_list_t *self);
+
+//  Add the pointer at the end of the list.
+void
+    zfl_list_append (zfl_list_t *self, void *value);
+
+//  Remove the item from the list.
+void
+    zfl_list_remove (zfl_list_t *self, void *value);
+
+//  Return the number of items in the list.
+size_t
+    zfl_list_size (zfl_list_t *self);
+
+//  Selftest.
+void
+    zfl_list_test (int verbose);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif
