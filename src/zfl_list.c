@@ -81,6 +81,7 @@ void *
 zfl_list_front (zfl_list_t *self)
 {
     assert (self);
+    assert (self->head);
     return self->head->value;
 }
 
@@ -126,7 +127,7 @@ zfl_list_remove (zfl_list_t *self, void *value)
         self->head = node->next;
 
     if (node->next == NULL)
-        self->tail = NULL;
+        self->tail = prev;
 
     free (node);
     self->size--;
