@@ -30,18 +30,24 @@
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_list.h"
 
-//  List's node.
+//  List node, used internally only
 
 struct _zfl_list_node {
-    struct _zfl_list_node   *next;
-    void                    *value;
+    struct _zfl_list_node
+        *next;
+    void
+        *value;
 };
 
+//  Actual list object
+
 struct _zfl_list {
-    struct _zfl_list_node   *head;
-    struct _zfl_list_node   *tail;
-    size_t                  size;
+    struct _zfl_list_node
+        *head, *tail;
+    size_t
+        size;
 };
+
 
 //  --------------------------------------------------------------------------
 //  List constructor
@@ -55,6 +61,7 @@ zfl_list_new ()
     self->size = 0;
     return self;
 }
+
 
 //  --------------------------------------------------------------------------
 //  List destructor
@@ -73,20 +80,24 @@ zfl_list_destroy (zfl_list_t **self_p)
     *self_p = NULL;
 }
 
+
 //  --------------------------------------------------------------------------
-//  Return the value at the head of list. The list must not be empty.
+//  Return the value at the head of list. If the list is empty, returns NULL.
 //  Note that this function does not remove the value from the list.
 
 void *
-zfl_list_front (zfl_list_t *self)
+zfl_list_first (zfl_list_t *self)
 {
     assert (self);
-    assert (self->head);
-    return self->head->value;
+    if (self->head)
+        return self->head->value;
+    else
+        return NULL;
 }
 
+
 //  --------------------------------------------------------------------------
-//  Add value at the end of the list.
+//  Add value to the end of the list.
 
 void
 zfl_list_append (zfl_list_t *self, void *value)
@@ -104,9 +115,10 @@ zfl_list_append (zfl_list_t *self, void *value)
     self->size++;
 }
 
+
 //  --------------------------------------------------------------------------
 //  Remove the value value from the list. The value must be stored in the list.
-//  The function does not deallocate the memory poited to by the removed value.
+//  The function does not deallocate the memory pointed to by the removed value.
 
 void
 zfl_list_remove (zfl_list_t *self, void *value)
@@ -133,6 +145,7 @@ zfl_list_remove (zfl_list_t *self, void *value)
     self->size--;
 }
 
+
 //  --------------------------------------------------------------------------
 //  Return the number of items in the list.
 
@@ -141,6 +154,7 @@ zfl_list_size (zfl_list_t *self)
 {
     return self->size;
 }
+
 
 //  --------------------------------------------------------------------------
 //  Runs self test of class
@@ -153,33 +167,36 @@ zfl_list_test (int verbose)
     zfl_list_t *list = zfl_list_new ();
     assert (list);
     assert (zfl_list_size (list) == 0);
+
     char *s1 = strdup ("first");
-    assert (s1);
     char *s2 = strdup ("second");
-    assert (s2);
     char *s3 = strdup ("third");
-    assert (s3);
+
     zfl_list_append (list, s1);
     assert (zfl_list_size (list) == 1);
     zfl_list_append (list, s2);
     assert (zfl_list_size (list) == 2);
     zfl_list_append (list, s3);
     assert (zfl_list_size (list) == 3);
-    char *tmp = zfl_list_front (list);
-    assert (tmp == s1);
+
+    char *first = zfl_list_first (list);
+    assert (first == s1);
     assert (zfl_list_size (list) == 3);
     zfl_list_remove (list, s3);
     assert (zfl_list_size (list) == 2);
     free (s3);
-    tmp = zfl_list_front (list);
-    assert (tmp == s1);
+
+    first = zfl_list_first (list);
+    assert (first == s1);
     assert (zfl_list_size (list) == 2);
-    zfl_list_remove (list, tmp);
+    zfl_list_remove (list, first);
     assert (zfl_list_size (list) == 1);
-    free (tmp);
+    free (first);
+
     zfl_list_remove (list, s2);
     assert (zfl_list_size (list) == 0);
     free (s2);
+
     zfl_list_append (list, strdup ("a"));
     zfl_list_append (list, strdup ("b"));
     zfl_list_append (list, strdup ("c"));

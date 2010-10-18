@@ -32,33 +32,18 @@ extern "C" {
 //  Opaque class structure
 typedef struct _zfl_list zfl_list_t;
 
-//  Create a new linked list.
 zfl_list_t *
-    zfl_list_new ();
-
-//  Destroy the list and deallocate memory pointed to by pointers kept in list.
+    zfl_list_new (void);
 void
     zfl_list_destroy (zfl_list_t **self_p);
-
-//  Return the first item.
-//  Note that this function does not removes the value from the list.
-//  The list must contain at list one value.
 void *
     zfl_list_front (zfl_list_t *self);
-
-//  Add the pointer at the end of the list.
 void
     zfl_list_append (zfl_list_t *self, void *value);
-
-//  Remove the item from the list.
 void
     zfl_list_remove (zfl_list_t *self, void *value);
-
-//  Return the number of items in the list.
 size_t
     zfl_list_size (zfl_list_t *self);
-
-//  Selftest.
 void
     zfl_list_test (int verbose);
 
