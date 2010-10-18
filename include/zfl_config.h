@@ -34,6 +34,8 @@ typedef struct _zfl_config_t zfl_config_t;
 
 zfl_config_t *
     zfl_config_new (zfl_tree_t *tree);
+zfl_config_t *
+    zfl_config_load (char *filename);
 void
     zfl_config_destroy (zfl_config_t **self_p);
 char *

@@ -78,6 +78,22 @@ zfl_config_new (zfl_tree_t *tree)
 
 
 //  --------------------------------------------------------------------------
+//  Creates new config object from ZPL (text properties) file
+//  Returns NULL if the file does not exist
+//
+zfl_config_t *
+zfl_config_load (char *filename)
+{
+    zfl_config_t *self = NULL;
+    zfl_tree_t *tree = zfl_tree_zpl_file (filename);
+    if (tree) {
+        self = zfl_config_new (tree);
+    }
+    return (self);
+}
+
+
+//  --------------------------------------------------------------------------
 //  Destructor
 //  Note, shuts down 0MQ
 //
@@ -247,9 +263,8 @@ zfl_config_socket (
             else
             if (streq (name, "option"))
                 rc = s_setsockopt (self, socket, tree);
-            else
-            if (self->verbose)
-                printf ("W: ignoring socket setting '%s'\n", socket_name);
+            //
+            //  else ignore it, user space setting
 
             tree = zfl_tree_next (tree);
         }
@@ -298,8 +313,7 @@ zfl_config_test (Bool verbose)
     printf (" * zfl_config: ");
 
     //  Create a new config from the ZPL test file
-    zfl_config_t *config = zfl_config_new (
-        zfl_tree_zpl_file ("zfl_config_test.txt"));
+    zfl_config_t *config = zfl_config_load ("zfl_config_test.txt");
     assert (config);
 
     //  Test unknown service
