@@ -72,7 +72,6 @@ zfl_list_destroy (zfl_list_t **self_p)
     struct _zfl_list_node *node, *next;
 
     for (node = (*self_p)->head; node != NULL; node = next) {
-        free (node->value);
         next = node->next;
         free (node);
     }
