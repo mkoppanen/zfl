@@ -527,8 +527,8 @@ zfl_msg_test (int verbose)
     zfl_msg_destroy (&zmsg);
     assert (zmsg == NULL);
 
-    zmq_close(input);
-    zmq_close(output);
+    zmq_close (input);
+    zmq_close (output);
 
     printf ("OK\n");
     zmq_term (context);
