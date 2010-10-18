@@ -37,9 +37,11 @@ zfl_list_t *
 void
     zfl_list_destroy (zfl_list_t **self_p);
 void *
-    zfl_list_front (zfl_list_t *self);
+    zfl_list_first (zfl_list_t *self);
 void
     zfl_list_append (zfl_list_t *self, void *value);
+void
+    zfl_list_push (zfl_list_t *self, void *value);
 void
     zfl_list_remove (zfl_list_t *self, void *value);
 size_t

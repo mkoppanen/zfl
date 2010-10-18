@@ -116,6 +116,24 @@ zfl_list_append (zfl_list_t *self, void *value)
 
 
 //  --------------------------------------------------------------------------
+//  Insert value at the beginning of the list.
+
+void
+zfl_list_push (zfl_list_t *self, void *value)
+{
+    struct _zfl_list_node *node;
+    node = malloc (sizeof (struct _zfl_list_node));
+    assert (node);
+    node->value = value;
+    node->next = self->head;
+    self->head = node;
+    if (self->tail == NULL)
+        self->tail = node;
+    self->size++;
+}
+
+
+//  --------------------------------------------------------------------------
 //  Remove the value value from the list. The value must be stored in the list.
 //  The function does not deallocate the memory pointed to by the removed value.
 
@@ -167,9 +185,12 @@ zfl_list_test (int verbose)
     assert (list);
     assert (zfl_list_size (list) == 0);
 
-    char *s1 = strdup ("first");
-    char *s2 = strdup ("second");
-    char *s3 = strdup ("third");
+    int *s1 = malloc (sizeof (int));
+    *s1 = 1;
+    int *s2 = malloc (sizeof (int));
+    *s2 = 2;
+    int *s3 = malloc (sizeof (int));
+    *s3 = 3;
 
     zfl_list_append (list, s1);
     assert (zfl_list_size (list) == 1);
@@ -178,28 +199,40 @@ zfl_list_test (int verbose)
     zfl_list_append (list, s3);
     assert (zfl_list_size (list) == 3);
 
-    char *first = zfl_list_first (list);
-    assert (first == s1);
+    assert (zfl_list_first (list) == s1);
     assert (zfl_list_size (list) == 3);
     zfl_list_remove (list, s3);
     assert (zfl_list_size (list) == 2);
-    free (s3);
 
-    first = zfl_list_first (list);
-    assert (first == s1);
-    assert (zfl_list_size (list) == 2);
-    zfl_list_remove (list, first);
+    assert (zfl_list_first (list) == s1);
+    zfl_list_remove (list, s1);
     assert (zfl_list_size (list) == 1);
-    free (first);
+    assert (zfl_list_first (list) == s2);
 
     zfl_list_remove (list, s2);
     assert (zfl_list_size (list) == 0);
-    free (s2);
 
-    zfl_list_append (list, strdup ("a"));
-    zfl_list_append (list, strdup ("b"));
-    zfl_list_append (list, strdup ("c"));
+    // test push operation
+    zfl_list_push (list, s1);
+    assert (zfl_list_size (list) == 1);
+    assert (zfl_list_first (list) == s1);
+    zfl_list_push (list, s2);
+    assert (zfl_list_size (list) == 2);
+    assert (zfl_list_first (list) == s2);
+    zfl_list_append (list, s3);
     assert (zfl_list_size (list) == 3);
+    assert (zfl_list_first (list) == s2);
+    zfl_list_remove (list, s2);
+    assert (zfl_list_first (list) == s1);
+    zfl_list_remove (list, s1);
+    assert (zfl_list_first (list) == s3);
+    zfl_list_remove (list, s3);
+    assert (zfl_list_size (list) == 0);
+
+    free (s1);
+    free (s2);
+    free (s3);
+
     zfl_list_destroy (&list);
     assert (list == NULL);
     printf ("OK\n");
