@@ -39,9 +39,9 @@ void
 char *
     zfl_config_service (zfl_config_t *self, int index);
 char *
-    zfl_config_property (zfl_config_t *self, char *service, char *name);
+    zfl_config_property (zfl_config_t *self, char *service_name, char *property);
 void *
-    zfl_config_socket (zfl_config_t *self, char *service, char *name, int type);
+    zfl_config_socket (zfl_config_t *self, char *service, char *socket_name, int type);
 void *
     zfl_config_context (zfl_config_t *self);
 Bool

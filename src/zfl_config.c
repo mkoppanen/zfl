@@ -121,20 +121,21 @@ zfl_config_service (zfl_config_t *self, int index)
 
 
 //  --------------------------------------------------------------------------
-//  Returns the value of a specified service's attribute, or "" if not found.
+//  Returns a named service property, or "" if not found.  Property can be a
+//  path of names separted by '/', meaning resolve through multiple levels
+//  starting from children of service.
 //
 char *
-zfl_config_property (zfl_config_t *self, char *service, char *attr)
+zfl_config_property (zfl_config_t *self, char *service_name, char *property)
 {
     assert (self);
-    assert (service);
-    assert (attr);
+    assert (service_name);
+    assert (property);
 
-    zfl_tree_t *tree = zfl_tree_locate (self->tree, service);
-    if (tree)
-        return zfl_tree_resolve (tree, attr, "");
-    else
-        return "";
+    zfl_tree_t *tree = zfl_tree_locate (self->tree, service_name);
+    if (!tree)
+        return "";              //  No such service
+    return zfl_tree_resolve (tree, property, "");
 }
 
 
@@ -209,26 +210,31 @@ s_setsockopt (zfl_config_t *self, void *socket, zfl_tree_t *tree)
 //  socket.
 //
 void *
-zfl_config_socket (zfl_config_t *self, char *service, char *name, int type)
+zfl_config_socket (
+    zfl_config_t *self,
+    char *service_name,
+    char *socket_name,
+    int   socket_type)
 {
     assert (self);
-    assert (service);
-    assert (strneq (service, "context"));
+    assert (service_name);
+    assert (strneq (service_name, "context"));
 
-    zfl_tree_t *tree = zfl_tree_locate (self->tree, service);
+    zfl_tree_t *tree = zfl_tree_locate (self->tree, service_name);
     if (!tree)
         return NULL;            //  No such service
 
-    void *socket = zmq_socket (self->context, type);
+    void *socket = zmq_socket (self->context, socket_type);
     if (!socket)
         return NULL;            //  Can't create socket
 
     if (zfl_config_verbose (self))
-        printf ("I: Configuring '%s' socket in '%s' service...\n", name, service);
+        printf ("I: Configuring '%s' socket in '%s' service...\n",
+            socket_name, service_name);
 
     //  Find socket in service
     int rc = 0;
-    tree = zfl_tree_locate (tree, name);
+    tree = zfl_tree_locate (tree, socket_name);
     if (tree) {
         tree = zfl_tree_child (tree);
         while (tree && rc == 0) {
@@ -243,14 +249,14 @@ zfl_config_socket (zfl_config_t *self, char *service, char *name, int type)
                 rc = s_setsockopt (self, socket, tree);
             else
             if (self->verbose)
-                printf ("W: ignoring socket setting '%s'\n", name);
+                printf ("W: ignoring socket setting '%s'\n", socket_name);
 
             tree = zfl_tree_next (tree);
         }
     }
     else
     if (self->verbose)
-        printf ("W: No configuration found for '%s'\n", name);
+        printf ("W: No configuration found for '%s'\n", socket_name);
 
     if (rc) {
         printf ("E: configuration failed - %s\n", zmq_strerror (errno));
@@ -309,6 +315,10 @@ zfl_config_test (Bool verbose)
     char *type = zfl_config_property (config, service, "type");
     assert (*type);
     assert (streq (type, "zqueue"));
+
+    char *endpoint = zfl_config_property (config, service, "frontend/endpoint");
+    assert (*endpoint);
+    assert (streq (endpoint, "valid-endpoint"));
 
     //  Configure two sockets
     void *frontend = zfl_config_socket (config, service, "frontend", ZMQ_SUB);
