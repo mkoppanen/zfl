@@ -115,13 +115,13 @@ s_start_configured_device (char *filename)
     assert (config);
 
     //  Find first device
-    char *device = zfl_config_device (config, 0);
+    char *device = zfl_config_service (config, 0);
     if (!*device) {
         printf ("E: No device specified, please read http://rfc.zeromq.org/spec:3\n");
         exit (EXIT_FAILURE);
     }
     //  Process device type
-    char *type = zfl_config_device_type (config, device);
+    char *type = zfl_config_property (config, device, "type");
 
     int device_type;            //  0MQ defined type
     int frontend_type;          //  Socket types depending

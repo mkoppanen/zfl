@@ -37,11 +37,11 @@ zfl_config_t *
 void
     zfl_config_destroy (zfl_config_t **self_p);
 char *
-    zfl_config_device (zfl_config_t *self, int index);
+    zfl_config_service (zfl_config_t *self, int index);
 char *
-    zfl_config_device_type (zfl_config_t *self, char *device);
+    zfl_config_property (zfl_config_t *self, char *service, char *name);
 void *
-    zfl_config_socket (zfl_config_t *self, char *device, char *name, int type);
+    zfl_config_socket (zfl_config_t *self, char *service, char *name, int type);
 void *
     zfl_config_context (zfl_config_t *self);
 Bool

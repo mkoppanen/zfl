@@ -96,12 +96,12 @@ zfl_config_destroy (zfl_config_t **self_p)
 
 
 //  --------------------------------------------------------------------------
-//  Returns the name of the Nth device in the configuration tree.  The first
-//  device is index 0, following C conventions for arrays.  Returns NULL if
-//  there is no such device.
+//  Returns the name of the Nth service in the configuration tree. The first
+//  service is index 0, following C conventions for arrays.  Returns NULL if
+//  there is no such service.
 //
 char *
-zfl_config_device (zfl_config_t *self, int index)
+zfl_config_service (zfl_config_t *self, int index)
 {
     assert (self);
 
@@ -121,17 +121,18 @@ zfl_config_device (zfl_config_t *self, int index)
 
 
 //  --------------------------------------------------------------------------
-//  Returns the type of the specified device, or "" if not specified.
+//  Returns the value of a specified service's attribute, or "" if not found.
 //
 char *
-zfl_config_device_type (zfl_config_t *self, char *device)
+zfl_config_property (zfl_config_t *self, char *service, char *attr)
 {
     assert (self);
-    assert (device);
+    assert (service);
+    assert (attr);
 
-    zfl_tree_t *tree = zfl_tree_locate (self->tree, device);
+    zfl_tree_t *tree = zfl_tree_locate (self->tree, service);
     if (tree)
-        return zfl_tree_resolve (tree, "type", "");
+        return zfl_tree_resolve (tree, attr, "");
     else
         return "";
 }
@@ -202,30 +203,30 @@ s_setsockopt (zfl_config_t *self, void *socket, zfl_tree_t *tree)
 }
 
 //  --------------------------------------------------------------------------
-//  Creates a named 0MQ socket within a named device, and configures the
+//  Creates a named 0MQ socket within a named service, and configures the
 //  socket as specified in the configuration data.  Returns NULL if the
-//  device or socket do not exist, or if there was an error configuring the
+//  service or socket do not exist, or if there was an error configuring the
 //  socket.
 //
 void *
-zfl_config_socket (zfl_config_t *self, char *device, char *name, int type)
+zfl_config_socket (zfl_config_t *self, char *service, char *name, int type)
 {
     assert (self);
-    assert (device);
-    assert (strneq (device, "context"));
+    assert (service);
+    assert (strneq (service, "context"));
 
-    zfl_tree_t *tree = zfl_tree_locate (self->tree, device);
+    zfl_tree_t *tree = zfl_tree_locate (self->tree, service);
     if (!tree)
-        return NULL;            //  No such device
+        return NULL;            //  No such service
 
     void *socket = zmq_socket (self->context, type);
     if (!socket)
         return NULL;            //  Can't create socket
 
     if (zfl_config_verbose (self))
-        printf ("I: Configuring '%s' socket in '%s' device...\n", name, device);
+        printf ("I: Configuring '%s' socket in '%s' service...\n", name, service);
 
-    //  Find socket in device
+    //  Find socket in service
     int rc = 0;
     tree = zfl_tree_locate (tree, name);
     if (tree) {
@@ -295,26 +296,26 @@ zfl_config_test (Bool verbose)
         zfl_tree_zpl_file ("zfl_config_test.txt"));
     assert (config);
 
-    //  Test unknown device
+    //  Test unknown service
     void *socket = zfl_config_socket (config, "nosuch", "socket", ZMQ_SUB);
     assert (socket == NULL);
     zmq_close (socket);
 
-    //  Find real device
-    char *device = zfl_config_device (config, 0);
-    assert (*device);
-    assert (streq (device, "main"));
+    //  Find real service
+    char *service = zfl_config_service (config, 0);
+    assert (*service);
+    assert (streq (service, "main"));
 
-    char *type = zfl_config_device_type (config, device);
+    char *type = zfl_config_property (config, service, "type");
     assert (*type);
     assert (streq (type, "zqueue"));
 
     //  Configure two sockets
-    void *frontend = zfl_config_socket (config, device, "frontend", ZMQ_SUB);
+    void *frontend = zfl_config_socket (config, service, "frontend", ZMQ_SUB);
     assert (frontend);
     zmq_close (frontend);
 
-    void *backend = zfl_config_socket (config, device, "backend", ZMQ_PUB);
+    void *backend = zfl_config_socket (config, service, "backend", ZMQ_PUB);
     assert (backend);
     zmq_close (backend);
 
