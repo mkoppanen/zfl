@@ -400,8 +400,7 @@ typedef unsigned int    qbyte;          //  Quad byte = 32 bits
 #define tblsize(x)          (sizeof (x) / sizeof ((x) [0]))
 #define tbllast(x)          (x [tblsize (x) - 1])
 
-#define randomof(num)       (int) (((float) num) * rand () / (RAND_MAX + 1.0))
-#define randomize()         srand ((uint) apr_time_usec (apr_time_now ()))
+#define within(num)         (int) (((float) num) * rand () / (RAND_MAX + 1.0))
 
 //  Free and duplicate string safely
 #define zfree(s)            if (s) { free (s); s = NULL; } else
