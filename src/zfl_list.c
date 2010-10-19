@@ -1,16 +1,13 @@
 /*  =========================================================================
     zfl_list.h - singly-linked list
 
-    Singly-linked list implementation. Meant to be used by message queues.
-
-    Follows the ZFL class conventions and is further developed as the ZFL
-    zfl_msg class.  See http://zfl.zeromq.org for more details.
+    Singly-linked list container.
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
     Copyright other contributors as noted in the AUTHORS file.
 
-    This file is part of the ZeroMQ Guide: http://zguide.zeromq.org
+    This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
 
     This is free software; you can redistribute it and/or modify it under the
     terms of the GNU Lesser General Public License as published by the Free
