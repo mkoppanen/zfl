@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_msg.h - ZFL singly-linked list class
+    zfl_list.h - ZFL singly-linked list class
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
