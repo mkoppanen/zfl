@@ -121,7 +121,6 @@ int
 zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size)
 {
     assert (self);
-    assert (size >= 0);
 
     zfree (self->data);
     self->dptr = NULL;          //  No data reference
