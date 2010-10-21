@@ -186,6 +186,7 @@ zfl_list_test (int verbose)
     assert (zfl_list_size (list) == 0);
 
     //  Three values we'll use as test data
+    //  List values are void *, not particularly strings
     char *cheese = "boursin";
     char *bread = "baguette";
     char *wine = "bordeaux";
