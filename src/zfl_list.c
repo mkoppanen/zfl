@@ -66,14 +66,17 @@ zfl_list_new ()
 void
 zfl_list_destroy (zfl_list_t **self_p)
 {
-    struct node_t *node, *next;
-
-    for (node = (*self_p)->head; node != NULL; node = next) {
-        next = node->next;
-        free (node);
+    assert (self_p);
+    if (*self_p) {
+        zfl_list_t *self = *self_p;
+        struct node_t *node, *next;
+        for (node = (*self_p)->head; node != NULL; node = next) {
+            next = node->next;
+            free (node);
+        }
+        free (self);
+        *self_p = NULL;
     }
-    free (*self_p);
-    *self_p = NULL;
 }
 
 
