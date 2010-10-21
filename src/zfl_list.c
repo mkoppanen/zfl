@@ -29,8 +29,8 @@
 
 //  List node, used internally only
 
-struct _zfl_list_node {
-    struct _zfl_list_node
+struct node_t {
+    struct node_t
         *next;
     void
         *value;
@@ -39,7 +39,7 @@ struct _zfl_list_node {
 //  Actual list object
 
 struct _zfl_list {
-    struct _zfl_list_node
+    struct node_t
         *head, *tail;
     size_t
         size;
@@ -66,7 +66,7 @@ zfl_list_new ()
 void
 zfl_list_destroy (zfl_list_t **self_p)
 {
-    struct _zfl_list_node *node, *next;
+    struct node_t *node, *next;
 
     for (node = (*self_p)->head; node != NULL; node = next) {
         next = node->next;
@@ -93,13 +93,13 @@ zfl_list_first (zfl_list_t *self)
 
 
 //  --------------------------------------------------------------------------
-//  Add value to the end of the list.
+//  Add value to the end of the list
 
 void
 zfl_list_append (zfl_list_t *self, void *value)
 {
-    struct _zfl_list_node *node;
-    node = malloc (sizeof (struct _zfl_list_node));
+    struct node_t *node;
+    node = malloc (sizeof (struct node_t));
     assert (node);
     node->value = value;
     if (self->tail)
@@ -113,13 +113,13 @@ zfl_list_append (zfl_list_t *self, void *value)
 
 
 //  --------------------------------------------------------------------------
-//  Insert value at the beginning of the list.
+//  Insert value at the beginning of the list
 
 void
 zfl_list_push (zfl_list_t *self, void *value)
 {
-    struct _zfl_list_node *node;
-    node = malloc (sizeof (struct _zfl_list_node));
+    struct node_t *node;
+    node = malloc (sizeof (struct node_t));
     assert (node);
     node->value = value;
     node->next = self->head;
@@ -137,7 +137,7 @@ zfl_list_push (zfl_list_t *self, void *value)
 void
 zfl_list_remove (zfl_list_t *self, void *value)
 {
-    struct _zfl_list_node *node, *prev = NULL;
+    struct node_t *node, *prev = NULL;
 
     //  First off, we need to find the list node.
     for (node = self->head; node != NULL; node = node->next) {
@@ -161,7 +161,7 @@ zfl_list_remove (zfl_list_t *self, void *value)
 
 
 //  --------------------------------------------------------------------------
-//  Return the number of items in the list.
+//  Return the number of items in the list
 
 size_t
 zfl_list_size (zfl_list_t *self)
@@ -171,7 +171,7 @@ zfl_list_size (zfl_list_t *self)
 
 
 //  --------------------------------------------------------------------------
-//  Runs self test of class
+//  Runs selftest of class
 
 void
 zfl_list_test (int verbose)
@@ -182,53 +182,51 @@ zfl_list_test (int verbose)
     assert (list);
     assert (zfl_list_size (list) == 0);
 
-    int *s1 = malloc (sizeof (int));
-    *s1 = 1;
-    int *s2 = malloc (sizeof (int));
-    *s2 = 2;
-    int *s3 = malloc (sizeof (int));
-    *s3 = 3;
+    //  Three values we'll use as test data
+    char *cheese = "boursin";
+    char *bread = "baguette";
+    char *wine = "bordeaux";
 
-    zfl_list_append (list, s1);
+    zfl_list_append (list, cheese);
     assert (zfl_list_size (list) == 1);
-    zfl_list_append (list, s2);
+    zfl_list_append (list, bread);
     assert (zfl_list_size (list) == 2);
-    zfl_list_append (list, s3);
+    zfl_list_append (list, wine);
     assert (zfl_list_size (list) == 3);
 
-    assert (zfl_list_first (list) == s1);
+    assert (zfl_list_first (list) == cheese);
     assert (zfl_list_size (list) == 3);
-    zfl_list_remove (list, s3);
+    zfl_list_remove (list, wine);
     assert (zfl_list_size (list) == 2);
 
-    assert (zfl_list_first (list) == s1);
-    zfl_list_remove (list, s1);
+    assert (zfl_list_first (list) == cheese);
+    zfl_list_remove (list, cheese);
     assert (zfl_list_size (list) == 1);
-    assert (zfl_list_first (list) == s2);
+    assert (zfl_list_first (list) == bread);
 
-    zfl_list_remove (list, s2);
+    zfl_list_remove (list, bread);
     assert (zfl_list_size (list) == 0);
 
-    // test push operation
-    zfl_list_push (list, s1);
+    zfl_list_push (list, cheese);
     assert (zfl_list_size (list) == 1);
-    assert (zfl_list_first (list) == s1);
-    zfl_list_push (list, s2);
-    assert (zfl_list_size (list) == 2);
-    assert (zfl_list_first (list) == s2);
-    zfl_list_append (list, s3);
-    assert (zfl_list_size (list) == 3);
-    assert (zfl_list_first (list) == s2);
-    zfl_list_remove (list, s2);
-    assert (zfl_list_first (list) == s1);
-    zfl_list_remove (list, s1);
-    assert (zfl_list_first (list) == s3);
-    zfl_list_remove (list, s3);
-    assert (zfl_list_size (list) == 0);
+    assert (zfl_list_first (list) == cheese);
 
-    free (s1);
-    free (s2);
-    free (s3);
+    zfl_list_push (list, bread);
+    assert (zfl_list_size (list) == 2);
+    assert (zfl_list_first (list) == bread);
+
+    zfl_list_append (list, wine);
+    assert (zfl_list_size (list) == 3);
+    assert (zfl_list_first (list) == bread);
+
+    zfl_list_remove (list, bread);
+    assert (zfl_list_first (list) == cheese);
+
+    zfl_list_remove (list, cheese);
+    assert (zfl_list_first (list) == wine);
+
+    zfl_list_remove (list, wine);
+    assert (zfl_list_size (list) == 0);
 
     zfl_list_destroy (&list);
     assert (list == NULL);
