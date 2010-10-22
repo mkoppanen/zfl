@@ -55,8 +55,7 @@ zfl_msg_new (void)
     zfl_msg_t
         *self;
 
-    self = malloc (sizeof (zfl_msg_t));
-    memset (self, 0, sizeof (zfl_msg_t));
+    self = zmalloc (sizeof (zfl_msg_t));
     return self;
 }
 
@@ -92,7 +91,7 @@ s_encode_uuid (unsigned char *data)
         hex_char [] = "0123456789ABCDEF";
 
     assert (data [0] == 0);
-    char *uuidstr = malloc (34);
+    char *uuidstr = zmalloc (34);
     uuidstr [0] = '@';
     int byte_nbr;
     for (byte_nbr = 0; byte_nbr < 16; byte_nbr++) {
@@ -124,7 +123,7 @@ s_decode_uuid (char *uuidstr)
 
     assert (strlen (uuidstr) == 33);
     assert (uuidstr [0] == '@');
-    unsigned char *data = malloc (17);
+    unsigned char *data = zmalloc (17);
     int byte_nbr;
     data [0] = 0;
     for (byte_nbr = 0; byte_nbr < 16; byte_nbr++)
@@ -143,7 +142,7 @@ static void
 s_set_part (zfl_msg_t *self, int part_nbr, unsigned char *data, size_t size)
 {
     self->_part_size [part_nbr] = size;
-    self->_part_data [part_nbr] = malloc (size + 1);
+    self->_part_data [part_nbr] = zmalloc (size + 1);
     memcpy (self->_part_data [part_nbr], data, size);
     //  Convert to C string if needed
     self->_part_data [part_nbr][size] = 0;
