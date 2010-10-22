@@ -1,7 +1,5 @@
 /*  =========================================================================
-    zfl_tests.c - run selftests
-
-    Runs all selftests.
+    zfl_hash.h - ZFL singly-linked hash class
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -24,39 +22,38 @@
     =========================================================================
 */
 
-#include "../include/zfl_prelude.h"
-#include "../include/zfl_base.h"
-#include "../include/zfl_blob.h"
-#include "../include/zfl_hash.h"
-#include "../include/zfl_list.h"
-#include "../include/zfl_msg.h"
-#include "../include/zfl_tree.h"
-#include "../include/zfl_tree_json.h"
-#include "../include/zfl_tree_zpl.h"
-#include "../include/zfl_config.h"
+#ifndef __ZFL_HASH_H_INCLUDED__
+#define __ZFL_HASH_H_INCLUDED__
 
-int main (int argc, char *argv [])
-{
-    //  Enable malloc tracing if the platform supports it
-    MALLOC_TRACE;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    Bool verbose;
-    if (argc == 2 && streq (argv [1], "-v"))
-        verbose = TRUE;
-    else
-        verbose = FALSE;
+//  Callback function for zfl_hash_apply method
+typedef int (zfl_hash_apply_fn) (char *key, void *value, void *argument);
 
-    printf ("Running ZFL self tests...\n");
-    zfl_base_test (verbose);
-    zfl_blob_test (verbose);
-    zfl_config_test (verbose);
-    zfl_hash_test (verbose);
-    zfl_list_test (verbose);
-    zfl_tree_test (verbose);
-    zfl_tree_json_test (verbose);
-    zfl_tree_zpl_test (verbose);
-    zfl_msg_test (verbose);
+//  Opaque class structure
+typedef struct _zfl_hash zfl_hash_t;
 
-    printf ("Tests passed OK\n");
-    return 0;
+zfl_hash_t *
+    zfl_hash_new (void);
+void
+    zfl_hash_destroy (zfl_hash_t **self_p);
+int
+    zfl_hash_insert (zfl_hash_t *self, char *key, void *value);
+void
+    zfl_hash_delete (zfl_hash_t *self, char *key);
+void *
+    zfl_hash_lookup (zfl_hash_t *self, char *key);
+size_t
+    zfl_hash_size (zfl_hash_t *self);
+int
+    zfl_hash_apply (zfl_hash_t *self, zfl_hash_apply_fn *callback, void *argument);
+void
+    zfl_hash_test (int verbose);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif

@@ -1,5 +1,7 @@
 #  Run selftests and check memory
+echo "Rebuilding ZFL..."
 gcc -g -o zfl_selftest zfl*.c -lzmq
 export MALLOC_TRACE=mtrace.txt
+echo "Starting selftests..."
 zfl_selftest # -v
 mtrace zfl_selftest mtrace.txt

@@ -37,6 +37,7 @@
 //
 #include <zfl_base.h>
 #include <zfl_blob.h>
+#include <zfl_hash.h>
 #include <zfl_list.h>
 #include <zfl_msg.h>
 #include <zfl_tree.h>
