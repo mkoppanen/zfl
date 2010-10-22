@@ -39,8 +39,7 @@
 
 struct _zfl_msg_t {
     //  Part data follows message recv/send order
-    unsigned char
-          *_part_data [ZFL_MSG_MAX_PARTS];
+    byte  *_part_data [ZFL_MSG_MAX_PARTS];
     size_t _part_size [ZFL_MSG_MAX_PARTS];
     size_t _part_count;
 };
@@ -85,7 +84,7 @@ zfl_msg_destroy (zfl_msg_t **self_p)
 //  Lets us print UUIDs as C strings and use them as addresses
 //
 static char *
-s_encode_uuid (unsigned char *data)
+s_encode_uuid (byte *data)
 {
     static char
         hex_char [] = "0123456789ABCDEF";
@@ -107,7 +106,7 @@ s_encode_uuid (unsigned char *data)
 //  Formats 17-byte UUID as 33-char string starting with '@'
 //  Lets us print UUIDs as C strings and use them as addresses
 //
-static unsigned char *
+static byte *
 s_decode_uuid (char *uuidstr)
 {
     static char
@@ -123,7 +122,7 @@ s_decode_uuid (char *uuidstr)
 
     assert (strlen (uuidstr) == 33);
     assert (uuidstr [0] == '@');
-    unsigned char *data = zmalloc (17);
+    byte *data = zmalloc (17);
     int byte_nbr;
     data [0] = 0;
     for (byte_nbr = 0; byte_nbr < 16; byte_nbr++)
@@ -139,7 +138,7 @@ s_decode_uuid (char *uuidstr)
 //  Private helper function to store a single message part
 
 static void
-s_set_part (zfl_msg_t *self, int part_nbr, unsigned char *data, size_t size)
+s_set_part (zfl_msg_t *self, int part_nbr, byte *data, size_t size)
 {
     self->_part_size [part_nbr] = size;
     self->_part_data [part_nbr] = zmalloc (size + 1);
@@ -191,13 +190,13 @@ zfl_msg_recv (void *socket)
             exit (1);
         }
         //  We handle 0MQ UUIDs as printable strings
-        unsigned char *data = zmq_msg_data (&message);
-        size_t         size = zmq_msg_size (&message);
+        byte  *data = zmq_msg_data (&message);
+        size_t size = zmq_msg_size (&message);
         if (size == 17 && data [0] == 0) {
             //  Store message part as string uuid
             char *uuidstr = s_encode_uuid (data);
             self->_part_size [self->_part_count] = strlen (uuidstr);
-            self->_part_data [self->_part_count] = (unsigned char *) uuidstr;
+            self->_part_data [self->_part_count] = (byte *) uuidstr;
             self->_part_count++;
         }
         else
@@ -235,10 +234,10 @@ zfl_msg_send (zfl_msg_t **self_p, void *socket)
         zmq_msg_t message;
 
         //  Unmangle 0MQ identities for writing to the socket
-        unsigned char *data = self->_part_data [part_nbr];
-        size_t         size = self->_part_size [part_nbr];
+        byte  *data = self->_part_data [part_nbr];
+        size_t size = self->_part_size [part_nbr];
         if (size == 33 && data [0] == '@') {
-            unsigned char *uuidbin = s_decode_uuid ((char *) data);
+            byte *uuidbin = s_decode_uuid ((char *) data);
             zmq_msg_init_size (&message, 17);
             memcpy (zmq_msg_data (&message), uuidbin, 17);
             free (uuidbin);
@@ -334,7 +333,7 @@ zfl_msg_push (zfl_msg_t *self, char *part)
 
     //  Move part stack up one element and insert new part
     memmove (&self->_part_data [1], &self->_part_data [0],
-        (ZFL_MSG_MAX_PARTS - 1) * sizeof (unsigned char *));
+        (ZFL_MSG_MAX_PARTS - 1) * sizeof (byte *));
     memmove (&self->_part_size [1], &self->_part_size [0],
         (ZFL_MSG_MAX_PARTS - 1) * sizeof (size_t));
     s_set_part (self, 0, (void *) part, strlen (part));
@@ -355,7 +354,7 @@ zfl_msg_pop (zfl_msg_t *self)
     //  Remove first part and move part stack down one element
     char *part = (char *) self->_part_data [0];
     memmove (&self->_part_data [0], &self->_part_data [1],
-        (ZFL_MSG_MAX_PARTS - 1) * sizeof (unsigned char *));
+        (ZFL_MSG_MAX_PARTS - 1) * sizeof (byte *));
     memmove (&self->_part_size [0], &self->_part_size [1],
         (ZFL_MSG_MAX_PARTS - 1) * sizeof (size_t));
     self->_part_count--;
@@ -421,8 +420,8 @@ zfl_msg_dump (zfl_msg_t *self)
 {
     int part_nbr;
     for (part_nbr = 0; part_nbr < self->_part_count; part_nbr++) {
-        unsigned char *data = self->_part_data [part_nbr];
-        size_t         size = self->_part_size [part_nbr];
+        byte  *data = self->_part_data [part_nbr];
+        size_t size = self->_part_size [part_nbr];
 
         //  Dump the message as text or binary
         int is_text = 1;
@@ -436,7 +435,7 @@ zfl_msg_dump (zfl_msg_t *self)
             if (is_text)
                 fprintf (stderr, "%c", data [char_nbr]);
             else
-                fprintf (stderr, "%02X", (unsigned char) data [char_nbr]);
+                fprintf (stderr, "%02X", (byte) data [char_nbr]);
         }
         fprintf (stderr, "\n");
     }
