@@ -3,6 +3,10 @@
 
     Expandable hash table container
 
+    Note that it's relatively slow (~50k insertions/deletes per second), so
+    don't do inserts/updates on the critical path for message I/O.  It can
+    do ~2.5M lookups per second for 16-char keys.  Timed on a 1.6GHz CPU.
+
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
     Copyright other contributors as noted in the AUTHORS file.
@@ -400,6 +404,10 @@ zfl_hash_test (int verbose)
                 testset [testnbr].exists = TRUE;
         }
     }
+    //  Test 1M lookups
+    for (iteration = 0; iteration < 1000000; iteration++)
+        value = zfl_hash_lookup (hash, "DEADBEEFABADCAFE");
+
     zfl_hash_destroy (&hash);
 
     assert (hash == NULL);
