@@ -49,7 +49,6 @@ zfl_blob_new (void *data, size_t size)
     zfl_blob_t
         *self;
 
-    assert (size >= 0);
     self = zmalloc (sizeof (zfl_blob_t));
     if (data)
         zfl_blob_set_data (self, data, size);
@@ -148,7 +147,6 @@ int
 zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size)
 {
     assert (self);
-    assert (size >= 0);
 
     zfree (self->data);         //  Free any copied data
     self->dptr = data;          //  Hold data reference
