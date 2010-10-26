@@ -10,6 +10,13 @@ zfl_socket class
         zmq_msg_init_data (&message, address, strlen (address) + 1, NULL, NULL);
         zmq_send (publisher, &message, ZMQ_SNDMORE);
 
+    set/get integer options without the grunk:
+        zfl_socket_setopt (socket, SOME_NAME, value);
+        value = zfl_socket_getopt (socket, SOME_NAME);
+
 zfl_socket_sendfmt
 zfl_socket_sendmore
 zfl_socket_send
+
+zfl_queue class
+    - manage queue of zfl_msg items
