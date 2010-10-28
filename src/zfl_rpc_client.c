@@ -142,13 +142,13 @@ backend_event (struct rpc_client *rpc)
         server->heartbeat_deadline = now_us () + HEARTBEAT_INTERVAL;
         zfl_list_append (rpc->alive_servers, server);
     }
-    else if (server == rpc->current_server) {
+    else
+    if (server == rpc->current_server) {
         zfl_msg_send (&msg, rpc->frontend);
         assert (rpc->request);
         zfl_msg_destroy (&rpc->request);
         rpc->current_server = NULL;
     }
-
     zfl_msg_destroy (&msg);
 }
 
@@ -173,12 +173,13 @@ frontend_event (struct rpc_client *rpc)
 
 //  --------------------------------------------------------------------------
 //  Handle control message from application.
-//  Returns 1 when the received message contains `stop` command
+//  Returns TRUE when the received message contains `stop` command
 
-static int
+static Bool
 control_event (struct rpc_client *rpc)
 {
-    int rc, ret = 0;
+    int rc;
+    Bool stopped = FALSE;
 
     zfl_msg_t *msg = zfl_msg_recv (rpc->control);
     assert (msg);
@@ -187,13 +188,15 @@ control_event (struct rpc_client *rpc)
     char *command = zfl_msg_pop (msg);
     if (strcmp (command, "stop") == 0) {
         assert (zfl_msg_parts (msg) == 0);
-        ret = 1;
+        stopped = TRUE;
     }
     else {
         assert (strcmp (command, "connect") == 0);
         assert (zfl_msg_parts (msg) == 2);
         char *server_id = zfl_msg_pop (msg);
         char *endpoint = zfl_msg_pop (msg);
+
+        //  Insert new server, which can't already exist
         assert (zfl_hash_lookup (rpc->registry, server_id) == NULL);
         rc = zmq_connect (rpc->backend, endpoint);
         assert (rc == 0);
@@ -201,6 +204,7 @@ control_event (struct rpc_client *rpc)
         rc = zfl_hash_insert (rpc->registry, server_id, server);
         assert (rc == 0);
         zfl_list_append (rpc->servers, server);
+
         //  Send response
         zfl_msg_t *response = zfl_msg_new ();
         zfl_msg_push (response, "ok");
@@ -208,11 +212,10 @@ control_event (struct rpc_client *rpc)
         free (server_id);
         free (endpoint);
     }
-
     zfl_msg_destroy (&msg);
     free (command);
 
-    return ret;
+    return stopped;
 }
 
 
@@ -235,7 +238,6 @@ heartbeat (struct rpc_client *rpc)
         zfl_msg_wrap (msg, server->server_id, "");
         zfl_msg_send (&msg, rpc->backend);
     }
-
     zfl_list_destroy (&servers);
 }
 
@@ -473,6 +475,7 @@ zfl_rpc_client_connect (zfl_rpc_client_t *self, char *server_id, char *endpoint)
     zfl_msg_push (msg, server_id);
     zfl_msg_push (msg, "connect");
     zfl_msg_send (&msg, self->control_socket);
+
     //  Receive and drop response
     msg = zfl_msg_recv (self->control_socket);
     zfl_msg_destroy (&msg);
