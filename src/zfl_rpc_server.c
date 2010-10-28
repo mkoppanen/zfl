@@ -67,6 +67,7 @@ struct server_args {
     void
         *context;       // 0MQ context
     char
+        *server_id,
         *endpoint,
         *control_endpoint;
 };
@@ -142,14 +143,16 @@ frontend_event (struct rpc_server *rpc)
         zfl_list_append (rpc->clients, client);
         zfl_hash_insert (rpc->registry, client->client_id, client);
     }
-    zfl_msg_wrap (msg, client_id, NULL);
-
-    if (zfl_msg_parts (msg) > 1)
+    if (zfl_msg_parts (msg) > 0) {
         //  Queue message
+        zfl_msg_wrap (msg, client_id, NULL);
         zfl_list_append (rpc->msg_queue, msg);
-    else
+    }
+    else {
         //  Echo heartbeat
+        zfl_msg_wrap (msg, client_id, "");
         zfl_msg_send (&msg, rpc->frontend);
+    }
 
     client->timestamp = now_us ();
     zfl_list_remove (rpc->clients, client);
@@ -163,7 +166,7 @@ frontend_event (struct rpc_server *rpc)
 static void
 backend_event (struct rpc_server *rpc)
 {
-    zfl_msg_t *msg = zfl_msg_recv (rpc->control);
+    zfl_msg_t *msg = zfl_msg_recv (rpc->backend);
     assert (msg);
     assert (rpc->server_busy);
     zfl_msg_send (&msg, rpc->frontend);
@@ -220,9 +223,12 @@ server_thread (void *arg)
     struct rpc_server *rpc = zmalloc (sizeof (struct rpc_server));
     assert (rpc);
 
-    //  There is no endpoint bound to the frontend socket at start.
+    //  Create frontend socket and sets it identity
     rpc->frontend = zmq_socket (server_args->context, ZMQ_XREP);
     assert (rpc->frontend);
+    rc = zmq_setsockopt (rpc->frontend, ZMQ_IDENTITY,
+        server_args->server_id, strlen (server_args->server_id));
+    assert (rc == 0);
 
     //  Create backend socket and bind endpoint to it
     rpc->backend = zmq_socket (server_args->context, ZMQ_REQ);
@@ -236,6 +242,7 @@ server_thread (void *arg)
     assert (rc == 0);
 
     //  Free argument struct
+    free (server_args->server_id);
     free (server_args->endpoint);
     free (server_args->control_endpoint);
     free (server_args);
@@ -359,7 +366,7 @@ format_control_endpoint (char *endpoint)
 //  Constructor
 
 zfl_rpc_server_t *
-zfl_rpc_server_new (void *zmq_context, char *endpoint)
+zfl_rpc_server_new (void *zmq_context, char *server_id, char *endpoint)
 {
     int rc;
 
@@ -381,6 +388,7 @@ zfl_rpc_server_new (void *zmq_context, char *endpoint)
     struct server_args *args = zmalloc (sizeof (struct server_args));
     assert (args);
     args->context = zmq_context;
+    args->server_id = strdup (server_id);
     args->endpoint = strdup (endpoint);
     args->control_endpoint = control_endpoint;
 

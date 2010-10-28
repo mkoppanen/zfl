@@ -33,7 +33,7 @@ extern "C" {
 typedef struct _zfl_rpc_server zfl_rpc_server_t;
 
 zfl_rpc_server_t *
-    zfl_rpc_server_new (void *zmq_context, char *endpoint);
+    zfl_rpc_server_new (void *zmq_context, char *server_id, char *endpoint);
 void
     zfl_rpc_server_destroy (zfl_rpc_server_t **self_p);
 void
