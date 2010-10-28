@@ -40,6 +40,8 @@
 #include <zfl_hash.h>
 #include <zfl_list.h>
 #include <zfl_msg.h>
+#include <zfl_rpc_client.h>
+#include <zfl_rpc_server.h>
 #include <zfl_tree.h>
 #include <zfl_tree_json.h>
 #include <zfl_tree_zpl.h>
