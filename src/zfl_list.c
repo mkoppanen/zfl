@@ -160,6 +160,24 @@ zfl_list_remove (zfl_list_t *self, void *value)
 
 
 //  --------------------------------------------------------------------------
+//  Make copy of itself
+
+zfl_list_t *
+zfl_list_copy (zfl_list_t *self)
+{
+    if (!self)
+        return NULL;
+
+    zfl_list_t *copy = zfl_list_new ();
+    assert (copy);
+
+    struct node_t *node;
+    for (node = self->head; node; node = node->next)
+        zfl_list_append (copy, node->value);
+    return copy;
+}
+
+//  --------------------------------------------------------------------------
 //  Return the number of items in the list
 
 size_t

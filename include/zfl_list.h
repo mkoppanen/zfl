@@ -44,6 +44,8 @@ void
     zfl_list_push (zfl_list_t *self, void *value);
 void
     zfl_list_remove (zfl_list_t *self, void *value);
+zfl_list_t *
+    zfl_list_copy (zfl_list_t *self);
 size_t
     zfl_list_size (zfl_list_t *self);
 void
