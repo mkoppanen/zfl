@@ -480,7 +480,7 @@ zfl_msg_test (int verbose)
         zfl_msg_dump (zmsg);
     assert (strcmp (zfl_msg_body (zmsg), "Hello") == 0);
 
-    zfl_msg_destroy(&zmsg);
+    zfl_msg_destroy (&zmsg);
     assert (zmsg == NULL);
 
     //  Test send and receive of multi-part message
