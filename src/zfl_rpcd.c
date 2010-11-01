@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_rpc_server.c - server side RPC
+    zfl_rpcd.c - server side RPC
 
     Server side API for implementing reliable remote procedure calls.
 
@@ -29,14 +29,14 @@
 #include "../include/zfl_hash.h"
 #include "../include/zfl_list.h"
 #include "../include/zfl_msg.h"
-#include "../include/zfl_rpc_server.h"
+#include "../include/zfl_rpcd.h"
 
 //  How often we should check for heartbeat signal
 #define HEARTBEAT_INTERVAL      1000000
 
 //  Structure of our class
 
-struct _zfl_rpc_server {
+struct _zfl_rpcd {
     void
         *rpc_socket,    //  used to receive requests/send responses
         *control_socket;//  used to RPC thread control
@@ -365,12 +365,12 @@ format_control_endpoint (char *endpoint)
 //  --------------------------------------------------------------------------
 //  Constructor
 
-zfl_rpc_server_t *
-zfl_rpc_server_new (void *zmq_context, char *server_id, char *endpoint)
+zfl_rpcd_t *
+zfl_rpcd_new (void *zmq_context, char *server_id, char *endpoint)
 {
     int rc;
 
-    zfl_rpc_server_t *self = zmalloc (sizeof (zfl_rpc_server_t));
+    zfl_rpcd_t *self = zmalloc (sizeof (zfl_rpcd_t));
     assert (self);
 
     self->rpc_socket = zmq_socket (zmq_context, ZMQ_REP);
@@ -403,9 +403,9 @@ zfl_rpc_server_new (void *zmq_context, char *server_id, char *endpoint)
 //  Destructor
 
 void
-zfl_rpc_server_destroy (zfl_rpc_server_t **self_p)
+zfl_rpcd_destroy (zfl_rpcd_t **self_p)
 {
-    zfl_rpc_server_t *self = *self_p;
+    zfl_rpcd_t *self = *self_p;
     int rc;
 
     if (!self)
@@ -437,7 +437,7 @@ zfl_rpc_server_destroy (zfl_rpc_server_t **self_p)
 //  Clients can connect to this endpoint and send their requests to the server
 
 void
-zfl_rpc_server_bind (zfl_rpc_server_t *self, char *endpoint)
+zfl_rpcd_bind (zfl_rpcd_t *self, char *endpoint)
 {
     if (!self)
         return;
@@ -456,7 +456,7 @@ zfl_rpc_server_bind (zfl_rpc_server_t *self, char *endpoint)
 //  The caller is responsible for destroying the returned message
 
 zfl_msg_t *
-zfl_rpc_server_recv (zfl_rpc_server_t *self)
+zfl_rpcd_recv (zfl_rpcd_t *self)
 {
     if (self)
         return zfl_msg_recv (self->rpc_socket);
@@ -468,7 +468,7 @@ zfl_rpc_server_recv (zfl_rpc_server_t *self)
 //  Send response to the RPC server thread
 
 void
-zfl_rpc_server_send (zfl_rpc_server_t *self, zfl_msg_t **msg_p)
+zfl_rpcd_send (zfl_rpcd_t *self, zfl_msg_t **msg_p)
 {
     if (self)
         zfl_msg_send (msg_p, self->rpc_socket);

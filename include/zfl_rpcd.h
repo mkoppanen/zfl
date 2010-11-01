@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_rpc_server.h - server side RPC
+    zfl_rpcd.h - server side RPC
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,26 +22,26 @@
     =========================================================================
 */
 
-#ifndef __ZFL_RPC_SERVER_H_INCLUDED__
-#define __ZFL_RPC_SERVER_H_INCLUDED__
+#ifndef __ZFL_RPCD_H_INCLUDED__
+#define __ZFL_RPCD_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 //  Opaque class structure
-typedef struct _zfl_rpc_server zfl_rpc_server_t;
+typedef struct _zfl_rpcd zfl_rpcd_t;
 
-zfl_rpc_server_t *
-    zfl_rpc_server_new (void *zmq_context, char *server_id, char *endpoint);
+zfl_rpcd_t *
+    zfl_rpcd_new (void *zmq_context, char *server_id, char *endpoint);
 void
-    zfl_rpc_server_destroy (zfl_rpc_server_t **self_p);
+    zfl_rpcd_destroy (zfl_rpcd_t **self_p);
 void
-    zfl_rpc_server_bind (zfl_rpc_server_t *self, char *endpoint);
+    zfl_rpcd_bind (zfl_rpcd_t *self, char *endpoint);
 zfl_msg_t *
-    zfl_rpc_server_recv (zfl_rpc_server_t *self);
+    zfl_rpcd_recv (zfl_rpcd_t *self);
 void
-    zfl_rpc_server_send (zfl_rpc_server_t *self, zfl_msg_t **msg_p);
+    zfl_rpcd_send (zfl_rpcd_t *self, zfl_msg_t **msg_p);
 
 #ifdef __cplusplus
 }
