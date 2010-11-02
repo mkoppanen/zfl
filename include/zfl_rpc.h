@@ -32,7 +32,7 @@ extern "C" {
 typedef struct _zfl_rpc zfl_rpc_t;
 
 zfl_rpc_t *
-    zfl_rpc_new (void *zmq_context, char *endpoint);
+    zfl_rpc_new (void *zmq_context);
 void
     zfl_rpc_destroy (zfl_rpc_t **self_p);
 void
