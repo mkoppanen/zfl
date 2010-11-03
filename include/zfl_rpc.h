@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_rpc_client.h - ZFL RPC client layer
+    zfl_rpc.h - ZFL RPC client layer
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,24 +22,24 @@
     =========================================================================
 */
 
-#ifndef __ZFL_RCP_CLIENT_H_INCLUDED__
-#define __ZFL_RCP_CLIENT_H_INCLUDED__
+#ifndef __ZFL_RCP_H_INCLUDED__
+#define __ZFL_RCP_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct _zfl_rpc_client zfl_rpc_client_t;
+typedef struct _zfl_rpc zfl_rpc_t;
 
-zfl_rpc_client_t *
-    zfl_rpc_client_new (void *zmq_context, char *endpoint);
+zfl_rpc_t *
+    zfl_rpc_new (void *zmq_context);
 void
-    zfl_rpc_client_destroy (zfl_rpc_client_t **self_p);
+    zfl_rpc_destroy (zfl_rpc_t **self_p);
 void
-    zfl_rpc_client_connect (zfl_rpc_client_t *self,
+    zfl_rpc_connect (zfl_rpc_t *self,
         char *server_id, char *endpoint);
 zfl_msg_t *
-    zfl_rpc_client_send (zfl_rpc_client_t *self, zfl_msg_t **request_p);
+    zfl_rpc_send (zfl_rpc_t *self, zfl_msg_t **request_p);
 
 #ifdef __cplusplus
 }

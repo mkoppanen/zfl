@@ -12,8 +12,8 @@ include_HEADERS = \
     ../include/zfl_hash.h \
     ../include/zfl_list.h \
     ../include/zfl_msg.h \
-    ../include/zfl_rpc_client.h \
-    ../include/zfl_rpc_server.h \
+    ../include/zfl_rpc.h \
+    ../include/zfl_rpcd.h \
     ../include/zfl_tree.h \
     ../include/zfl_tree_json.h \
     ../include/zfl_tree_zpl.h
@@ -25,8 +25,8 @@ libzfl_la_SOURCES = \
     zfl_hash.c \
     zfl_list.c \
     zfl_msg.c \
-    zfl_rpc_client.c \
-    zfl_rpc_server.c \
+    zfl_rpc.c \
+    zfl_rpcd.c \
     zfl_tree.c \
     zfl_tree_json.c \
     zfl_tree_zpl.c

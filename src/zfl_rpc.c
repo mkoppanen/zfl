@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_rpc_client.c - client side RPC
+    zfl_rpc.c - client side RPC
 
     Client side API for implementing reliable remote procedure calls.
 
@@ -29,7 +29,7 @@
 #include "../include/zfl_hash.h"
 #include "../include/zfl_list.h"
 #include "../include/zfl_msg.h"
-#include "../include/zfl_rpc_client.h"
+#include "../include/zfl_rpc.h"
 
 //  Heartbeat rate (in microseconds)
 #define HEARTBEAT_INTERVAL      500000
@@ -39,10 +39,10 @@
 
 //  Structure of our class
 
-struct _zfl_rpc_client {
+struct _zfl_rpc {
     void
-        *rpc_socket,            //  used to send requests/receive replies
-        *control_socket;        //  used to control RPC thread
+        *data_socket,           //  used to send requests/receive replies
+        *ctrl_socket;           //  used to control RPC thread
     pthread_t
         thread;                 //  ID of API thread
 };
@@ -82,12 +82,12 @@ struct rpc_server {
 
 //  Used to pass arguments on RPC thread creation
 
-struct rpc_client_thread_args {
+struct rpc_thread_args {
     void
-        *context;       // 0MQ context
+        *zmq_context;
     char
-        *rpc_endpoint,
-        *control_endpoint;
+        *data_endpoint,
+        *ctrl_endpoint;
 };
 
 //  --------------------------------------------------------------------------
@@ -110,7 +110,6 @@ static struct rpc_server *
 new_rpc_server (char *server_id)
 {
     struct rpc_server *server = zmalloc (sizeof (struct rpc_server));
-    assert (server);
     server->server_id = strdup (server_id);
     server->alive = 0;
     return server;
@@ -244,29 +243,26 @@ heartbeat (struct rpc_client *rpc)
 
 //  --------------------------------------------------------------------------
 static void *
-rpc_client_thread (void *arg)
+rpc_thread (void *arg)
 {
-    struct rpc_client_thread_args *client_args = arg;
+    struct rpc_thread_args *client_args = arg;
     int rc;
 
     struct rpc_client *rpc = zmalloc (sizeof (struct rpc_client));
-    assert (rpc);
 
-    rpc->frontend = zmq_socket (client_args->context, ZMQ_REP);
+    rpc->frontend = zmq_socket (client_args->zmq_context, ZMQ_REP);
     assert (rpc->frontend);
-    rc = zmq_connect (rpc->frontend, client_args->rpc_endpoint);
+    rc = zmq_connect (rpc->frontend, client_args->data_endpoint);
     assert (rc == 0);
-
-    rpc->control = zmq_socket (client_args->context, ZMQ_REP);
+    rpc->control = zmq_socket (client_args->zmq_context, ZMQ_REP);
     assert (rpc->control);
-    rc = zmq_connect (rpc->control, client_args->control_endpoint);
+    rc = zmq_connect (rpc->control, client_args->ctrl_endpoint);
     assert (rc == 0);
-
-    rpc->backend = zmq_socket (client_args->context, ZMQ_XREP);
+    rpc->backend = zmq_socket (client_args->zmq_context, ZMQ_XREP);
     assert (rpc->backend);
 
-    free (client_args->rpc_endpoint);
-    free (client_args->control_endpoint);
+    free (client_args->data_endpoint);
+    free (client_args->ctrl_endpoint);
     free (client_args);
 
     rpc->servers = zfl_list_new ();
@@ -384,49 +380,39 @@ rpc_client_thread (void *arg)
 
 
 //  --------------------------------------------------------------------------
-//  Formats control endpoint
-
-static char *
-format_control_endpoint (char *endpoint)
-{
-    char *suffix = "-control";
-    char *buf = malloc (strlen (endpoint) + strlen (suffix) + 1);
-    assert (buf);
-    strcpy (buf, endpoint);
-    strcat (buf, suffix);
-    return buf;
-}
-
-
-//  --------------------------------------------------------------------------
 //  Constructor
 
-zfl_rpc_client_t *
-zfl_rpc_client_new (void *zmq_context, char *endpoint)
+zfl_rpc_t *
+zfl_rpc_new (void *zmq_context)
 {
     int rc;
+    char
+        data_endpoint [32],
+        ctrl_endpoint [32];
 
-    zfl_rpc_client_t *self = zmalloc (sizeof (zfl_rpc_client_t));
-    assert (self);
+    zfl_rpc_t *self = zmalloc (sizeof (zfl_rpc_t));
+    self->data_socket = zmq_socket (zmq_context, ZMQ_REQ);
+    assert (self->data_socket);
+    self->ctrl_socket = zmq_socket (zmq_context, ZMQ_REQ);
+    assert (self->ctrl_socket);
 
-    self->rpc_socket = zmq_socket (zmq_context, ZMQ_REQ);
-    assert (self->rpc_socket);
-    rc = zmq_bind (self->rpc_socket, endpoint);
+    while (1) {
+        long id = random ();
+        sprintf (data_endpoint, "inproc://rpc/%08lX/data", id);
+        sprintf (ctrl_endpoint, "inproc://rpc/%08lX/ctrl", id);
+        rc = zmq_bind (self->data_socket, data_endpoint);
+        if (rc == 0)
+            break;
+    }
+    rc = zmq_bind (self->ctrl_socket, ctrl_endpoint);
     assert (rc == 0);
 
-    self->control_socket = zmq_socket (zmq_context, ZMQ_REQ);
-    assert (self->control_socket);
-    char *control_endpoint = format_control_endpoint (endpoint);
-    rc = zmq_bind (self->control_socket, control_endpoint);
-    assert (rc == 0);
+    struct rpc_thread_args *thread_args = zmalloc (sizeof *thread_args);
+    thread_args->zmq_context = zmq_context;
+    thread_args->data_endpoint = strdup (data_endpoint);
+    thread_args->ctrl_endpoint = strdup (ctrl_endpoint);
 
-    struct rpc_client_thread_args *args = zmalloc (sizeof *args);
-    assert (args);
-    args->context = zmq_context;
-    args->rpc_endpoint = strdup (endpoint);
-    args->control_endpoint = control_endpoint;
-
-    rc = pthread_create (&self->thread, NULL, rpc_client_thread, args);
+    rc = pthread_create (&self->thread, NULL, rpc_thread, thread_args);
     assert (rc == 0);
 
     return self;
@@ -437,9 +423,9 @@ zfl_rpc_client_new (void *zmq_context, char *endpoint)
 //  Destructor
 
 void
-zfl_rpc_client_destroy (zfl_rpc_client_t **self_p)
+zfl_rpc_destroy (zfl_rpc_t **self_p)
 {
-    zfl_rpc_client_t *self = *self_p;
+    zfl_rpc_t *self = *self_p;
     int rc;
 
     if (!self)
@@ -449,13 +435,13 @@ zfl_rpc_client_destroy (zfl_rpc_client_t **self_p)
     assert (stop_request);
 
     zfl_msg_push (stop_request, "stop");
-    zfl_msg_send (&stop_request, self->control_socket);
+    zfl_msg_send (&stop_request, self->ctrl_socket);
 
     rc = pthread_join (self->thread, NULL);
     assert (rc == 0);
 
-    zmq_close (self->rpc_socket);
-    zmq_close (self->control_socket);
+    zmq_close (self->data_socket);
+    zmq_close (self->ctrl_socket);
 
     free (self);
     *self_p = NULL;
@@ -464,20 +450,20 @@ zfl_rpc_client_destroy (zfl_rpc_client_t **self_p)
 
 //  --------------------------------------------------------------------------
 //  Connect RPC client to server
-//  One RPC server can be connected to more servers
+//  RPC client can be connected to multiple servers
 
 void
-zfl_rpc_client_connect (zfl_rpc_client_t *self, char *server_id, char *endpoint)
+zfl_rpc_connect (zfl_rpc_t *self, char *server_id, char *endpoint)
 {
     zfl_msg_t *msg = zfl_msg_new ();
     assert (msg);
     zfl_msg_push (msg, endpoint);
     zfl_msg_push (msg, server_id);
     zfl_msg_push (msg, "connect");
-    zfl_msg_send (&msg, self->control_socket);
+    zfl_msg_send (&msg, self->ctrl_socket);
 
     //  Receive and drop response
-    msg = zfl_msg_recv (self->control_socket);
+    msg = zfl_msg_recv (self->ctrl_socket);
     zfl_msg_destroy (&msg);
 }
 
@@ -487,9 +473,9 @@ zfl_rpc_client_connect (zfl_rpc_client_t *self, char *server_id, char *endpoint)
 //  Returns server's reply
 
 zfl_msg_t *
-zfl_rpc_client_send (zfl_rpc_client_t *self, zfl_msg_t **request_p)
+zfl_rpc_send (zfl_rpc_t *self, zfl_msg_t **request_p)
 {
-    zfl_msg_send (request_p, self->rpc_socket);
-    zfl_msg_t *reply = zfl_msg_recv (self->rpc_socket);
+    zfl_msg_send (request_p, self->data_socket);
+    zfl_msg_t *reply = zfl_msg_recv (self->data_socket);
     return reply;
 }
