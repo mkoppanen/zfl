@@ -60,6 +60,8 @@ struct rpc_client {
         *lru_queue;             //  servers ready to serve (in LRU order)
     zfl_hash_t
         *registry;              //  maps server names to pointer to server struct
+    unsigned long
+        sequence_nr;            //  sequence number allocator
     zfl_msg_t
         *request;               //  pending request or NULL
     struct rpc_server
@@ -142,11 +144,19 @@ backend_event (struct rpc_client *rpc)
         zfl_list_append (rpc->alive_servers, server);
     }
     else
-    if (server == rpc->current_server) {
-        zfl_msg_send (&msg, rpc->frontend);
-        assert (rpc->request);
-        zfl_msg_destroy (&rpc->request);
-        rpc->current_server = NULL;
+    if (zfl_msg_parts (msg) == 2) {
+        if (server == rpc->current_server) {
+            assert (rpc->request);
+            char *request_id = zfl_msg_pop (msg);
+            unsigned long sequence_nr = strtoul (request_id, NULL, 10);
+            free (request_id);
+            if (sequence_nr == rpc->sequence_nr) {
+                zfl_msg_body_set (rpc->request, zfl_msg_body (msg));
+                zfl_msg_send (&rpc->request, rpc->frontend);
+                rpc->sequence_nr++;
+                rpc->current_server = NULL;
+            }
+        }
     }
     zfl_msg_destroy (&msg);
 }
@@ -277,6 +287,7 @@ rpc_thread (void *arg)
     rpc->registry = zfl_hash_new ();
     assert (rpc->registry);
 
+    rpc->sequence_nr = 0;
     rpc->request = NULL;
     rpc->current_server = NULL;
     rpc->next_heartbeat = now_us ();
@@ -338,7 +349,14 @@ rpc_thread (void *arg)
         if (rpc->request && !rpc->current_server) {
             if (zfl_list_size (rpc->lru_queue) > 0) {
                 struct rpc_server *server = zfl_list_first (rpc->lru_queue);
-                zfl_msg_t *msg = zfl_msg_dup (rpc->request);
+                zfl_msg_t *msg = zfl_msg_new ();
+                //  Copy the request without address envelope
+                zfl_msg_body_set (msg, zfl_msg_body (rpc->request));
+                //  Add request ID
+                char request_id [16];
+                sprintf (request_id, "%lu", rpc->sequence_nr);
+                zfl_msg_push (msg, request_id);
+                //  Add address envelope
                 zfl_msg_wrap (msg, server->server_id, NULL);
                 zfl_msg_send (&msg, rpc->backend);
                 rpc->current_server = server;
