@@ -156,6 +156,7 @@ frontend_event (struct rpc_server *rpc)
     client->timestamp = now_us ();
     zfl_list_remove (rpc->clients, client);
     zfl_list_append (rpc->clients, client);
+    free (client_id);
 }
 
 
