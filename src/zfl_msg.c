@@ -282,6 +282,21 @@ zfl_msg_body (zfl_msg_t *self)
 
 
 //  --------------------------------------------------------------------------
+//  Return size of the message body, if any
+
+size_t
+zfl_msg_body_size (zfl_msg_t *self)
+{
+    assert (self);
+
+    if (self->_part_count)
+        return self->_part_size [self->_part_count - 1];
+    else
+        return 0;
+}
+
+
+//  --------------------------------------------------------------------------
 //  Set message body as copy of provided string
 //  If message is empty, creates a new message body
 
