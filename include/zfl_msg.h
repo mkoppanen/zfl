@@ -55,6 +55,8 @@ size_t
 //  Read and set message body part as C string
 char
     *zfl_msg_body (zfl_msg_t *self);
+size_t
+    zfl_msg_body_size (zfl_msg_t *self);
 void
     zfl_msg_body_set (zfl_msg_t *self, char *body);
 void
