@@ -138,7 +138,7 @@ ZFL uses the GNU autotools system, so non-portable code can use the macros this 
 
 ## Using ZFL
 
-### Building and installing
+### Building and Installing
 
 ZFL uses autotools for packaging. To build from git (all example commands are for Linux):
 
@@ -235,7 +235,7 @@ Before attempting to patch code for portability, please read the `zfl_prelude.h`
 
 The canonical 'standard operating system' for all ZFL code is Linux, gcc, POSIX.
 
-### Memory leak testing
+### Memory Leak Testing
 
 To test against memory leaks we use the mtrace tool under Linux. The zfl_selftest.c program calls MALLOC_TRACE, which zfl_prelude.h sets to mtrace() under Linux. This is how we build and run the selftests with mtrace:
 
