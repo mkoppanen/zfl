@@ -45,6 +45,13 @@ struct _zfl_config_t {
         *blob;                  //  Value blob, if any
 };
 
+//  Local functions
+
+static int
+s_config_execute (zfl_config_t *self, zfl_config_fct handler, void *arg, int level);
+static int
+s_config_save (zfl_config_t *self, void *arg, int level);
+
 
 //  --------------------------------------------------------------------------
 //  Constructor
@@ -104,7 +111,7 @@ zfl_config_destroy (zfl_config_t **self_p)
 //  Construct a config object and load from a specified file.
 //
 //  If the file looks like JSON it's parsed as such, else it's parsed as ZPL
-//  (rfc.zeromq.org/spec:4/zpl). If the filename is "-", reads from STDIN.
+//  (rfc.zeromq.org/spec:4/zpl). If the filename is "-", reads from stdin.
 //  Returns NULL if the file does not exist or cannot be read or has an
 //  invalid syntax.
 //
@@ -119,7 +126,7 @@ zfl_config_load (char *filename)
     else {
         file = fopen (filename, "r");
         if (!file)
-            return NULL;            //  File missing or not readable
+            return NULL;        //  File missing or not readable
     }
     //  Load file data into a memory blob
     zfl_blob_t *blob = zfl_blob_new (NULL, 0);
@@ -140,6 +147,52 @@ zfl_config_load (char *filename)
 
     zfl_blob_destroy (&blob);
     return self;
+}
+
+
+//  --------------------------------------------------------------------------
+//  Saves config to a named file in ZPL (simple text) format.
+//  If the file is "-", writes to stdout.
+//  Returns zero if OK, -1 in case the file could not be created.
+//
+int
+zfl_config_save (zfl_config_t *self, char *filename)
+{
+    assert (self);
+
+    int rc = 0;
+    if (streq (filename, "-")) {
+        //  "-" means write to stdout
+        int rc = zfl_config_execute (self, s_config_save, stdout);
+    }
+    else {
+        FILE *file;
+        file = fopen (filename, "w");
+        if (file)
+            rc = zfl_config_execute (self, s_config_save, file);
+        else
+            rc = -1;          //  File not writeable
+    }
+    return rc;
+}
+
+static int
+s_config_save (zfl_config_t *self, void *arg, int level)
+{
+    assert (self);
+    assert (arg);
+
+    FILE *file = (FILE *) arg;
+    if (level > 0) {
+        if (self->blob)
+            fprintf (file, "%*s%s = %s\n", (level - 1) * 4, "",
+                self->name? self->name: "(Unnamed)",
+                (char *) zfl_blob_data (self->blob));
+        else
+            fprintf (file, "%*s%s\n", (level - 1) * 4, "",
+                self->name? self->name: "(Unnamed)");
+    }
+    return 0;
 }
 
 
@@ -166,7 +219,7 @@ zfl_config_next (zfl_config_t *self)
 
 
 //  --------------------------------------------------------------------------
-//  Finds the latest node at the specified depth, where 0 is the root.  If no
+//  Finds the latest node at the specified depth, where 0 is the root. If no
 //  such node exists, returns NULL.
 //
 zfl_config_t *
@@ -187,7 +240,7 @@ zfl_config_at_depth (zfl_config_t *self, int level)
 
 
 //  --------------------------------------------------------------------------
-//  Finds a node specified by path, consisting of name/name/...  If the node
+//  Finds a node specified by path, consisting of name/name/... If the node
 //  exists, returns node, else returns NULL.
 //
 zfl_config_t *
@@ -216,7 +269,7 @@ zfl_config_locate (zfl_config_t *self, char *path)
 
 
 //  --------------------------------------------------------------------------
-//  Finds a node specified by path, consisting of name/name/...  If the node
+//  Finds a node specified by path, consisting of name/name/... If the node
 //  exists, returns its value as a string, else returns default_value.
 //
 char *
@@ -267,7 +320,7 @@ zfl_config_value (zfl_config_t *self)
 
 
 //  --------------------------------------------------------------------------
-//  Set config value from specified blob.  Note that the data is copied.
+//  Set config value from specified blob. Note that the data is copied.
 //
 int
 zfl_config_set_value (zfl_config_t *self, zfl_blob_t *blob)
@@ -333,63 +386,30 @@ zfl_config_set_printf (zfl_config_t *self, char *format, ...)
 
 
 //  --------------------------------------------------------------------------
-//  Walks the config as a hierarchy.  Executes handler on self, then does all
-//  children in a list.  That algorithm assumes there is exactly one root
+//  Walks the config as a hierarchy. Executes handler on self, then does all
+//  children in a list. That algorithm assumes there is exactly one root
 //  node with no siblings.
 //
+int
+zfl_config_execute (zfl_config_t *self, zfl_config_fct handler, void *arg)
+{
+    //  Execute top level config at level zero
+    assert (self);
+    return s_config_execute (self, handler, arg, 0);
+}
+
 static int
-s_config_execute (zfl_config_t *self, zfl_config_fct handler, void *context, int level)
+s_config_execute (zfl_config_t *self, zfl_config_fct handler, void *arg, int level)
 {
     assert (self);
-    int rc = handler (self, context, level);
+    int rc = handler (self, arg, level);
 
     //  Process all children in one go, as a list
     zfl_config_t *child = self->child;
     while (child && !rc) {
-        rc = s_config_execute (child, handler, context, level + 1);
+        rc = s_config_execute (child, handler, arg, level + 1);
         child = child->next;
     }
-    return rc;
-}
-
-int
-zfl_config_execute (zfl_config_t *self, zfl_config_fct handler, void *context)
-{
-    //  Execute top level config at level zero
-    assert (self);
-    return s_config_execute (self, handler, context, 0);
-}
-
-
-//  --------------------------------------------------------------------------
-//  Dump config to stdout in ZPL format
-//
-static int
-s_config_dump (zfl_config_t *self, void *context, int level)
-{
-    assert (self);
-    if (level > 0) {
-        if (self->blob)
-            printf ("%*s%s = %s\n", (level - 1) * 4, "",
-                self->name? self->name: "(Unnamed)",
-                (char *) zfl_blob_data (self->blob));
-        else
-            printf ("%*s%s\n", (level - 1) * 4, "",
-                self->name? self->name: "(Unnamed)");
-    }
-    return 0;
-}
-
-
-//  --------------------------------------------------------------------------
-//  Prints config to stdout, for debugging purposes
-//
-int
-zfl_config_dump (zfl_config_t *self)
-{
-    //  Execute top level config at level zero
-    assert (self);
-    int rc = zfl_config_execute (self, s_config_dump, NULL);
     return rc;
 }
 
@@ -445,7 +465,7 @@ zfl_config_test (Bool verbose)
     zfl_config_set_string (bind, "tcp://eth0:5556");
     if (verbose) {
         puts ("");
-        zfl_config_dump (root);
+        zfl_config_save (root, "-");
     }
     zfl_config_destroy (&root);
     assert (root == NULL);
@@ -454,10 +474,12 @@ zfl_config_test (Bool verbose)
     zfl_config_t *config;
     config = zfl_config_load ("zfl_config_test.json");
     assert (config);
+    zfl_config_destroy (&config);
 
     //  Test loading from a ZPL file
     config = zfl_config_load ("zfl_config_test.txt");
     assert (config);
+    zfl_config_destroy (&config);
 
     printf ("OK\n");
     return 0;

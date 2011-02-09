@@ -33,7 +33,7 @@ extern "C" {
 typedef struct _zfl_config_t zfl_config_t;
 
 //  Function that executes config
-typedef int (zfl_config_fct) (zfl_config_t *self, void *context, int level);
+typedef int (zfl_config_fct) (zfl_config_t *self, void *arg, int level);
 
 zfl_config_t *
     zfl_config_new (char *name, zfl_config_t *parent);
@@ -41,10 +41,8 @@ void
     zfl_config_destroy (zfl_config_t **self_p);
 zfl_config_t *
     zfl_config_load (char *filename);
-/* TODO: save config to file and destroy
-zfl_config_t *
-    zfl_config_save (zfl_config_t **self_p, char *filename);
-*/
+int
+    zfl_config_save (zfl_config_t *self, char *filename);
 zfl_config_t *
     zfl_config_child (zfl_config_t *self);
 zfl_config_t *
@@ -70,7 +68,7 @@ int
 int
     zfl_config_set_printf (zfl_config_t *self, char *format, ...);
 int
-    zfl_config_execute (zfl_config_t *self, zfl_config_fct handler, void *context);
+    zfl_config_execute (zfl_config_t *self, zfl_config_fct handler, void *arg);
 int
     zfl_config_dump (zfl_config_t *self);
 int

@@ -176,7 +176,7 @@ zfl_config_json_test (Bool verbose)
     zfl_config_t *config = zfl_config_json_file ("zfl_config_test.json");
     if (verbose) {
         puts ("");
-        zfl_config_dump (config);
+        zfl_config_save (config, "-");
     }
     zfl_config_destroy (&config);
 

@@ -313,7 +313,7 @@ zfl_config_zpl_test (Bool verbose)
     assert (config);
     if (verbose) {
         puts ("");
-        zfl_config_dump (config);
+        zfl_config_save (config, "-");
     }
     zfl_config_destroy (&config);
 
