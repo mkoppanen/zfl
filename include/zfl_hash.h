@@ -31,6 +31,8 @@ extern "C" {
 
 //  Callback function for zfl_hash_apply method
 typedef int (zfl_hash_apply_fn) (char *key, void *value, void *argument);
+//  Callback function for zfl_hash_freefn method
+typedef void (zfl_hash_free_fn) (void *data);
 
 //  Opaque class structure
 typedef struct _zfl_hash zfl_hash_t;
@@ -45,6 +47,8 @@ void
     zfl_hash_delete (zfl_hash_t *self, char *key);
 void *
     zfl_hash_lookup (zfl_hash_t *self, char *key);
+void *
+    zfl_hash_freefn (zfl_hash_t *self, char *key, zfl_hash_free_fn *free_fn);
 size_t
     zfl_hash_size (zfl_hash_t *self);
 int

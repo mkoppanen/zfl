@@ -3,12 +3,15 @@ MAN3 =
 MAN7 = zfl.7 \
     zfl_base.7 \
     zfl_blob.7 \
+    zfl_config.7 \
+    zfl_device.7 \
     zfl_hash.7 \
     zfl_list.7 \
     zfl_log.7 \
     zfl_msg.7 \
-    zfl_device.7 \
-    zfl_config.7
+    zfl_rpc.7 \
+    zfl_rpcd.7 \
+    zfl_thread.7
 MAN_DOC = $(MAN1) $(MAN3) $(MAN7)
 
 MAN_TXT = $(MAN1:%.1=%.txt)

@@ -1,0 +1,25 @@
+zfl_rpc(7)
+===========
+
+
+NAME
+----
+zfl_rpc - ZFL rpc class
+
+
+SYNOPSIS
+--------
+*zfl_rpc_t *zfl_rpc_new (void);*
+*int zfl_rpc_test (void);*
+*void zfl_rpc_destroy (zfl_rpc_t **rpc_p);*
+
+
+DESCRIPTION
+-----------
+To be defined.
+
+
+SEE ALSO
+--------
+linkzfl:zfl[7]
+

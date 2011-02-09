@@ -622,21 +622,25 @@ static inline void *
     void
         *mem;
 
-    mem = malloc (size);
+    mem = calloc (1, size);
     if (mem == NULL) {
         fprintf (stderr, "FATAL ERROR at %s:%u, in %s\n", file, line, func);
         fprintf (stderr, "OUT OF MEMORY (malloc returned NULL)\n");
         fflush (stderr);
         abort ();
     }
-    else
-        memset (mem, 0, size);
-
     return mem;
 }
 
-#define zmalloc(size) safe_malloc(size, __FILE__, __LINE__, ZFL_ASSERT_SANE_FUNCTION)
-
+//  Define _ZMALLOC_DEBUG if you need to trace memory leaks using e.g. mtrace,
+//  otherwise all allocations will claim to come from zfl_prelude.h.  For best
+//  results, compile all classes so you see dangling object allocations.
+//
+#ifdef _ZMALLOC_DEBUG
+#   define zmalloc(size) calloc(1,(size))
+#else
+#   define zmalloc(size) safe_malloc((size), __FILE__, __LINE__, ZFL_ASSERT_SANE_FUNCTION)
+#endif
 
 //- DLL exports -------------------------------------------------------------
 

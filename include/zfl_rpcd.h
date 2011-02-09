@@ -42,6 +42,8 @@ zfl_msg_t *
     zfl_rpcd_recv (zfl_rpcd_t *self);
 void
     zfl_rpcd_send (zfl_rpcd_t *self, zfl_msg_t **msg_p);
+int
+    zfl_rpcd_test (Bool verbose);
 
 #ifdef __cplusplus
 }

@@ -44,9 +44,9 @@ struct _zfl_rpcd {
         thread;         //  handle to RPC thread
 };
 
-//  RPC server state
+//  Internal structure used by RPC thread
 
-struct rpc_server {
+typedef struct {
     void
         *frontend,      //  client requests and heartbeats
         *backend,       //  socket to send requests/receive response
@@ -58,19 +58,19 @@ struct rpc_server {
         *msg_queue;     //  queue of pending requests
     zfl_hash_t
         *registry;      //  used to lookup client using the ID
-};
+} rpcd_t;
 
 
 //  Used to pass arguments on RPC thread creation
 
-struct server_args {
+typedef struct {
     void
         *context;       // 0MQ context
     char
         *server_id,
         *data_endpoint,
         *ctrl_endpoint;
-};
+} thread_args_t;
 
 
 //  Used to keep track of connected clients
@@ -87,7 +87,7 @@ struct client {
 //  Return current time in us
 
 static uint64_t
-now_us ()
+s_now ()
 {
     struct timeval tv;
     int rc = gettimeofday (&tv, NULL);
@@ -100,11 +100,11 @@ now_us ()
 //  Creates new client
 
 static struct client *
-client_new(char *id)
+s_client_new (char *id)
 {
     struct client *client = zmalloc (sizeof (struct client));
     client->client_id = strdup (id);
-    client->timestamp = now_us ();
+    client->timestamp = s_now ();
     return client;
 }
 
@@ -113,7 +113,7 @@ client_new(char *id)
 //  Deallocate client structure
 
 static void
-client_destroy (struct client **self_p)
+s_client_destroy (struct client **self_p)
 {
     struct client *self = *self_p;
     free (self->client_id);
@@ -126,36 +126,36 @@ client_destroy (struct client **self_p)
 //  Handle message from a client
 
 static void
-frontend_event (struct rpc_server *rpc)
+s_frontend_event (rpcd_t *rpcd)
 {
-    zfl_msg_t *msg = zfl_msg_recv (rpc->frontend);
+    zfl_msg_t *msg = zfl_msg_recv (rpcd->frontend);
     assert (msg);
     assert (zfl_msg_parts (msg) > 0);
 
     char *client_id = zfl_msg_unwrap (msg);
     assert (client_id);
 
-    struct client *client = zfl_hash_lookup (rpc->registry, client_id);
+    struct client *client = zfl_hash_lookup (rpcd->registry, client_id);
     if (client == NULL) {
-        client = client_new (client_id);
+        client = s_client_new (client_id);
         assert (client);
-        zfl_list_append (rpc->clients, client);
-        zfl_hash_insert (rpc->registry, client->client_id, client);
+        zfl_list_append (rpcd->clients, client);
+        zfl_hash_insert (rpcd->registry, client->client_id, client);
     }
     if (zfl_msg_parts (msg) > 0) {
         //  Queue message
         zfl_msg_wrap (msg, client_id, NULL);
-        zfl_list_append (rpc->msg_queue, msg);
+        zfl_list_append (rpcd->msg_queue, msg);
     }
     else {
         //  Echo heartbeat
         zfl_msg_wrap (msg, client_id, "");
-        zfl_msg_send (&msg, rpc->frontend);
+        zfl_msg_send (&msg, rpcd->frontend);
     }
 
-    client->timestamp = now_us ();
-    zfl_list_remove (rpc->clients, client);
-    zfl_list_append (rpc->clients, client);
+    client->timestamp = s_now ();
+    zfl_list_remove (rpcd->clients, client);
+    zfl_list_append (rpcd->clients, client);
     free (client_id);
 }
 
@@ -164,13 +164,13 @@ frontend_event (struct rpc_server *rpc)
 //  Rely response from server to client
 
 static void
-backend_event (struct rpc_server *rpc)
+s_backend_event (rpcd_t *rpcd)
 {
-    zfl_msg_t *msg = zfl_msg_recv (rpc->backend);
+    zfl_msg_t *msg = zfl_msg_recv (rpcd->backend);
     assert (msg);
-    assert (rpc->server_busy);
-    zfl_msg_send (&msg, rpc->frontend);
-    rpc->server_busy = 0;
+    assert (rpcd->server_busy);
+    zfl_msg_send (&msg, rpcd->frontend);
+    rpcd->server_busy = 0;
 }
 
 
@@ -179,11 +179,11 @@ backend_event (struct rpc_server *rpc)
 //  Returns 1 when application asks for thread termination.
 
 static int
-control_event (struct rpc_server *rpc)
+s_control_event (rpcd_t *rpcd)
 {
     int ret = 0;
 
-    zfl_msg_t *req = zfl_msg_recv (rpc->control);
+    zfl_msg_t *req = zfl_msg_recv (rpcd->control);
     assert (req);
     assert (zfl_msg_parts (req) > 0);
     char *command = zfl_msg_pop (req);
@@ -196,7 +196,7 @@ control_event (struct rpc_server *rpc)
         assert (zfl_msg_parts (req) == 1);
         char *endpoint = zfl_msg_pop (req);
         assert (endpoint);
-        zmq_bind (rpc->frontend, endpoint);
+        zmq_bind (rpcd->frontend, endpoint);
         free (endpoint);
     }
 
@@ -217,61 +217,61 @@ control_event (struct rpc_server *rpc)
 static void *
 rpcd_thread (void *arg)
 {
-    struct server_args *server_args = arg;
+    thread_args_t *thread_args = arg;
     int rc;
 
-    struct rpc_server *rpc = zmalloc (sizeof (struct rpc_server));
+    rpcd_t *rpcd = zmalloc (sizeof (rpcd_t));
 
-    //  Create frontend socket and sets it identity
-    rpc->frontend = zmq_socket (server_args->context, ZMQ_XREP);
-    assert (rpc->frontend);
-    rc = zmq_setsockopt (rpc->frontend, ZMQ_IDENTITY,
-        server_args->server_id, strlen (server_args->server_id));
+    //  Create frontend socket and sets its identity
+    rpcd->frontend = zmq_socket (thread_args->context, ZMQ_XREP);
+    assert (rpcd->frontend);
+    rc = zmq_setsockopt (rpcd->frontend, ZMQ_IDENTITY,
+        thread_args->server_id, strlen (thread_args->server_id));
     assert (rc == 0);
 
     //  Create backend socket and bind endpoint to it
-    rpc->backend = zmq_socket (server_args->context, ZMQ_REQ);
-    assert (rpc->backend);
-    rc = zmq_connect (rpc->backend, server_args->data_endpoint);
+    rpcd->backend = zmq_socket (thread_args->context, ZMQ_REQ);
+    assert (rpcd->backend);
+    rc = zmq_connect (rpcd->backend, thread_args->data_endpoint);
     assert (rc == 0);
 
-    rpc->control = zmq_socket (server_args->context, ZMQ_PULL);
-    assert (rpc->control);
-    rc = zmq_connect (rpc->control, server_args->ctrl_endpoint);
+    rpcd->control = zmq_socket (thread_args->context, ZMQ_PULL);
+    assert (rpcd->control);
+    rc = zmq_connect (rpcd->control, thread_args->ctrl_endpoint);
     assert (rc == 0);
 
     //  Free argument struct
-    free (server_args->server_id);
-    free (server_args->data_endpoint);
-    free (server_args->ctrl_endpoint);
-    free (server_args);
+    free (thread_args->server_id);
+    free (thread_args->data_endpoint);
+    free (thread_args->ctrl_endpoint);
+    free (thread_args);
 
     //  No clients connected
-    rpc->clients = zfl_list_new ();
-    assert (rpc->clients);
+    rpcd->clients = zfl_list_new ();
+    assert (rpcd->clients);
 
-    rpc->registry = zfl_hash_new ();
-    assert (rpc->registry);
+    rpcd->registry = zfl_hash_new ();
+    assert (rpcd->registry);
 
     //  No requests pending
-    rpc->msg_queue = zfl_list_new ();
-    assert (rpc->msg_queue);
+    rpcd->msg_queue = zfl_list_new ();
+    assert (rpcd->msg_queue);
 
     //  Controls thread termination.
-    int stop = 0;
+    int stopped = 0;
 
     //  How long to wait while polling. The actual value
     //  is recalculated in the loop below.
     long poll_timeout = -1;
 
-    while (!stop) {
+    while (!stopped) {
         zmq_pollitem_t items [] = {
             //  Wait for heartbeat signal and client requests
-            {rpc->frontend, -1, ZMQ_POLLIN, 0},
+            {rpcd->frontend, -1, ZMQ_POLLIN, 0},
             //  Wait for response
-            {rpc->backend, -1, ZMQ_POLLIN, 0},
+            {rpcd->backend, -1, ZMQ_POLLIN, 0},
             //  Wait for control messages
-            {rpc->control, -1, ZMQ_POLLIN, 0}
+            {rpcd->control, -1, ZMQ_POLLIN, 0}
         };
 
         rc = zmq_poll (items, 3, poll_timeout);
@@ -279,68 +279,71 @@ rpcd_thread (void *arg)
 
         if (items [0].revents & ZMQ_POLLIN)
             //  Either request or heartbeat
-            frontend_event (rpc);
+            s_frontend_event (rpcd);
         if (items [1].revents & ZMQ_POLLIN)
             //  Response to last request
-            backend_event (rpc);
+            s_backend_event (rpcd);
         if (items [2].revents & ZMQ_POLLIN)
             //  Stop message
-            stop = control_event (rpc);
+            stopped = s_control_event (rpcd);
 
         //  get current time
-        uint64_t now = now_us ();
+        uint64_t now = s_now ();
 
-        while (zfl_list_size (rpc->clients) > 0) {
-            struct client *client = zfl_list_first (rpc->clients);
+        while (zfl_list_size (rpcd->clients) > 0) {
+            struct client *client = zfl_list_first (rpcd->clients);
             assert (client);
             if (now < client->timestamp + HEARTBEAT_INTERVAL)
                 break;
-            zfl_list_remove (rpc->clients, client);
-            zfl_hash_delete (rpc->registry, client->client_id);
-            client_destroy (&client);
+            zfl_list_remove (rpcd->clients, client);
+            zfl_hash_delete (rpcd->registry, client->client_id);
+            s_client_destroy (&client);
         }
 
         //  If there is a message in the message queue, forward
         //  it to the server
-        if (zfl_list_size (rpc->msg_queue) > 0) {
-            if (!rpc->server_busy) {
-                zfl_msg_t *msg = zfl_list_first (rpc->msg_queue);
-                zfl_list_remove (rpc->msg_queue, msg);
-                zfl_msg_send (&msg, rpc->backend);
-                rpc->server_busy = 1;
+        if (zfl_list_size (rpcd->msg_queue) > 0) {
+            if (!rpcd->server_busy) {
+                zfl_msg_t *msg = zfl_list_first (rpcd->msg_queue);
+                zfl_list_remove (rpcd->msg_queue, msg);
+                zfl_msg_send (&msg, rpcd->backend);
+                rpcd->server_busy = 1;
             }
         }
 
-        if (zfl_list_size (rpc->clients) == 0)
+        if (zfl_list_size (rpcd->clients) == 0)
             poll_timeout = -1;
         else {
-            struct client *client = zfl_list_first (rpc->clients);
+            struct client *client = zfl_list_first (rpcd->clients);
             poll_timeout = now + HEARTBEAT_INTERVAL - client->timestamp;
         }
     }
 
     //  Close sockets
-    zmq_close (rpc->frontend);
-    zmq_close (rpc->backend);
-    zmq_close (rpc->control);
+    zmq_close (rpcd->frontend);
+    zmq_close (rpcd->backend);
+    zmq_close (rpcd->control);
 
     //  Free all clients
-    while (zfl_list_size (rpc->clients)) {
-        struct client *client = zfl_list_first (rpc->clients);
-        zfl_list_remove (rpc->clients, client);
-        client_destroy (&client);
+    while (zfl_list_size (rpcd->clients)) {
+        struct client *client = zfl_list_first (rpcd->clients);
+        zfl_list_remove (rpcd->clients, client);
+        s_client_destroy (&client);
     }
 
     //  Free all queued messages
-    while (zfl_list_size (rpc->msg_queue) > 0) {
-        zfl_msg_t *msg = zfl_list_first (rpc->msg_queue);
-        zfl_list_remove (rpc->msg_queue, msg);
+    while (zfl_list_size (rpcd->msg_queue) > 0) {
+        zfl_msg_t *msg = zfl_list_first (rpcd->msg_queue);
+        zfl_list_remove (rpcd->msg_queue, msg);
         zfl_msg_destroy (&msg);
     }
 
-    zfl_list_destroy (&rpc->clients);
-    zfl_hash_destroy (&rpc->registry);
-    zfl_list_destroy (&rpc->msg_queue);
+    //  Destroy data structures
+    zfl_list_destroy (&rpcd->clients);
+    zfl_hash_destroy (&rpcd->registry);
+    zfl_list_destroy (&rpcd->msg_queue);
+
+    free (rpcd);
 
     return NULL;
 }
@@ -360,7 +363,7 @@ zfl_rpcd_new (void *zmq_context, char *server_id)
     zfl_rpcd_t *self = zmalloc (sizeof (zfl_rpcd_t));
 
     //  Prepare thread arguments
-    struct server_args *args = zmalloc (sizeof (struct server_args));
+    thread_args_t *args = zmalloc (sizeof (thread_args_t));
     self->data_socket = zmq_socket (zmq_context, ZMQ_REP);
     assert (self->data_socket);
     self->ctrl_socket = zmq_socket (zmq_context, ZMQ_PUSH);
@@ -462,4 +465,39 @@ zfl_rpcd_send (zfl_rpcd_t *self, zfl_msg_t **msg_p)
 {
     if (self)
         zfl_msg_send (msg_p, self->data_socket);
+}
+
+
+//  --------------------------------------------------------------------------
+//  Selftest
+
+int
+zfl_rpcd_test (Bool verbose)
+{
+    zfl_rpcd_t
+        *rpcd;
+
+    printf (" * zfl_rpcd: ");
+
+    int major, minor, patch;
+    zmq_version (&major, &minor, &patch);
+    if ((major * 1000 + minor * 100 + patch) < 2100) {
+        printf ("E: need at least 0MQ version 2.1.0\n");
+        exit (EXIT_FAILURE);
+    }
+    void *context = zmq_init (1);
+    assert (context);
+
+    rpcd = zfl_rpcd_new (context, "master");
+    assert (rpcd);
+    zfl_rpcd_bind (rpcd, "tcp://*:5001");
+
+    //  Don't actually wait for input since the client won't be there
+
+    zfl_rpcd_destroy (&rpcd);
+    assert (rpcd == NULL);
+
+    zmq_term (context);
+    printf ("OK\n");
+    return 0;
 }

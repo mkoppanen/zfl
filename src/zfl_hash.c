@@ -50,6 +50,8 @@ struct _item_t {
         index;                  //  Index of item in table
     char
         *key;                   //  Item's original key
+    zfl_hash_free_fn
+        *free_fn;               //  Value free function if any
 };
 
 //  Hash table structure
@@ -152,6 +154,8 @@ s_item_destroy (zfl_hash_t *self, item_t *item)
     assert (cur_item);
     *prev_item = item->next;
     self->size--;
+    if (item->free_fn)
+        (item->free_fn) (item->value);
     free (item->key);
     free (item);
 }
@@ -280,6 +284,29 @@ zfl_hash_lookup (zfl_hash_t *self, char *key)
     item_t *item = s_item_lookup (self, key);
     if (item)
         return item->value;
+    else
+        return NULL;
+}
+
+
+//  --------------------------------------------------------------------------
+//  Set a free function for the specified hash table item. When the item is
+//  destroyed, the free function, if any, is called on that item value.
+//  Use this when hash item values are dynamically allocated, to ensure that
+//  you don't have memory leaks. You can pass 'free' or NULL as a free_fn.
+//  Returns the item value, or NULL if there is no such item.
+
+void *
+zfl_hash_freefn (zfl_hash_t *self, char *key, zfl_hash_free_fn *free_fn)
+{
+    assert (self);
+    assert (key);
+
+    item_t *item = s_item_lookup (self, key);
+    if (item) {
+        item->free_fn = free_fn;
+        return item->value;
+    }
     else
         return NULL;
 }

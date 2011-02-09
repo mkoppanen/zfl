@@ -1,0 +1,25 @@
+zfl_rpcd(7)
+===========
+
+
+NAME
+----
+zfl_rpcd - ZFL rpcd class
+
+
+SYNOPSIS
+--------
+*zfl_rpcd_t *zfl_rpcd_new (void);*
+*int zfl_rpcd_test (void);*
+*void zfl_rpcd_destroy (zfl_rpcd_t **rpcd_p);*
+
+
+DESCRIPTION
+-----------
+To be defined.
+
+
+SEE ALSO
+--------
+linkzfl:zfl[7]
+
