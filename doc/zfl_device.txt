@@ -1,0 +1,32 @@
+zfl_device(7)
+=============
+
+
+NAME
+----
+zfl_device - configure a device or device socket
+
+
+SYNOPSIS
+--------
+*zfl_device_t *zfl_device_new (void);*
+*int zfl_device_method (zfl_device_t *device);*
+*int zfl_device_test (void);*
+*void zfl_device_destroy (zfl_device_t **device_p);*
+
+
+DESCRIPTION
+-----------
+Used to configure 0MQ devices and their sockets. Takes configuration data
+from a zfl_config object, and implements the rfc.zeromq.org/spec:5/zdcf
+specification. Configuration data must be either in JSON or in the ZPL
+format as defined by rfc.zeromq.org/spec:4/zpl. Use this class to for
+stand-alone devices. It is not suitable for built-in devices (i.e. which
+operate as threads of larger processes). See examples/zdevice.c for a
+working example.
+
+
+SEE ALSO
+--------
+linkzfl:zfl[7]
+

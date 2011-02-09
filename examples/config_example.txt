@@ -1,5 +1,5 @@
 #   ZPL configuration file example
-#   Syntax is defined at http://rfc.zeromq.org/spec:4
+#   Syntax is defined at http://rfc.zeromq.org/spec:5
 #
 context
     iothreads = 1

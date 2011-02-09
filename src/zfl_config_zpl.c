@@ -1,11 +1,11 @@
 /*  =========================================================================
-    zfl_tree_zpl.c
+    zfl_config_zpl.c
 
     Loads a ZPL property set as defined at http://rfc.zeromq.org/spec:4 into
-    a zfl_tree_t structure.  This code would be a LOT shorter in Perl :-)
+    a zfl_config_t structure.  This code would be a LOT shorter in Perl :-)
 
     -------------------------------------------------------------------------
-    Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
+    Copyright (c) 1991-2011 iMatix Corporation <www.imatix.com>
     Copyright other contributors as noted in the AUTHORS file.
 
     This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
@@ -28,18 +28,18 @@
 #include <zmq.h>
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_blob.h"
-#include "../include/zfl_tree.h"
+#include "../include/zfl_config.h"
 
-//  Store name and value in zfl_tree_t tree
+//  Store name and value in zfl_config_t config
 static int
-s_have_element (zfl_tree_t *root, int level, char *name, char *value, int lineno)
+s_have_element (zfl_config_t *root, int level, char *name, char *value, int lineno)
 {
     //  Navigate to parent for this element
-    zfl_tree_t *parent = zfl_tree_at_depth (root, level);
+    zfl_config_t *parent = zfl_config_at_depth (root, level);
     if (parent) {
-        zfl_tree_t *tree = zfl_tree_new (name, parent);
+        zfl_config_t *config = zfl_config_new (name, parent);
         if (*value)
-            zfl_tree_set_string (tree, value);
+            zfl_config_set_string (config, value);
         return 0;
     }
     else {
@@ -164,11 +164,11 @@ s_collect_value (char **start, int lineno)
 }
 
 
-//  Process current line and attach to tree
+//  Process current line and attach to config
 //  Returns 0 on success, -1 if there was a syntax error
 //
 static int
-s_process_line (zfl_tree_t *root, char *start, int lineno)
+s_process_line (zfl_config_t *root, char *start, int lineno)
 {
     //  Did we parse the line successfully?
     int rc = 0;
@@ -205,8 +205,8 @@ s_process_line (zfl_tree_t *root, char *start, int lineno)
 
 
 //  --------------------------------------------------------------------------
-//  Load ZPL data into zfl_tree_t structure.  Here is an example ZPL stream
-//  and corresponding tree structure:
+//  Load ZPL data into zfl_config_t structure.  Here is an example ZPL stream
+//  and corresponding config structure:
 //
 //  context
 //      iothreads = 1
@@ -242,11 +242,11 @@ s_process_line (zfl_tree_t *root, char *start, int lineno)
 //    v
 //  iothreads=1-->verbose=false
 //
-zfl_tree_t *
-zfl_tree_zpl (char *zpl_string)
+zfl_config_t *
+zfl_config_zpl (char *zpl_string)
 {
-    //  Prepare new zfl_tree_t structure
-    zfl_tree_t *self = zfl_tree_new ("root", NULL);
+    //  Prepare new zfl_config_t structure
+    zfl_config_t *self = zfl_config_new ("root", NULL);
 
     //  Process ZPL string line by line
     char *next_line = zpl_string;
@@ -272,8 +272,8 @@ zfl_tree_zpl (char *zpl_string)
     }
     //  Either the whole ZPL file is valid or none of it is
     if (!valid) {
-        zfl_tree_destroy (&self);
-        self = zfl_tree_new ("root", NULL);
+        zfl_config_destroy (&self);
+        self = zfl_config_new ("root", NULL);
     }
     return self;
 }
@@ -283,8 +283,8 @@ zfl_tree_zpl (char *zpl_string)
 //  Load ZPL data from specified text file.  Returns NULL if the file does
 //  not exist or can't be read by this process.
 //
-zfl_tree_t *
-zfl_tree_zpl_file (char *filename)
+zfl_config_t *
+zfl_config_zpl_file (char *filename)
 {
     FILE *file = fopen (filename, "r");
     if (file) {
@@ -292,9 +292,9 @@ zfl_tree_zpl_file (char *filename)
         assert (blob);
         assert (zfl_blob_load (blob, file));
         fclose (file);
-        zfl_tree_t *tree = zfl_tree_zpl (zfl_blob_data (blob));
+        zfl_config_t *config = zfl_config_zpl (zfl_blob_data (blob));
         zfl_blob_destroy (&blob);
-        return tree;
+        return config;
     }
     else
         return NULL;
@@ -305,17 +305,17 @@ zfl_tree_zpl_file (char *filename)
 //  Selftest
 //
 int
-zfl_tree_zpl_test (Bool verbose)
+zfl_config_zpl_test (Bool verbose)
 {
-    printf (" * zfl_tree_zpl: ");
+    printf (" * zfl_config_zpl: ");
 
-    zfl_tree_t *tree = zfl_tree_zpl_file ("zfl_config_test.txt");
-    assert (tree);
+    zfl_config_t *config = zfl_config_zpl_file ("zfl_config_test.txt");
+    assert (config);
     if (verbose) {
         puts ("");
-        zfl_tree_dump (tree);
+        zfl_config_dump (config);
     }
-    zfl_tree_destroy (&tree);
+    zfl_config_destroy (&config);
 
     printf ("OK\n");
     return 0;

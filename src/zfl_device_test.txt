@@ -1,0 +1,24 @@
+#   Example configuration file for zfl_device. Please see:
+#
+#   * ZPL, http://rfc.zeromq.org/spec:4 for the syntax.
+#   * ZDCF, http://rfc.zeromq.org/spec:5 for the semantics.
+#
+#   Configure device context
+context
+    iothreads = 1
+    verbose = 0
+
+#   Define the 'main' device, it's a ZMQ_QUEUE device
+#   that accepts connections from clients and services.
+#
+main
+    type = zmq_queue
+    frontend
+        option
+            hwm = 1000
+            swap = 25000000
+        bind = inproc://addr1
+        bind = ipc://addr3
+        endpoint = valid-endpoint
+    backend
+        bind = inproc://addr3

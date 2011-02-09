@@ -1,24 +1,26 @@
 zfl_config(7)
-===========
+=============
 
 
 NAME
 ----
-zfl_config - configure a device or service
+zfl_config - load properties from configuration files
 
 
 SYNOPSIS
 --------
 *zfl_config_t *zfl_config_new (void);*
-*int zfl_config_method (zfl_config_t *config);
+*int zfl_config_method (zfl_config_t *config);*
 *int zfl_config_test (void);*
 *void zfl_config_destroy (zfl_config_t **config_p);*
 
 
 DESCRIPTION
 -----------
-The _zfl_config_ class provides functions to configure a device from JSON data.
 
+Loads a configuration file formatted in JSON or in ZPL format as defined
+by rfc.zeromq.org/spec:4/zpl. Provides methods to navigate this data and
+access property values. See zfl_device.c for examples of use.
 
 SEE ALSO
 --------

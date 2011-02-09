@@ -36,10 +36,10 @@
 #include <zmq.h>
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_blob.h"
-#include "../include/zfl_tree.h"
-#include "../include/zfl_tree_json.h"
-#include "../include/zfl_tree_zpl.h"
 #include "../include/zfl_config.h"
+#include "../include/zfl_config_json.h"
+#include "../include/zfl_config_zpl.h"
+#include "../include/zfl_device.h"
 
 
 static void
@@ -59,18 +59,19 @@ main (int argc, char *argv [])
     if (argc == 4)
         s_start_automagic_device (argv [1], argv [2], argv [3]);
     else {
-        printf ("\nzdevice - start standard 0MQ device\n\n");
-        printf ("    Copyright (c) 1991-2010 iMatix Corporation and contributors\n");
+        printf ("\nzdevice - start standard 0MQ device\n");
+        printf ("\n");
+        printf ("    Copyright (c) 1991-2011 iMatix Corporation and contributors\n");
         printf ("    Part of the ZeroMQ Function Library: http://zfl.zeromq.org\n");
-        printf ("    License: LGPLv3+\n\n");
-
+        printf ("    License: LGPLv3+\n");
+        printf ("\n");
         printf ("zdevice CONFIG | DEVICE FRONTEND BACKEND\n\n");
         printf ("CONFIG:\n    Config file[1] or '-' meaning stdin\n");
         printf ("DEVICE:\n    'zmq_queue', 'zmq_forwarder', or 'zmq_streamer'\n");
         printf ("FRONTEND:\n    Endpoint for device frontend socket\n");
-        printf ("BACKEND:\n    Endpoint for device backend socket\n\n");
-
-        printf ("[1] see http://rfc.zeromq.org/spec:3, http://rfc.zeromq.org/spec:4\n");
+        printf ("BACKEND:\n    Endpoint for device backend socket\n");
+        printf ("\n");
+        printf ("[1] see http://rfc.zeromq.org/spec:4, http://rfc.zeromq.org/spec:5\n");
     }
     return 0;
 }
@@ -81,47 +82,22 @@ main (int argc, char *argv [])
 static void
 s_start_configured_device (char *filename)
 {
-    FILE *file;                 //  Config file stream
-    if (streq (filename, "-"))
-        file = stdin;           //  "-" means read from stdin
-    else {
-        file = fopen (filename, "r");
-        if (!file) {
-            printf ("E: '%s' doesn't exist or can't be read\n", filename);
-            exit (EXIT_FAILURE);
-        }
+
+
+    //  Create and configure a zfl_device object
+    zfl_device_t *device = zfl_device_new (filename);
+    if (!device) {
+        printf ("E: '%s' can't be read, or has invalid syntax\n", filename);
+        exit (EXIT_FAILURE);
     }
-    //  Load file data into memory
-    zfl_blob_t *blob = zfl_blob_new (NULL, 0);
-    assert (blob);
-    assert (zfl_blob_load (blob, file));
-    fclose (file);
-
-    //  Autodetect whether it's JSON or ZPL text
-    char *data = (char *) zfl_blob_data (blob);
-    while (isspace (*data))
-        data++;
-
-    zfl_tree_t *tree;
-    if (*data == '{')
-        tree = zfl_tree_json (zfl_blob_data (blob));
-    else
-        tree = zfl_tree_zpl (zfl_blob_data (blob));
-
-    zfl_blob_destroy (&blob);
-
-    //  Create a new config from the loaded tree
-    zfl_config_t *config = zfl_config_new (tree);
-    assert (config);
-
     //  Find first device
-    char *device = zfl_config_service (config, 0);
-    if (!*device) {
-        printf ("E: No device specified, please read http://rfc.zeromq.org/spec:3\n");
+    char *main_device = zfl_device_locate (device, 0);
+    if (!*main_device) {
+        printf ("E: No device specified, please read http://rfc.zeromq.org/spec:5\n");
         exit (EXIT_FAILURE);
     }
     //  Process device type
-    char *type = zfl_config_property (config, device, "type");
+    char *type = zfl_device_property (device, main_device, "type");
 
     int device_type;            //  0MQ defined type
     int frontend_type;          //  Socket types depending
@@ -129,19 +105,19 @@ s_start_configured_device (char *filename)
     s_parse_device_type (type, &device_type, &frontend_type, &backend_type);
 
     //  Create and configure sockets
-    void *frontend = zfl_config_socket (config, device, "frontend", frontend_type);
+    void *frontend = zfl_device_socket (device, main_device, "frontend", frontend_type);
     assert (frontend);
-    void *backend = zfl_config_socket (config, device, "backend", backend_type);
+    void *backend = zfl_device_socket (device, main_device, "backend", backend_type);
     assert (backend);
 
     //  Start the device now
-    if (zfl_config_verbose (config))
+    if (zfl_device_verbose (device))
         printf ("I: Starting device...\n");
 
     //  Will not actually ever return
     zmq_device (device_type, frontend, backend);
 
-    zfl_config_destroy (&config);
+    zfl_device_destroy (&device);
 }
 
 

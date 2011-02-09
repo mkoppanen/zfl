@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_tree_json.h - ZFL tree_json class
+    zfl_config_json.h - ZFL config_json class
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,20 +22,20 @@
     =========================================================================
 */
 
-#ifndef __ZFL_TREE_JSON_H_INCLUDED__
-#define __ZFL_TREE_JSON_H_INCLUDED__
+#ifndef __ZFL_CONFIG_JSON_H_INCLUDED__
+#define __ZFL_CONFIG_JSON_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//  Load tree from JSON string
-zfl_tree_t *
-    zfl_tree_json (char *json_string);
-zfl_tree_t *
-    zfl_tree_json_file (char *filename);
+//  Load config from JSON string
+zfl_config_t *
+    zfl_config_json (char *json_string);
+zfl_config_t *
+    zfl_config_json_file (char *filename);
 int
-    zfl_tree_json_test (Bool verbose);
+    zfl_config_json_test (Bool verbose);
 
 #ifdef __cplusplus
 }

@@ -27,13 +27,13 @@
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_base.h"
 #include "../include/zfl_blob.h"
+#include "../include/zfl_config.h"
+#include "../include/zfl_config_json.h"
+#include "../include/zfl_config_zpl.h"
+#include "../include/zfl_device.h"
 #include "../include/zfl_hash.h"
 #include "../include/zfl_list.h"
 #include "../include/zfl_msg.h"
-#include "../include/zfl_tree.h"
-#include "../include/zfl_tree_json.h"
-#include "../include/zfl_tree_zpl.h"
-#include "../include/zfl_config.h"
 
 int main (int argc, char *argv [])
 {
@@ -47,15 +47,16 @@ int main (int argc, char *argv [])
         verbose = FALSE;
 
     printf ("Running ZFL self tests...\n");
-//    zfl_base_test (verbose);
- //   zfl_blob_test (verbose);
-  //  zfl_config_test (verbose);
+
+    zfl_base_test (verbose);
+    zfl_blob_test (verbose);
+    zfl_device_test (verbose);
     zfl_hash_test (verbose);
-  //  zfl_list_test (verbose);
-   // zfl_tree_test (verbose);
-  //  zfl_tree_json_test (verbose);
-  //  zfl_tree_zpl_test (verbose);
-  //  zfl_msg_test (verbose);
+    zfl_list_test (verbose);
+    zfl_config_test (verbose);
+    zfl_config_json_test (verbose);
+    zfl_config_zpl_test (verbose);
+    zfl_msg_test (verbose);
 
     printf ("Tests passed OK\n");
     return 0;

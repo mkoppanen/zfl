@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_tree_zpl.h - ZFL tree_zpl class
+    zfl_config_zpl.h - ZFL config_zpl class
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,20 +22,20 @@
     =========================================================================
 */
 
-#ifndef __ZFL_TREE_ZPL_H_INCLUDED__
-#define __ZFL_TREE_ZPL_H_INCLUDED__
+#ifndef __ZFL_CONFIG_ZPL_H_INCLUDED__
+#define __ZFL_CONFIG_ZPL_H_INCLUDED__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//  Load tree from ZPL string
-zfl_tree_t *
-    zfl_tree_zpl (char *zpl_string);
-zfl_tree_t *
-    zfl_tree_zpl_file (char *filename);
+//  Load config from ZPL string
+zfl_config_t *
+    zfl_config_zpl (char *zpl_string);
+zfl_config_t *
+    zfl_config_zpl_file (char *filename);
 int
-    zfl_tree_zpl_test (Bool verbose);
+    zfl_config_zpl_test (Bool verbose);
 
 #ifdef __cplusplus
 }

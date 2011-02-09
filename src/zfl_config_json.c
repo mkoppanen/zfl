@@ -1,7 +1,7 @@
 /*  =========================================================================
-    zfl_tree_json.c
+    zfl_config_json.c
 
-    Loads a JSON file into a zfl_tree structure.  Does not provide detailed
+    Loads a JSON file into a zfl_config structure.  Does not provide detailed
     error reporting.  To verify your JSON files use http://www.jsonlint.com.
     This version uses the cJSON library.
 
@@ -29,7 +29,7 @@
 #include <zmq.h>
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_blob.h"
-#include "../include/zfl_tree.h"
+#include "../include/zfl_config.h"
 
 //  Import the cJSON library
 #include "import/cJSON/cJSON.h"
@@ -39,16 +39,16 @@
 //  Load one JSON element, recursively
 //
 static void
-s_load_element (zfl_tree_t *parent, cJSON *element)
+s_load_element (zfl_config_t *parent, cJSON *element)
 {
     assert (parent);
     assert (element);
 
     if (element->type == cJSON_Object) {
-        zfl_tree_t *tree = zfl_tree_new (element->string, parent);
+        zfl_config_t *config = zfl_config_new (element->string, parent);
         element = element->child;
         while (element) {
-            s_load_element (tree, element);
+            s_load_element (config, element);
             element = element->next;
         }
     }
@@ -57,27 +57,27 @@ s_load_element (zfl_tree_t *parent, cJSON *element)
         cJSON *value = element->child;
         assert (value);
         while (value) {
-            zfl_tree_t *tree = zfl_tree_new (element->string, parent);
+            zfl_config_t *config = zfl_config_new (element->string, parent);
             if (value->type == cJSON_String)
-                zfl_tree_set_string (tree, value->valuestring);
+                zfl_config_set_string (config, value->valuestring);
             else
-                zfl_tree_set_printf (tree, "%d", value->valueint);
+                zfl_config_set_printf (config, "%d", value->valueint);
             value = value->next;
         }
     }
     else {
-        zfl_tree_t *tree = zfl_tree_new (element->string, parent);
+        zfl_config_t *config = zfl_config_new (element->string, parent);
         if (element->type == cJSON_String)
-            zfl_tree_set_string (tree, element->valuestring);
+            zfl_config_set_string (config, element->valuestring);
         else
-            zfl_tree_set_printf (tree, "%d", element->valueint);
+            zfl_config_set_printf (config, "%d", element->valueint);
     }
 }
 
 
 //  --------------------------------------------------------------------------
-//  Load JSON data into zfl_tree_t structure.  Here is an example JSON string
-//  and corresponding tree structure:
+//  Load JSON data into zfl_config_t structure.  Here is an example JSON string
+//  and corresponding config structure:
 //
 //  {
 //      "context": {
@@ -120,24 +120,24 @@ s_load_element (zfl_tree_t *parent, cJSON *element)
 //  iothreads=1-->verbose=false
 //
 //
-zfl_tree_t *
-zfl_tree_json (char *json_string)
+zfl_config_t *
+zfl_config_json (char *json_string)
 {
-    //  Prepare new zfl_tree_t structure
-    zfl_tree_t *self = zfl_tree_new ("root", NULL);
+    //  Prepare new zfl_config_t structure
+    zfl_config_t *self = zfl_config_new ("root", NULL);
 
     //  Parse JSON data
     cJSON *json = cJSON_Parse (json_string);
     if (!json)
         json = cJSON_Parse ("{ }");
 
-    //  Load JSON data into tree where top item is unnamed
+    //  Load JSON data into config where top item is unnamed
     cJSON *child = json->child;
     while (child) {
         s_load_element (self, child);
         child = child->next;
     }
-    //  Delete JSON tree
+    //  Delete JSON config
     cJSON_Delete (json);
     return self;
 }
@@ -147,8 +147,8 @@ zfl_tree_json (char *json_string)
 //  Load JSON data from specified text file.  Returns NULL if the file does
 //  not exist or can't be read by this process.
 //
-zfl_tree_t *
-zfl_tree_json_file (char *filename)
+zfl_config_t *
+zfl_config_json_file (char *filename)
 {
     FILE *file = fopen (filename, "r");
     if (file) {
@@ -156,9 +156,9 @@ zfl_tree_json_file (char *filename)
         assert (blob);
         assert (zfl_blob_load (blob, file));
         fclose (file);
-        zfl_tree_t *tree = zfl_tree_json (zfl_blob_data (blob));
+        zfl_config_t *config = zfl_config_json (zfl_blob_data (blob));
         zfl_blob_destroy (&blob);
-        return tree;
+        return config;
     }
     else
         return NULL;
@@ -169,16 +169,16 @@ zfl_tree_json_file (char *filename)
 //  Selftest
 //
 int
-zfl_tree_json_test (Bool verbose)
+zfl_config_json_test (Bool verbose)
 {
-    printf (" * zfl_tree_json: ");
+    printf (" * zfl_config_json: ");
 
-    zfl_tree_t *tree = zfl_tree_json_file ("zfl_config_test.json");
+    zfl_config_t *config = zfl_config_json_file ("zfl_config_test.json");
     if (verbose) {
         puts ("");
-        zfl_tree_dump (tree);
+        zfl_config_dump (config);
     }
-    zfl_tree_destroy (&tree);
+    zfl_config_destroy (&config);
 
     printf ("OK\n");
     return 0;
