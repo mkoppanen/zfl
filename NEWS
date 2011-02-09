@@ -1,6 +1,10 @@
 9 February 2011
 
-* Renamed zfl_config to zfl_device, to be more explanatory.
-* Renamed zfl_tree to zfl_config, for same reasons.
-* Updated examples and test cases to match.
-* zfl_device_new autodetects JSON and ZPL
+Reorganized configuration classes
+- zfl_config replaces zfl_tree
+- zfl_config_json replaces zfl_tree_json
+- zfl_config_zpl replaces zfl_tree_zpl
+- zfl_config_load autodetects JSON and ZPL input, parses accordingly
+- zfl_config_load allows filename to be "_" meaning "read from stdin"
+- zfl_device replaces zfl_config and is specifically for configuring devices
+- zdevice example updated to use new classes
