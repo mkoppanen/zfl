@@ -1,3 +1,8 @@
+zfl_thread class
+    - replace non-portable pthread calls in portable code
+    - zfl_thread_new, zfl_thread_exit, zfl_thread_wait
+
+
 zfl_socket class
     - allow configuration and tuning via ZDCF
     - allow send and receive of strings, safely:
@@ -14,9 +19,10 @@ zfl_socket class
         zfl_socket_setopt (socket, SOME_NAME, value);
         value = zfl_socket_getopt (socket, SOME_NAME);
 
-zfl_socket_sendfmt
-zfl_socket_sendmore
-zfl_socket_send
+    zfl_socket_sendfmt
+    zfl_socket_sendmore
+    zfl_socket_send
 
 zfl_queue class
     - manage queue of zfl_msg items
+

@@ -1,0 +1,28 @@
+zfl_thread(7)
+=============
+
+
+NAME
+----
+zfl_thread - ZFL thread class
+
+
+SYNOPSIS
+--------
+*zfl_thread_t *zfl_thread_new (void);*
+*int zfl_thread_method (zfl_thread_t *thread);
+*int zfl_thread_test (void);*
+*void zfl_thread_destroy (zfl_thread_t **thread_p);*
+
+
+DESCRIPTION
+-----------
+Provides a portable API for creating, killing, and waiting on operating
+system threads. Used instead of, e.g., pthreads, which is not portable to
+all platforms.
+
+
+SEE ALSO
+--------
+linkzfl:zfl[7]
+

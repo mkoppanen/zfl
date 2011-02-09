@@ -16,7 +16,8 @@ include_HEADERS = \
     ../include/zfl_list.h \
     ../include/zfl_msg.h \
     ../include/zfl_rpc.h \
-    ../include/zfl_rpcd.h
+    ../include/zfl_rpcd.h \
+    ../include/zfl_thread.h
 
 libzfl_la_SOURCES = \
     zfl_base.c \
@@ -29,7 +30,8 @@ libzfl_la_SOURCES = \
     zfl_list.c \
     zfl_msg.c \
     zfl_rpc.c \
-    zfl_rpcd.c
+    zfl_rpcd.c \
+    zfl_thread.c
 
 INCLUDES = -I$(top_srcdir)/include
 bin_PROGRAMS = zfl_selftest

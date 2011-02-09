@@ -34,6 +34,9 @@
 #include "../include/zfl_hash.h"
 #include "../include/zfl_list.h"
 #include "../include/zfl_msg.h"
+#include "../include/zfl_rpc.h"
+#include "../include/zfl_rpcd.h"
+#include "../include/zfl_thread.h"
 
 int main (int argc, char *argv [])
 {
@@ -50,13 +53,16 @@ int main (int argc, char *argv [])
 
     zfl_base_test (verbose);
     zfl_blob_test (verbose);
-    zfl_device_test (verbose);
-    zfl_hash_test (verbose);
-    zfl_list_test (verbose);
     zfl_config_test (verbose);
     zfl_config_json_test (verbose);
     zfl_config_zpl_test (verbose);
+    zfl_device_test (verbose);
+    zfl_hash_test (verbose);
+    zfl_list_test (verbose);
     zfl_msg_test (verbose);
+    zfl_rpc_test (verbose);
+    zfl_rpcd_test (verbose);
+    zfl_thread_test (verbose);
 
     printf ("Tests passed OK\n");
     return 0;

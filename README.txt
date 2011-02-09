@@ -206,10 +206,11 @@ These are the existing ZFL classes:
 * zfl_base - base class, provides no functionality.
 * zfl_blob - work with length-specified binary objects.
 * zfl_config - work with a configuration property tree.
-* zfl_config_json - load a config from JSON data.
-* zfl_config_zpl - load a config from http://rfc.zeromq.org/spec:4 ZPL data.
 * zfl_device - configure 0MQ devices.
 * zfl_msg - work with 0MQ multipart messages.
+* zfl_rpc - reliable RPC client.
+* zfl_rpcd - reliable RPC server.
+* zfl_thread - work with operating system threads.
 
 ## Under the Hood
 
