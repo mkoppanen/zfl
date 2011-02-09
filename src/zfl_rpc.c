@@ -29,6 +29,7 @@
 #include "../include/zfl_hash.h"
 #include "../include/zfl_list.h"
 #include "../include/zfl_msg.h"
+#include "../include/zfl_thread.h"
 #include "../include/zfl_rpc.h"
 
 //  Heartbeat rate (in microseconds)
@@ -43,8 +44,8 @@ struct _zfl_rpc {
     void
         *data_socket,           //  Used to send requests/receive replies
         *ctrl_socket;           //  Used to control RPC thread
-    pthread_t
-        thread;                 //  ID of API thread
+    zfl_thread_t
+        *thread;                //  API thread
 };
 
 
@@ -453,8 +454,8 @@ zfl_rpc_new (void *zmq_context)
     thread_args->data_endpoint = strdup (data_endpoint);
     thread_args->ctrl_endpoint = strdup (ctrl_endpoint);
 
-    rc = pthread_create (&self->thread, NULL, s_rpc_thread, thread_args);
-    assert (rc == 0);
+    self->thread = zfl_thread_new (s_rpc_thread, thread_args);
+    assert (self->thread);
 
     return self;
 }
@@ -467,8 +468,6 @@ void
 zfl_rpc_destroy (zfl_rpc_t **self_p)
 {
     zfl_rpc_t *self = *self_p;
-    int rc;
-
     if (!self)
         return;
 
@@ -477,8 +476,8 @@ zfl_rpc_destroy (zfl_rpc_t **self_p)
     zfl_msg_push (stop_request, "stop");
     zfl_msg_send (&stop_request, self->ctrl_socket);
 
-    rc = pthread_join (self->thread, NULL);
-    assert (rc == 0);
+    zfl_thread_wait (self->thread);
+    zfl_thread_destroy (&self->thread);
 
     zmq_close (self->data_socket);
     zmq_close (self->ctrl_socket);

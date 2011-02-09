@@ -29,6 +29,7 @@
 #include "../include/zfl_hash.h"
 #include "../include/zfl_list.h"
 #include "../include/zfl_msg.h"
+#include "../include/zfl_thread.h"
 #include "../include/zfl_rpcd.h"
 
 //  How often we should check for heartbeat signal
@@ -40,8 +41,8 @@ struct _zfl_rpcd {
     void
         *data_socket,   //  used to receive requests/send responses
         *ctrl_socket;   //  used to control RPC thread
-    pthread_t
-        thread;         //  handle to RPC thread
+    zfl_thread_t
+        *thread;        //  handle to RPC thread
 };
 
 //  Internal structure used by RPC thread
@@ -215,7 +216,7 @@ s_control_event (rpcd_t *rpcd)
 //  RPC thread.
 
 static void *
-rpcd_thread (void *arg)
+s_rpcd_thread (void *arg)
 {
     thread_args_t *thread_args = arg;
     int rc;
@@ -363,7 +364,6 @@ zfl_rpcd_new (void *zmq_context, char *server_id)
     zfl_rpcd_t *self = zmalloc (sizeof (zfl_rpcd_t));
 
     //  Prepare thread arguments
-    thread_args_t *args = zmalloc (sizeof (thread_args_t));
     self->data_socket = zmq_socket (zmq_context, ZMQ_REP);
     assert (self->data_socket);
     self->ctrl_socket = zmq_socket (zmq_context, ZMQ_PUSH);
@@ -380,13 +380,14 @@ zfl_rpcd_new (void *zmq_context, char *server_id)
     rc = zmq_bind (self->ctrl_socket, ctrl_endpoint);
     assert (rc == 0);
 
-    args->context = zmq_context;
-    args->server_id = strdup (server_id);
-    args->data_endpoint = strdup (data_endpoint);
-    args->ctrl_endpoint = strdup (ctrl_endpoint);
+    thread_args_t *thread_args = zmalloc (sizeof (thread_args_t));
+    thread_args->context = zmq_context;
+    thread_args->server_id = strdup (server_id);
+    thread_args->data_endpoint = strdup (data_endpoint);
+    thread_args->ctrl_endpoint = strdup (ctrl_endpoint);
 
-    rc = pthread_create (&self->thread, NULL, rpcd_thread, args);
-    assert (rc == 0);
+    self->thread = zfl_thread_new (s_rpcd_thread, thread_args);
+    assert (self->thread);
 
     return self;
 }
@@ -411,8 +412,8 @@ zfl_rpcd_destroy (zfl_rpcd_t **self_p)
     zfl_msg_send (&stop_msg, self->ctrl_socket);
 
     //  Wait until RPC thread terminates
-    rc = pthread_join (self->thread, NULL);
-    assert (rc == 0);
+    zfl_thread_wait (self->thread);
+    zfl_thread_destroy (&self->thread);
 
     //  Close sockets
     rc = zmq_close (self->data_socket);
