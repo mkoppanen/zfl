@@ -1,10 +1,23 @@
 9 February 2011
 
 Reorganized configuration classes
-- zfl_config replaces zfl_tree
+- zfl_device class replaces zfl_config, specifically for configuring devices
+- zfl_config class replaces zfl_tree
 - zfl_config_json replaces zfl_tree_json
 - zfl_config_zpl replaces zfl_tree_zpl
 - zfl_config_load autodetects JSON and ZPL input, parses accordingly
 - zfl_config_load allows filename to be "_" meaning "read from stdin"
-- zfl_device replaces zfl_config and is specifically for configuring devices
-- zdevice example updated to use new classes
+- zfl_config_save saves config tree in ZPL format (new method)
+- zfl_config_save allows filename to be "_" meaning "write to stdout"
+- examples/zdevice updated to use new classes
+
+Started on zfl_thread class
+- zfl_thread_new, _destroy, _wait methods
+
+Add zfl_hash_freefn to allow heap-allocated item values
+
+Improvements to zfl_rpc and zfl_rpcd
+- resolved various memory leaks
+- code cleanups for consistency with other ZFL classes
+- added zfl_rpc_test and zfl_rpcd_test selftest methods
+- added documentation stubs
