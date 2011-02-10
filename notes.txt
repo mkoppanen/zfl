@@ -26,3 +26,7 @@ zfl_socket class
 zfl_queue class
     - manage queue of zfl_msg items
 
+
+Building on Windows
+- MSVC requires /TP switch to handle C99 constructs in ZFL code
+- all allocations need explicit cast to destination type

@@ -379,7 +379,7 @@ typedef unsigned int    qbyte;          //  Quad byte = 32 bits
 
 #if (defined (__UTYPE_LINUX))
 #   include <mcheck.h>
-#   define MALLOC_TRACE     mtrace()
+#   define MALLOC_TRACE     mtrace();
 #else
 #   define MALLOC_TRACE
 #endif

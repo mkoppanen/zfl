@@ -56,6 +56,8 @@ zfl_thread_new (void *(*thread_fn) (void *), void *args)
     self = (zfl_thread_t *) zmalloc (sizeof (zfl_thread_t));
 #if defined (__UNIX__)
     int rc = pthread_create (&self->thread, NULL, thread_fn, args);
+#elif defined (__WINDOWS__)
+   int rc = 0;
 #else
 #   error "Platform not supported by zfl_thread class"
 #endif
@@ -89,6 +91,8 @@ zfl_thread_wait (zfl_thread_t *self)
 {
 #if defined (__UNIX__)
     int rc = pthread_join (self->thread, NULL);
+#elif defined (__WINDOWS__)
+   int rc = 0;
 #else
 #   error "Platform not supported by zfl_thread class"
 #endif
@@ -111,7 +115,7 @@ zfl_thread_cancel (zfl_thread_t *self)
 
 static void *
 test_thread (void *args) {
-    assert (streq (args, "HELLO"));
+    assert (streq ((char *) args, "HELLO"));
     return NULL;
 }
 

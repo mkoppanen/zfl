@@ -272,7 +272,31 @@ If you define a new ZFL class `myclass` you need to:
 
 ### Coding Style
 
-In general the zfl_base class defines the style for the whole library. The overriding rule for coding style is consistency.
+In general the zfl_base class defines the style for the whole library. The overriding rule for coding style is consistency. We use the C99 standard for syntax including principally:
+
+* The // comment style.
+* Variables mixed with code.
+
+### Assertions
+
+We use assertions heavily to catch bad argument values. The ZFL classes do not attempt to validate arguments and report errors; bad arguments are treated as fatal application programming errors.
+
+We also use assertions heavily on calls to system functions that are never supposed to fail, where failure is to be treated as a fatal non-recoverable error (e.g. running out of memory).
+
+Assertion code should always take this form:
+
+    int rc = some_function (arguments);
+    assert (rc == 0);
+
+Rather than the side-effect form:
+
+    assert (some_function (arguments) == 0);
+
+Since assertions may be removed by an optimizing compiler.
+
+### Documentation
+
+Each ZFL class has its own man page in the doc directory. The contents of the man page are cut/paste from the class header and source files. Please maintain the doc file as you add new methods or modify the class test method (which for most classes acts as the EXAMPLE code).
 
 ### Porting ZFL
 

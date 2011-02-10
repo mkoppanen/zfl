@@ -41,7 +41,7 @@
 int main (int argc, char *argv [])
 {
     //  Enable malloc tracing if the platform supports it
-    MALLOC_TRACE;
+    MALLOC_TRACE
 
     Bool verbose;
     if (argc == 2 && streq (argv [1], "-v"))
