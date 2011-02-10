@@ -32,12 +32,12 @@
 //  Structure of our class
 
 struct _zfl_thread_t {
-#if defined (_POSIX_SOURCE)
+#if defined (__UNIX__)
 pthread_t
     thread;
 #elif defined (__WINDOWS__)
 int
-    filler;                         //  An example property
+    filler;                         //  To be done
 #else
 #   error "Platform not supported by zfl_thread class"
 #endif
@@ -54,7 +54,7 @@ zfl_thread_new (void *(*thread_fn) (void *), void *args)
         *self;
 
     self = zmalloc (sizeof (zfl_thread_t));
-#if defined (_POSIX_SOURCE)
+#if defined (__UNIX__)
     int rc = pthread_create (&self->thread, NULL, thread_fn, args);
 #else
 #   error "Platform not supported by zfl_thread class"
@@ -87,7 +87,7 @@ zfl_thread_destroy (zfl_thread_t **self_p)
 int
 zfl_thread_wait (zfl_thread_t *self)
 {
-#if defined (_POSIX_SOURCE)
+#if defined (__UNIX__)
     int rc = pthread_join (self->thread, NULL);
 #else
 #   error "Platform not supported by zfl_thread class"
