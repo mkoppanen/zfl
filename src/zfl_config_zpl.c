@@ -76,7 +76,7 @@ s_collect_name (char **start, int lineno)
         (*start)++;
 
     size_t length = *start - readptr;
-    char *name = zmalloc (length + 1);
+    char *name = (char *) zmalloc (length + 1);
     memcpy (name, readptr, length);
     name [length] = 0;
     if (name [0]== '/' || name [length -1] == '/') {
@@ -131,7 +131,7 @@ s_collect_value (char **start, int lineno)
             char *endquote = strchr (readptr + 1, *readptr);
             if (endquote) {
                 size_t value_length = endquote - readptr - 1;
-                value = zmalloc (value_length + 1);
+                value = (char *) zmalloc (value_length + 1);
                 memcpy (value, readptr + 1, value_length);
                 value [value_length] = 0;
                 rc = s_verify_eoln (endquote + 1, lineno);
@@ -292,7 +292,7 @@ zfl_config_zpl_file (char *filename)
         assert (blob);
         assert (zfl_blob_load (blob, file));
         fclose (file);
-        zfl_config_t *config = zfl_config_zpl (zfl_blob_data (blob));
+        zfl_config_t *config = zfl_config_zpl ((char *) zfl_blob_data (blob));
         zfl_blob_destroy (&blob);
         return config;
     }

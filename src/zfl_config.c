@@ -64,7 +64,7 @@ zfl_config_new (char *name, zfl_config_t *parent)
     zfl_config_t
         *self;
 
-    self = zmalloc (sizeof (zfl_config_t));
+    self = (zfl_config_t *) zmalloc (sizeof (zfl_config_t));
     zfl_config_set_name (self, name);
     if (parent) {
         if (parent->child) {
@@ -140,9 +140,9 @@ zfl_config_load (char *filename)
 
     zfl_config_t *self;
     if (*data == '{')
-        self = zfl_config_json (zfl_blob_data (blob));
+        self = zfl_config_json ((char *) zfl_blob_data (blob));
     else
-        self = zfl_config_zpl (zfl_blob_data (blob));
+        self = zfl_config_zpl ((char *) zfl_blob_data (blob));
 
     zfl_blob_destroy (&blob);
     return self;
@@ -340,7 +340,7 @@ zfl_config_string (zfl_config_t *self)
 {
     assert (self);
     if (self->blob)
-        return zfl_blob_data (self->blob);
+        return (char *) zfl_blob_data (self->blob);
     else
         return "";
 }
@@ -355,7 +355,7 @@ zfl_config_set_string (zfl_config_t *self, char *string)
 {
     assert (self);
     zfl_blob_t *blob = zfl_blob_new (NULL, 0);
-    zfl_blob_set_dptr (blob, string, string? strlen (string) + 1: 0);
+    zfl_blob_set_dptr (blob, (byte *) string, string? strlen (string) + 1: 0);
     zfl_config_set_value (self, blob);
     zfl_blob_destroy (&blob);
     return 0;
@@ -377,7 +377,7 @@ zfl_config_set_printf (zfl_config_t *self, char *format, ...)
     va_end (args);
 
     zfl_blob_t *blob = zfl_blob_new (NULL, 0);
-    zfl_blob_set_dptr (blob, value, strlen (value) + 1);
+    zfl_blob_set_dptr (blob, (byte *) value, strlen (value) + 1);
     zfl_config_set_value (self, blob);
     zfl_blob_destroy (&blob);
     return 0;

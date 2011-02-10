@@ -54,7 +54,7 @@ zfl_msg_new (void)
     zfl_msg_t
         *self;
 
-    self = zmalloc (sizeof (zfl_msg_t));
+    self = (zfl_msg_t *) zmalloc (sizeof (zfl_msg_t));
     return self;
 }
 
@@ -91,7 +91,7 @@ s_encode_uuid (byte *data)
         hex_char [] = "0123456789ABCDEF";
 
     assert (data [0] == 0);
-    char *uuidstr = zmalloc (34);
+    char *uuidstr = (char *) zmalloc (34);
     uuidstr [0] = '@';
     int byte_nbr;
     for (byte_nbr = 0; byte_nbr < 16; byte_nbr++) {
@@ -123,7 +123,7 @@ s_decode_uuid (char *uuidstr)
 
     assert (strlen (uuidstr) == 33);
     assert (uuidstr [0] == '@');
-    byte *data = zmalloc (17);
+    byte *data = (byte *) zmalloc (17);
     int byte_nbr;
     data [0] = 0;
     for (byte_nbr = 0; byte_nbr < 16; byte_nbr++)
@@ -142,7 +142,7 @@ static void
 s_set_part (zfl_msg_t *self, int part_nbr, byte *data, size_t size)
 {
     self->_part_size [part_nbr] = size;
-    self->_part_data [part_nbr] = zmalloc (size + 1);
+    self->_part_data [part_nbr] = (byte *) zmalloc (size + 1);
     memcpy (self->_part_data [part_nbr], data, size);
     //  Convert to C string if needed
     self->_part_data [part_nbr][size] = 0;
@@ -159,7 +159,7 @@ zfl_msg_dup (zfl_msg_t *self)
     zfl_msg_t *dup = zfl_msg_new ();
     assert (dup);
 
-    int part_nbr;
+    uint part_nbr;
     for (part_nbr = 0; part_nbr < self->_part_count; part_nbr++)
         s_set_part (dup, part_nbr,
             self->_part_data [part_nbr], self->_part_size [part_nbr]);
@@ -191,7 +191,7 @@ zfl_msg_recv (void *socket)
             exit (1);
         }
         //  We handle 0MQ UUIDs as printable strings
-        byte  *data = zmq_msg_data (&message);
+        byte *data = (byte *) zmq_msg_data (&message);
         size_t size = zmq_msg_size (&message);
         if (size == 17 && data [0] == 0) {
             //  Store message part as string uuid
@@ -228,7 +228,7 @@ zfl_msg_send (zfl_msg_t **self_p, void *socket)
     assert (socket);
     zfl_msg_t *self = *self_p;
 
-    int part_nbr;
+    uint part_nbr;
     for (part_nbr = 0; part_nbr < self->_part_count; part_nbr++) {
         //  Could be improved to use zero-copy since we destroy
         //  the message parts after sending anyhow...
@@ -314,7 +314,7 @@ zfl_msg_body_set (zfl_msg_t *self, char *body)
     else
         self->_part_count = 1;
 
-    s_set_part (self, self->_part_count - 1, (void *) body, strlen (body));
+    s_set_part (self, self->_part_count - 1, (byte *) body, strlen (body));
 }
 
 
@@ -352,7 +352,7 @@ zfl_msg_push (zfl_msg_t *self, char *part)
         (ZFL_MSG_MAX_PARTS - 1) * sizeof (byte *));
     memmove (&self->_part_size [1], &self->_part_size [0],
         (ZFL_MSG_MAX_PARTS - 1) * sizeof (size_t));
-    s_set_part (self, 0, (void *) part, strlen (part));
+    s_set_part (self, 0, (byte *) part, strlen (part));
     self->_part_count += 1;
 }
 
@@ -434,14 +434,14 @@ zfl_msg_unwrap (zfl_msg_t *self)
 void
 zfl_msg_dump (zfl_msg_t *self)
 {
-    int part_nbr;
+    uint part_nbr;
     for (part_nbr = 0; part_nbr < self->_part_count; part_nbr++) {
         byte  *data = self->_part_data [part_nbr];
         size_t size = self->_part_size [part_nbr];
 
         //  Dump the message as text or binary
         int is_text = 1;
-        int char_nbr;
+        uint char_nbr;
         for (char_nbr = 0; char_nbr < size; char_nbr++)
             if (data [char_nbr] < 32 || data [char_nbr] > 127)
                 is_text = 0;

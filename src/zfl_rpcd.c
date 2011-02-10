@@ -85,15 +85,24 @@ struct client {
 
 
 //  --------------------------------------------------------------------------
-//  Return current time in us
+//  Return current time (in microseconds)
+//	This code should go into a zfl_time class
 
 static uint64_t
-s_now ()
+s_now (void)
 {
+#if (defined (__UNIX__))
     struct timeval tv;
     int rc = gettimeofday (&tv, NULL);
     assert (rc == 0);
     return (uint64_t) tv.tv_sec * 1000000 + tv.tv_usec;
+#elif (defined (__WINDOWS__))
+	SYSTEMTIME st;
+	GetSystemTime (&st);
+	return (uint64_t) st.wSecond * 1000000 + st.wMilliseconds * 1000;
+#else
+#	error "zfl_rpc does not compile on this system"
+#endif
 }
 
 
@@ -103,7 +112,7 @@ s_now ()
 static struct client *
 s_client_new (char *id)
 {
-    struct client *client = zmalloc (sizeof (struct client));
+    struct client *client = (struct client *) zmalloc (sizeof (struct client));
     client->client_id = strdup (id);
     client->timestamp = s_now ();
     return client;
@@ -136,7 +145,7 @@ s_frontend_event (rpcd_t *rpcd)
     char *client_id = zfl_msg_unwrap (msg);
     assert (client_id);
 
-    struct client *client = zfl_hash_lookup (rpcd->registry, client_id);
+    struct client *client = (struct client *) zfl_hash_lookup (rpcd->registry, client_id);
     if (client == NULL) {
         client = s_client_new (client_id);
         assert (client);
@@ -218,10 +227,10 @@ s_control_event (rpcd_t *rpcd)
 static void *
 s_rpcd_thread (void *arg)
 {
-    thread_args_t *thread_args = arg;
+    thread_args_t *thread_args = (thread_args_t *) arg;
     int rc;
 
-    rpcd_t *rpcd = zmalloc (sizeof (rpcd_t));
+    rpcd_t *rpcd = (rpcd_t *) zmalloc (sizeof (rpcd_t));
 
     //  Create frontend socket and sets its identity
     rpcd->frontend = zmq_socket (thread_args->context, ZMQ_XREP);
@@ -292,7 +301,7 @@ s_rpcd_thread (void *arg)
         uint64_t now = s_now ();
 
         while (zfl_list_size (rpcd->clients) > 0) {
-            struct client *client = zfl_list_first (rpcd->clients);
+            struct client *client = (struct client *) zfl_list_first (rpcd->clients);
             assert (client);
             if (now < client->timestamp + HEARTBEAT_INTERVAL)
                 break;
@@ -305,7 +314,7 @@ s_rpcd_thread (void *arg)
         //  it to the server
         if (zfl_list_size (rpcd->msg_queue) > 0) {
             if (!rpcd->server_busy) {
-                zfl_msg_t *msg = zfl_list_first (rpcd->msg_queue);
+                zfl_msg_t *msg = (zfl_msg_t *) zfl_list_first (rpcd->msg_queue);
                 zfl_list_remove (rpcd->msg_queue, msg);
                 zfl_msg_send (&msg, rpcd->backend);
                 rpcd->server_busy = 1;
@@ -315,8 +324,8 @@ s_rpcd_thread (void *arg)
         if (zfl_list_size (rpcd->clients) == 0)
             poll_timeout = -1;
         else {
-            struct client *client = zfl_list_first (rpcd->clients);
-            poll_timeout = now + HEARTBEAT_INTERVAL - client->timestamp;
+            struct client *client = (struct client *) zfl_list_first (rpcd->clients);
+            poll_timeout = (long) (now + HEARTBEAT_INTERVAL - client->timestamp);
         }
     }
 
@@ -327,14 +336,14 @@ s_rpcd_thread (void *arg)
 
     //  Free all clients
     while (zfl_list_size (rpcd->clients)) {
-        struct client *client = zfl_list_first (rpcd->clients);
+        struct client *client = (struct client *) zfl_list_first (rpcd->clients);
         zfl_list_remove (rpcd->clients, client);
         s_client_destroy (&client);
     }
 
     //  Free all queued messages
     while (zfl_list_size (rpcd->msg_queue) > 0) {
-        zfl_msg_t *msg = zfl_list_first (rpcd->msg_queue);
+        zfl_msg_t *msg = (zfl_msg_t *) zfl_list_first (rpcd->msg_queue);
         zfl_list_remove (rpcd->msg_queue, msg);
         zfl_msg_destroy (&msg);
     }
@@ -361,7 +370,7 @@ zfl_rpcd_new (void *zmq_context, char *server_id)
         data_endpoint [32],
         ctrl_endpoint [32];
 
-    zfl_rpcd_t *self = zmalloc (sizeof (zfl_rpcd_t));
+    zfl_rpcd_t *self = (zfl_rpcd_t *) zmalloc (sizeof (zfl_rpcd_t));
 
     //  Prepare thread arguments
     self->data_socket = zmq_socket (zmq_context, ZMQ_REP);
@@ -369,8 +378,10 @@ zfl_rpcd_new (void *zmq_context, char *server_id)
     self->ctrl_socket = zmq_socket (zmq_context, ZMQ_PUSH);
     assert (self->ctrl_socket);
 
+    //  Allow any number of RPC servers to exist in our process
+	srandom ((unsigned) time (NULL));
     while (1) {
-        long id = random ();
+        long id = within (0x100000000);
         sprintf (data_endpoint, "inproc://rpcd/%08lX/data", id);
         sprintf (ctrl_endpoint, "inproc://rpcd/%08lX/ctrl", id);
         rc = zmq_bind (self->data_socket, data_endpoint);
@@ -380,7 +391,7 @@ zfl_rpcd_new (void *zmq_context, char *server_id)
     rc = zmq_bind (self->ctrl_socket, ctrl_endpoint);
     assert (rc == 0);
 
-    thread_args_t *thread_args = zmalloc (sizeof (thread_args_t));
+    thread_args_t *thread_args = (thread_args_t *) zmalloc (sizeof (thread_args_t));
     thread_args->context = zmq_context;
     thread_args->server_id = strdup (server_id);
     thread_args->data_endpoint = strdup (data_endpoint);

@@ -73,7 +73,7 @@ zfl_device_new (char *filename)
 
     //  Now create the device object and configure its context
     zfl_device_t *self = NULL;
-    assert (self = zmalloc (sizeof (zfl_device_t)));
+    self = (zfl_device_t *) zmalloc (sizeof (zfl_device_t));
     self->config = config;          //  Device object owns the config
 
     self->verbose = atoi (zfl_config_resolve (config, "context/verbose", "0"));

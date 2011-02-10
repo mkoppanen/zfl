@@ -155,7 +155,7 @@ zfl_config_json_file (char *filename)
         assert (blob);
         assert (zfl_blob_load (blob, file));
         fclose (file);
-        zfl_config_t *config = zfl_config_json (zfl_blob_data (blob));
+        zfl_config_t *config = zfl_config_json ((char *) zfl_blob_data (blob));
         zfl_blob_destroy (&blob);
         return config;
     }

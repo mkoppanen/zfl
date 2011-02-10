@@ -53,7 +53,7 @@ zfl_thread_new (void *(*thread_fn) (void *), void *args)
     zfl_thread_t
         *self;
 
-    self = zmalloc (sizeof (zfl_thread_t));
+    self = (zfl_thread_t *) zmalloc (sizeof (zfl_thread_t));
 #if defined (__UNIX__)
     int rc = pthread_create (&self->thread, NULL, thread_fn, args);
 #else

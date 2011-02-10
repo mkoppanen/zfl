@@ -120,7 +120,7 @@ s_item_insert (zfl_hash_t *self, char *key, void *value)
     //  Leaves self->cached_index with calculated hash value
     item_t *item = s_item_lookup (self, key);
     if (item == NULL) {
-        item = zmalloc (sizeof (item_t));
+        item = (item_t *) zmalloc (sizeof (item_t));
         item->value = value;
         item->key = strdup (key);
         item->index = self->cached_index;
@@ -167,12 +167,9 @@ s_item_destroy (zfl_hash_t *self, item_t *item)
 zfl_hash_t *
 zfl_hash_new (void)
 {
-    zfl_hash_t *self = zmalloc (sizeof (zfl_hash_t));
-    assert (self);
-
+    zfl_hash_t *self = (zfl_hash_t *) zmalloc (sizeof (zfl_hash_t));
     self->limit = INITIAL_SIZE;
-    self->items = zmalloc (sizeof (item_t *) * self->limit);
-
+    self->items = (item_t **) zmalloc (sizeof (item_t *) * self->limit);
     return self;
 }
 
@@ -232,7 +229,7 @@ zfl_hash_insert (zfl_hash_t *self, char *key, void *value)
 
         //  Create new hash table
         new_limit = self->limit * GROWTH_FACTOR / 100;
-        new_items = zmalloc (sizeof (item_t *) * new_limit);
+        new_items = (item_t **) zmalloc (sizeof (item_t *) * new_limit);
 
         //  Move all items to the new hash table, rehashing to
         //  take into account new hash table limit

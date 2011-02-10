@@ -52,8 +52,7 @@ struct _zfl_list {
 zfl_list_t *
 zfl_list_new ()
 {
-    zfl_list_t *self = zmalloc (sizeof (zfl_list_t));
-    assert (self);
+    zfl_list_t *self = (zfl_list_t *) zmalloc (sizeof (zfl_list_t));
     return self;
 }
 
@@ -100,7 +99,7 @@ void
 zfl_list_append (zfl_list_t *self, void *value)
 {
     struct node_t *node;
-    node = zmalloc (sizeof (struct node_t));
+    node = (node_t *) zmalloc (sizeof (struct node_t));
     node->value = value;
     if (self->tail)
         self->tail->next = node;
@@ -119,7 +118,7 @@ void
 zfl_list_push (zfl_list_t *self, void *value)
 {
     struct node_t *node;
-    node = zmalloc (sizeof (struct node_t));
+    node = (node_t *) zmalloc (sizeof (struct node_t));
     node->value = value;
     node->next = self->head;
     self->head = node;
