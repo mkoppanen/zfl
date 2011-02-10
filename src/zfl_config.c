@@ -57,7 +57,7 @@ s_config_save (zfl_config_t *self, void *arg, int level);
 //  Constructor
 //
 //  Optionally attach new config to parent config, as first or next child.
-//
+
 zfl_config_t *
 zfl_config_new (char *name, zfl_config_t *parent)
 {
@@ -85,7 +85,7 @@ zfl_config_new (char *name, zfl_config_t *parent)
 
 //  --------------------------------------------------------------------------
 //  Destructor
-//
+
 void
 zfl_config_destroy (zfl_config_t **self_p)
 {
@@ -114,7 +114,6 @@ zfl_config_destroy (zfl_config_t **self_p)
 //  (rfc.zeromq.org/spec:4/zpl). If the filename is "-", reads from stdin.
 //  Returns NULL if the file does not exist or cannot be read or has an
 //  invalid syntax.
-//
 
 zfl_config_t *
 zfl_config_load (char *filename)
@@ -154,7 +153,7 @@ zfl_config_load (char *filename)
 //  Saves config to a named file in ZPL (simple text) format.
 //  If the file is "-", writes to stdout.
 //  Returns zero if OK, -1 in case the file could not be created.
-//
+
 int
 zfl_config_save (zfl_config_t *self, char *filename)
 {
@@ -209,7 +208,7 @@ zfl_config_child (zfl_config_t *self)
 
 //  --------------------------------------------------------------------------
 //  Return config next
-//
+
 zfl_config_t *
 zfl_config_next (zfl_config_t *self)
 {
@@ -221,7 +220,7 @@ zfl_config_next (zfl_config_t *self)
 //  --------------------------------------------------------------------------
 //  Finds the latest node at the specified depth, where 0 is the root. If no
 //  such node exists, returns NULL.
-//
+
 zfl_config_t *
 zfl_config_at_depth (zfl_config_t *self, int level)
 {
@@ -242,7 +241,7 @@ zfl_config_at_depth (zfl_config_t *self, int level)
 //  --------------------------------------------------------------------------
 //  Finds a node specified by path, consisting of name/name/... If the node
 //  exists, returns node, else returns NULL.
-//
+
 zfl_config_t *
 zfl_config_locate (zfl_config_t *self, char *path)
 {
@@ -271,7 +270,7 @@ zfl_config_locate (zfl_config_t *self, char *path)
 //  --------------------------------------------------------------------------
 //  Finds a node specified by path, consisting of name/name/... If the node
 //  exists, returns its value as a string, else returns default_value.
-//
+
 char *
 zfl_config_resolve (zfl_config_t *self, char *path, char *default_value)
 {
@@ -285,7 +284,7 @@ zfl_config_resolve (zfl_config_t *self, char *path, char *default_value)
 
 //  --------------------------------------------------------------------------
 //  Return config name as string.
-//
+
 char *
 zfl_config_name (zfl_config_t *self)
 {
@@ -297,7 +296,7 @@ zfl_config_name (zfl_config_t *self)
 //  --------------------------------------------------------------------------
 //  Set config name
 //  The name may be NULL.
-//
+
 int
 zfl_config_set_name (zfl_config_t *self, char *name)
 {
@@ -310,7 +309,7 @@ zfl_config_set_name (zfl_config_t *self, char *name)
 
 //  --------------------------------------------------------------------------
 //  Returns config value as blob.
-//
+
 zfl_blob_t *
 zfl_config_value (zfl_config_t *self)
 {
@@ -321,7 +320,7 @@ zfl_config_value (zfl_config_t *self)
 
 //  --------------------------------------------------------------------------
 //  Set config value from specified blob. Note that the data is copied.
-//
+
 int
 zfl_config_set_value (zfl_config_t *self, zfl_blob_t *blob)
 {
@@ -335,7 +334,7 @@ zfl_config_set_value (zfl_config_t *self, zfl_blob_t *blob)
 
 //  --------------------------------------------------------------------------
 //  Returns config string value
-//
+
 char *
 zfl_config_string (zfl_config_t *self)
 {
@@ -350,7 +349,7 @@ zfl_config_string (zfl_config_t *self)
 //  --------------------------------------------------------------------------
 //  Set config value from a string.
 //  The string may be NULL, which wipes the config value.
-//
+
 int
 zfl_config_set_string (zfl_config_t *self, char *string)
 {
@@ -365,7 +364,7 @@ zfl_config_set_string (zfl_config_t *self, char *string)
 
 //  --------------------------------------------------------------------------
 //  Set config value from a string formatted using printf syntax.
-//
+
 int
 zfl_config_set_printf (zfl_config_t *self, char *format, ...)
 {
@@ -389,7 +388,7 @@ zfl_config_set_printf (zfl_config_t *self, char *format, ...)
 //  Walks the config as a hierarchy. Executes handler on self, then does all
 //  children in a list. That algorithm assumes there is exactly one root
 //  node with no siblings.
-//
+
 int
 zfl_config_execute (zfl_config_t *self, zfl_config_fct handler, void *arg)
 {
@@ -416,7 +415,7 @@ s_config_execute (zfl_config_t *self, zfl_config_fct handler, void *arg, int lev
 
 //  --------------------------------------------------------------------------
 //  Selftest
-//
+
 int
 zfl_config_test (Bool verbose)
 {

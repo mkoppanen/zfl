@@ -4,15 +4,54 @@ zfl_config(7)
 
 NAME
 ----
-zfl_config - load properties from configuration files
+zfl_config - work with configuration files
 
 
 SYNOPSIS
 --------
-*zfl_config_t *zfl_config_new (void);*
-*int zfl_config_method (zfl_config_t *config);*
-*int zfl_config_test (void);*
-*void zfl_config_destroy (zfl_config_t **config_p);*
+----
+//  Function that executes config
+typedef int (zfl_config_fct) (zfl_config_t *self, void *arg, int level);
+
+zfl_config_t *
+    zfl_config_new (char *name, zfl_config_t *parent);
+void
+    zfl_config_destroy (zfl_config_t **self_p);
+zfl_config_t *
+    zfl_config_load (char *filename);
+int
+    zfl_config_save (zfl_config_t *self, char *filename);
+zfl_config_t *
+    zfl_config_child (zfl_config_t *self);
+zfl_config_t *
+    zfl_config_next (zfl_config_t *self);
+zfl_config_t *
+    zfl_config_locate (zfl_config_t *self, char *path);
+char *
+    zfl_config_resolve (zfl_config_t *self, char *path, char *default_value);
+zfl_config_t *
+    zfl_config_at_depth (zfl_config_t *self, int level);
+char *
+    zfl_config_name (zfl_config_t *self);
+int
+    zfl_config_set_name (zfl_config_t *self, char *name);
+zfl_blob_t *
+    zfl_config_value (zfl_config_t *self);
+int
+    zfl_config_set_value (zfl_config_t *self, zfl_blob_t *blob);
+char *
+    zfl_config_string (zfl_config_t *self);
+int
+    zfl_config_set_string (zfl_config_t *self, char *string);
+int
+    zfl_config_set_printf (zfl_config_t *self, char *format, ...);
+int
+    zfl_config_execute (zfl_config_t *self, zfl_config_fct handler, void *arg);
+int
+    zfl_config_dump (zfl_config_t *self);
+int
+    zfl_config_test (Bool verbose);
+----
 
 
 DESCRIPTION
@@ -20,7 +59,60 @@ DESCRIPTION
 
 Loads a configuration file formatted in JSON or in ZPL format as defined
 by rfc.zeromq.org/spec:4/zpl. Provides methods to navigate this data and
-access property values. See zfl_device.c for examples of use.
+access property values. See zfl_config.c for examples of use.
+
+
+EXAMPLE
+-------
+.From zfl_config_test method
+----
+zfl_config_t
+    *root,
+    *type,
+    *frontend,
+    *option,
+    *hwm,
+    *swap,
+    *subscribe,
+    *bind,
+    *backend;
+
+//  Left is first child, next is next sibling
+root     = zfl_config_new ("root", NULL);
+type     = zfl_config_new ("type", root);
+zfl_config_set_string (type, "zqueue");
+frontend = zfl_config_new ("frontend", root);
+option   = zfl_config_new ("option", frontend);
+hwm      = zfl_config_new ("hwm", option);
+zfl_config_set_string (hwm, "1000");
+swap     = zfl_config_new ("swap", option);
+zfl_config_set_string (swap, "25000000");
+subscribe = zfl_config_new ("subscribe", option);
+zfl_config_set_printf (subscribe, "#%d", 2);
+bind     = zfl_config_new ("bind", frontend);
+zfl_config_set_string (bind, "tcp://eth0:5555");
+backend  = zfl_config_new ("backend", root);
+bind     = zfl_config_new ("bind", backend);
+zfl_config_set_string (bind, "tcp://eth0:5556");
+if (verbose) {
+    puts ("");
+    zfl_config_save (root, "-");
+}
+zfl_config_destroy (&root);
+assert (root == NULL);
+
+//  Test loading from a JSON file
+zfl_config_t *config;
+config = zfl_config_load ("zfl_config_test.json");
+assert (config);
+zfl_config_destroy (&config);
+
+//  Test loading from a ZPL file
+config = zfl_config_load ("zfl_config_test.txt");
+assert (config);
+zfl_config_destroy (&config);
+----
+
 
 SEE ALSO
 --------

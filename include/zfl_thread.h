@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_thread.h - ZFL thread class
+    zfl_thread.h - work with operating system threads
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>

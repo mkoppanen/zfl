@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_rpcd.c - server side RPC
+    zfl_rpcd.c - server side reliable RPC
 
     Server side API for implementing reliable remote procedure calls.
 
@@ -153,7 +153,6 @@ s_frontend_event (rpcd_t *rpcd)
         zfl_msg_wrap (msg, client_id, "");
         zfl_msg_send (&msg, rpcd->frontend);
     }
-
     client->timestamp = s_now ();
     zfl_list_remove (rpcd->clients, client);
     zfl_list_append (rpcd->clients, client);
@@ -162,7 +161,7 @@ s_frontend_event (rpcd_t *rpcd)
 
 
 //  --------------------------------------------------------------------------
-//  Rely response from server to client
+//  Reply response from server to client
 
 static void
 s_backend_event (rpcd_t *rpcd)
@@ -208,7 +207,8 @@ s_control_event (rpcd_t *rpcd)
 }
 
 
-//  RPC server thread.
+//  --------------------------------------------------------------------------
+//  Main RPC client thread; this is what we talk to via other methods
 //  It accepts requests from frontend socket and forwards them to
 //  application thread. The design assumes the application thread can
 //  process at most one request at a time. There is also a control

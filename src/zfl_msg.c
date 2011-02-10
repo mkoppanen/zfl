@@ -58,6 +58,7 @@ zfl_msg_new (void)
     return self;
 }
 
+
 //  --------------------------------------------------------------------------
 //  Destructor
 
@@ -82,7 +83,7 @@ zfl_msg_destroy (zfl_msg_t **self_p)
 //  --------------------------------------------------------------------------
 //  Formats 17-byte UUID as 33-char string starting with '@'
 //  Lets us print UUIDs as C strings and use them as addresses
-//
+
 static char *
 s_encode_uuid (byte *data)
 {
@@ -105,7 +106,7 @@ s_encode_uuid (byte *data)
 //  --------------------------------------------------------------------------
 //  Formats 17-byte UUID as 33-char string starting with '@'
 //  Lets us print UUIDs as C strings and use them as addresses
-//
+
 static byte *
 s_decode_uuid (char *uuidstr)
 {
@@ -456,7 +457,6 @@ zfl_msg_dump (zfl_msg_t *self)
     }
     fflush (stderr);
 }
-
 
 
 //  --------------------------------------------------------------------------

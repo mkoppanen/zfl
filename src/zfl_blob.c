@@ -42,7 +42,7 @@ struct _zfl_blob_t {
 
 //  --------------------------------------------------------------------------
 //  Constructor
-//
+
 zfl_blob_t *
 zfl_blob_new (void *data, size_t size)
 {
@@ -58,7 +58,7 @@ zfl_blob_new (void *data, size_t size)
 
 //  --------------------------------------------------------------------------
 //  Destructor
-//
+
 void
 zfl_blob_destroy (zfl_blob_t **self_p)
 {
@@ -77,7 +77,7 @@ zfl_blob_destroy (zfl_blob_t **self_p)
 //  that it can be parsed as a string if necessary.  Returns size of blob
 //  data.  Idempotent, does not change current read position in file. If
 //  file cannot be read, returns empty blob.
-//
+
 size_t
 zfl_blob_load (zfl_blob_t *self, FILE *file)
 {
@@ -115,7 +115,7 @@ zfl_blob_load (zfl_blob_t *self, FILE *file)
 //
 //      zfl_blob_set_data (blob, buffer, size);
 //      zfl_blob_set_data (blob, object, sizeof (*object));
-//
+
 int
 zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size)
 {
@@ -142,7 +142,7 @@ zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size)
 //  freed during lifetime of blob.
 //
 //      zfl_blob_set_dptr (blob, object, sizeof (*object));
-//
+
 int
 zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size)
 {
@@ -158,7 +158,7 @@ zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size)
 
 //  --------------------------------------------------------------------------
 //  Returns pointer to blob data.
-//
+
 void *
 zfl_blob_data (zfl_blob_t *self)
 {
@@ -169,7 +169,7 @@ zfl_blob_data (zfl_blob_t *self)
 
 //  --------------------------------------------------------------------------
 //  Returns size of blob data.
-//
+
 size_t
 zfl_blob_size (zfl_blob_t *self)
 {
@@ -180,7 +180,7 @@ zfl_blob_size (zfl_blob_t *self)
 
 //  --------------------------------------------------------------------------
 //  Selftest
-//
+
 int
 zfl_blob_test (Bool verbose)
 {

@@ -63,7 +63,7 @@ static int
 //  it's parsed as ZPL. If the filename is "-", reads from STDIN. Creates a
 //  0MQ context for the device, initialized as specified in the config file.
 //  Returns NULL if the file does not exist or cannot be read.
-//
+
 zfl_device_t *
 zfl_device_new (char *filename)
 {
@@ -96,7 +96,7 @@ zfl_device_new (char *filename)
 //  --------------------------------------------------------------------------
 //  Destructor
 //  Note, shuts down 0MQ
-//
+
 void
 zfl_device_destroy (zfl_device_t **self_p)
 {
@@ -113,7 +113,7 @@ zfl_device_destroy (zfl_device_t **self_p)
 
 //  --------------------------------------------------------------------------
 //  Returns the 0MQ context associated with this device
-//
+
 void *
 zfl_device_context (zfl_device_t *self)
 {
@@ -124,7 +124,7 @@ zfl_device_context (zfl_device_t *self)
 
 //  --------------------------------------------------------------------------
 //  Returns the verbose property
-//
+
 Bool
 zfl_device_verbose (zfl_device_t *self)
 {
@@ -162,7 +162,7 @@ zfl_device_locate (zfl_device_t *self, int index)
 //  Returns a named device property, or "" if not found. Property can be a
 //  path of names separted by '/', meaning resolve through multiple levels
 //  starting from children of device.
-//
+
 char *
 zfl_device_property (zfl_device_t *self, char *device_name, char *property)
 {
@@ -183,7 +183,7 @@ zfl_device_property (zfl_device_t *self, char *device_name, char *property)
 //  socket as specified in the property data. Returns NULL if the
 //  device or socket do not exist, or if there was an error deviceuring the
 //  socket.
-//
+
 void *
 zfl_device_socket (
     zfl_device_t *self,

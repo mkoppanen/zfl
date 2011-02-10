@@ -4,22 +4,115 @@ zfl_rpcd(7)
 
 NAME
 ----
-zfl_rpcd - ZFL rpcd class
+zfl_rpcd - server side reliable RPC
 
 
 SYNOPSIS
 --------
-*zfl_rpcd_t *zfl_rpcd_new (void);*
-*int zfl_rpcd_test (void);*
-*void zfl_rpcd_destroy (zfl_rpcd_t **rpcd_p);*
+----
+zfl_rpcd_t *
+    zfl_rpcd_new (void *zmq_context, char *server_id);
+void
+    zfl_rpcd_destroy (zfl_rpcd_t **self_p);
+void
+    zfl_rpcd_bind (zfl_rpcd_t *self, char *endpoint);
+zfl_msg_t *
+    zfl_rpcd_recv (zfl_rpcd_t *self);
+void
+    zfl_rpcd_send (zfl_rpcd_t *self, zfl_msg_t **msg_p);
+int
+    zfl_rpcd_test (Bool verbose);
+----
 
 
 DESCRIPTION
 -----------
-To be defined.
+Server side API for implementing reliable remote procedure calls.
+Use in conjuction with zfl_rpc at the client side.
+
+
+EXAMPLE
+-------
+.Example RPC server application
+----
+#include "zfl.h"
+
+static zfl_msg_t *
+handle_request (zfl_msg_t *request, char *server_id)
+{
+    //  Validate request
+    assert (zfl_msg_parts (request) > 1);
+
+    printf ("I: Request received [%s]\n", zfl_msg_body (request));
+
+    if (within (10) == 0) {
+        // Simulate temporary slowdown
+        fprintf (stderr, "I: Simulating 1s delay\n");
+        sleep (1);
+    }
+    else
+    if (within (100) == 0) {
+        // Simulate crash
+        fprintf (stderr, "I: Simulating crash\n");
+        return NULL;
+    }
+
+    // Simulate processing overhead
+    struct timespec delay = { .tv_nsec = 10000 };
+    nanosleep (&delay, NULL);
+
+    zfl_msg_t *response = zfl_msg_dup (request);
+    zfl_msg_body_fmt (response, "response from %s", server_id);
+
+    return response;
+}
+
+int main (int argc, char *argv [])
+{
+    int major, minor, patch;
+    zmq_version (&major, &minor, &patch);
+    printf ("0MQ version is %d.%d.%d\n", major, minor, patch);
+    if ((major * 1000 + minor * 100 + patch) < 2100) {
+        printf ("E: need at least version 2.1.0\n");
+        exit (EXIT_FAILURE);
+    }
+    if (argc != 3) {
+        fprintf (stderr, "usage: server server_id endpoint\n");
+        exit (1);
+    }
+    char *server_id = argv [1];
+    char *endpoint = argv [2];
+
+    void *context = zmq_init (1);
+    assert (context);
+
+    while (1) {
+        zfl_rpcd_t *rpcd;
+        rpcd = zfl_rpcd_new (context, server_id);
+        assert (rpcd);
+        zfl_rpcd_bind (rpcd, endpoint);
+
+        while (1) {
+            zfl_msg_t *request = zfl_rpcd_recv (rpcd);
+            assert (request);
+            zfl_msg_t *response = handle_request (request, server_id);
+            zfl_msg_destroy (&request);
+
+            if (!response)
+                break;
+            zfl_rpcd_send (rpcd, &response);
+        }
+        //  Simulate a freeze, to test RPC reliability
+        //  We might also randomly exit the loop to simulate a crash
+        zfl_rpcd_destroy (&rpcd);
+        sleep (5);
+    }
+    int rc = zmq_term (context);
+    assert (rc == 0);
+}
+----
 
 
 SEE ALSO
 --------
 linkzfl:zfl[7]
-

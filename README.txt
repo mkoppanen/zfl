@@ -33,6 +33,128 @@ All classes are maintained by a single person, who is the responsible editor for
 
 The general rule is, if you contribute code to ZFL you must be willing to maintain it as long as there are users of it. Code with no active maintainer will in general be deprecated and/or removed.
 
+## Using ZFL
+
+### Building and Installing
+
+ZFL uses autotools for packaging. To build from git (all example commands are for Linux):
+
+    git clone git://github.com/zeromq/zfl.git
+    cd zfl
+    sh autogen.sh
+    ./configure
+    make all
+    sudo make install
+    sudo ldconfig
+
+You will need the pkg-config, libtool, and autoreconf packages. Set the LD_LIBRARY_PATH to /usr/local/libs unless you install elsewhere.
+
+After building, you can run the ZFL selftests:
+
+    cd src
+    ./zfl_selftest
+
+### Linking with an Application
+
+Include `zfl.h` in your application and link with libzfl. Here is a typical gcc link command:
+
+    gcc -lzfl -lzmq myapp.c -o myapp
+
+You should read `zfl.h`. This file includes `zmq.h` and the system header files that typical 0MQ applications will need. The provided 'c' shell script lets you write simple portable build scripts:
+
+    c -lzfl -lzmq -l myapp
+
+### The Class Model
+
+ZFL consists of classes, each class consisting of a .h and a .c. Classes may depend on other classes.
+
+`zfl.h` includes all classes header files, all the time. For the user, ZFL forms one single package. All classes start by including `zfl.h`. All applications that use ZFL start by including `zfl.h`. `zfl.h` also defines a limited number of small, useful macros and typedefs that have proven useful for writing clearer C code.
+
+The canonical example for ZFL style is the zfl_base class, which defines the template for all other classes. The nomenclature for all classes is consistent. We use zfl_base as an example:
+
+* Source files: zfl_base.c, zfl_base.h
+* Methods: zfl_base_test, zfl_base_print, ...
+
+All classes are based on a flat C class system and follow these rules:
+
+* Class typedef: `zfl_base_t`
+* Constructor: `zfl_base_new`
+* Destructor: `zfl_base_destroy`
+* Property methods: `zfl_base_property_set`, `zfl_base_property`
+* Class structures are private (defined in the .c source but not the .h)
+* Properties are accessed only via methods named as described above.
+* In the class source code the object is always called `self`.
+* The constructor may take arbitrary arguments, and returns NULL on failure, or a new object.
+* The destructor takes a pointer to an object reference and nullifies it.
+
+Return values for methods are:
+
+* For methods that return an object reference, either the reference, or NULL on failure.
+* For methods that signal success/failure, a return value of 0 means sucess, -1 failure.
+
+Private/static functions in a class are named `s_functionname` and are not exported via the header file.
+
+All classes have a test method called `zfl_classname_test`.
+
+### ZFL Classes
+
+These are the existing ZFL classes:
+
+* zfl_base - base class for ZFL
+* zfl_blob - binary long object
+* zfl_config - work with configuration files
+* zfl_device - configure a device or device socket
+* zfl_hash - expandable hash table container
+* zfl_list - singly-linked list container
+* zfl_msg - multipart 0MQ message
+* zfl_rpcd - server side reliable RPC
+* zfl_rpc - client side reliable RPC
+* zfl_thread - work with operating system threads
+
+### Predefined Macros
+
+The file zfl_prelude.h defines a number of macros including these:
+
+    #define FOREVER             for (;;)            //  FOREVER { ... }
+    #define until(expr)         while (!(expr))     //  do { ... } until (expr)
+    #define streq(s1,s2)        (!strcmp ((s1), (s2)))
+    #define strneq(s1,s2)       (strcmp ((s1), (s2)))
+    #define strused(s)          (*(s) != 0)
+    #define strnull(s)          (*(s) == 0)
+    #define strclr(s)           (*(s) = 0)
+    #define strlast(s)          ((s) [strlen (s) - 1])
+    #define strterm(s)          ((s) [strlen (s)])
+
+    #define tblsize(x)          (sizeof (x) / sizeof ((x) [0]))
+    #define tbllast(x)          (x [tblsize (x) - 1])
+
+    #define randomof(num)       (int) (((float) num) * rand () / (RAND_MAX + 1.0))
+    #define randomize()         srand ((uint) apr_time_usec (apr_time_now ()))
+
+    #if (!defined (MIN))
+    #   define MIN(a,b)         (((a) < (b))? (a): (b))
+    #   define MAX(a,b)         (((a) > (b))? (a): (b))
+    #endif
+
+    //- Assertion that pointer value is as expect -------------------------------
+
+    #define assert_eq(value,const) \
+    if ((value) != (const)) {\
+        printf ("Assertion failed, expected=%d actual=%d", (const), (value));\
+        assert ((value) == (const));\
+    }
+
+    //- Boolean operators and constants -----------------------------------------
+
+    #if (!defined (TRUE))
+    #    define TRUE        1               //  ANSI standard
+    #    define FALSE       0
+    #endif
+
+### Error Handling
+
+Functions that create or search objects return object references success and NULL on failure.  Functions that perform work return 0 on success and -1 on failure.
+
 ## Design Ideology
 
 ### The Problem with C
@@ -136,82 +258,6 @@ ZFL uses the GNU autotools system, so non-portable code can use the macros this 
     zfl_selftest
     mtrace zfl_selftest mtrace.txt
 
-## Using ZFL
-
-### Building and Installing
-
-ZFL uses autotools for packaging. To build from git (all example commands are for Linux):
-
-    git clone git://github.com/zeromq/zfl.git
-    cd zfl
-    sh autogen.sh
-    ./configure
-    make all
-    sudo make install
-    sudo ldconfig
-
-You will need the pkg-config, libtool, and autoreconf packages. Set the LD_LIBRARY_PATH to /usr/local/libs unless you install elsewhere.
-
-After building, you can run the ZFL selftests:
-
-    cd src
-    ./zfl_selftest
-
-### Using ZFL
-
-Include `zfl.h` in your application and link with libzfl. Here is a typical gcc link command:
-
-    gcc -lzfl -lzmq myapp.c -o myapp
-
-You should read `zfl.h`. This file includes `zmq.h` and the system header files that typical 0MQ applications will need. The provided 'c' shell script lets you write simple portable build scripts:
-
-    c -lzfl -lzmq -l myapp
-
-### Class Model
-
-ZFL consists of classes, each class consisting of a .h and a .c. Classes may depend on other classes.
-
-`zfl.h` includes all classes header files, all the time. For the user, ZFL forms one single package. All classes start by including `zfl.h`. All applications that use ZFL start by including `zfl.h`. `zfl.h` also defines a limited number of small, useful macros and typedefs that have proven useful for writing clearer C code.
-
-The canonical example for ZFL style is the zfl_base class, which defines the template for all other classes. The nomenclature for all classes is consistent. We use zfl_base as an example:
-
-* Source files: zfl_base.c, zfl_base.h
-* Methods: zfl_base_test, zfl_base_print, ...
-
-All classes are based on a flat C class system and follow these rules:
-
-* Class typedef: `zfl_base_t`
-* Constructor: `zfl_base_new`
-* Destructor: `zfl_base_destroy`
-* Property methods: `zfl_base_property_set`, `zfl_base_property`
-* Class structures are private (defined in the .c source but not the .h)
-* Properties are accessed only via methods named as described above.
-* In the class source code the object is always called `self`.
-* The constructor may take arbitrary arguments, and returns NULL on failure, or a new object.
-* The destructor takes a pointer to an object reference and nullifies it.
-
-Return values for methods are:
-
-* For methods that return an object reference, either the reference, or NULL on failure.
-* For methods that signal success/failure, a return value of 0 means sucess, -1 failure.
-
-Private/static functions in a class are named `s_functionname` and are not exported via the header file.
-
-All classes have a test method called `zfl_classname_test`.
-
-### ZFL Classes
-
-These are the existing ZFL classes:
-
-* zfl_base - base class, provides no functionality.
-* zfl_blob - work with length-specified binary objects.
-* zfl_config - work with a configuration property tree.
-* zfl_device - configure 0MQ devices.
-* zfl_msg - work with 0MQ multipart messages.
-* zfl_rpc - reliable RPC client.
-* zfl_rpcd - reliable RPC server.
-* zfl_thread - work with operating system threads.
-
 ## Under the Hood
 
 ### Adding a New Class
@@ -223,6 +269,10 @@ If you define a new ZFL class `myclass` you need to:
 * Add the myclass header and test call to `src/zfl_selftest.c`.
 * Add a reference documentation to 'doc/zfl_myclass.txt'.
 * Add myclass to 'src/Makefile.am` and `doc/Makefile.am`.
+
+### Coding Style
+
+In general the zfl_base class defines the style for the whole library. The overriding rule for coding style is consistency.
 
 ### Porting ZFL
 

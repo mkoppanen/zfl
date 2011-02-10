@@ -4,15 +4,23 @@ zfl_thread(7)
 
 NAME
 ----
-zfl_thread - ZFL thread class
+zfl_thread - work with operating system threads
 
 
 SYNOPSIS
 --------
-*zfl_thread_t *zfl_thread_new (void);*
-*int zfl_thread_method (zfl_thread_t *thread);
-*int zfl_thread_test (void);*
-*void zfl_thread_destroy (zfl_thread_t **thread_p);*
+----
+zfl_thread_t *
+    zfl_thread_new (void *(*thread_fn) (void *), void *args);
+void
+    zfl_thread_destroy (zfl_thread_t **self_p);
+int
+    zfl_thread_wait (zfl_thread_t *self);
+int
+    zfl_thread_cancel (zfl_thread_t *self);
+int
+    zfl_thread_test (Bool verbose);
+----
 
 
 DESCRIPTION
@@ -22,7 +30,22 @@ system threads. Used instead of, e.g., pthreads, which is not portable to
 all platforms.
 
 
+EXAMPLE
+-------
+.From zfl_thread_test method
+----
+zfl_thread_t
+    *thread;
+
+thread = zfl_thread_new (test_thread, "HELLO");
+assert (thread);
+zfl_thread_wait (thread);
+
+zfl_thread_destroy (&thread);
+assert (thread == NULL);
+----
+
+
 SEE ALSO
 --------
 linkzfl:zfl[7]
-

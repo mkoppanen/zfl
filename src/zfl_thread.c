@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_thread.c
+    zfl_thread.c - work with operating system threads
 
     Provides a portable API for creating, killing, and waiting on operating
     system threads. Used instead of, e.g., pthreads, which is not portable to
@@ -46,7 +46,7 @@ int
 
 //  --------------------------------------------------------------------------
 //  Constructor
-//
+
 zfl_thread_t *
 zfl_thread_new (void *(*thread_fn) (void *), void *args)
 {
@@ -68,7 +68,7 @@ zfl_thread_new (void *(*thread_fn) (void *), void *args)
 
 //  --------------------------------------------------------------------------
 //  Destructor
-//
+
 void
 zfl_thread_destroy (zfl_thread_t **self_p)
 {
@@ -98,7 +98,7 @@ zfl_thread_wait (zfl_thread_t *self)
 
 //  --------------------------------------------------------------------------
 //
-//
+
 int
 zfl_thread_cancel (zfl_thread_t *self)
 {

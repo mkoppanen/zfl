@@ -1,8 +1,8 @@
 /*  =========================================================================
     zfl_base.c - base class for ZFL
 
-    Provides template for new classes, and canonical style guidelines for all
-    ZFL source code.
+    Provides manual template for new classes, and canonical style guidelines
+    for all ZFL source code.
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2011 iMatix Corporation <www.imatix.com>
@@ -43,6 +43,7 @@ s_private_function_example (void)
     return 0;
 }
 
+
 //  --------------------------------------------------------------------------
 //  Constructor
 
@@ -57,6 +58,7 @@ zfl_base_new (void)
     return self;
 }
 
+
 //  --------------------------------------------------------------------------
 //  Destructor
 
@@ -70,6 +72,7 @@ zfl_base_destroy (zfl_base_t **self_p)
         *self_p = NULL;
     }
 }
+
 
 //  --------------------------------------------------------------------------
 //  Filler property

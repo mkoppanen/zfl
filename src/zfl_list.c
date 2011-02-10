@@ -1,5 +1,5 @@
 /*  =========================================================================
-    zfl_list.h - singly-linked list
+    zfl_list.h - singly-linked list container
 
     Singly-linked list container.
 
@@ -176,6 +176,7 @@ zfl_list_copy (zfl_list_t *self)
         zfl_list_append (copy, node->value);
     return copy;
 }
+
 
 //  --------------------------------------------------------------------------
 //  Return the number of items in the list

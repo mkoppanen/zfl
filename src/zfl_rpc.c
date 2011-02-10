@@ -1,7 +1,8 @@
 /*  =========================================================================
-    zfl_rpc.c - client side RPC
+    zfl_rpc.c - client side reliable RPC
 
     Client side API for implementing reliable remote procedure calls.
+    Use in conjunction with the zfl_rpcd class for the server side.
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -116,8 +117,6 @@ typedef struct {
         *ctrl_endpoint;
 } thread_args_t;
 
-
-//  Local functions
 
 //  --------------------------------------------------------------------------
 //  Return current time (in microseconds)
@@ -267,6 +266,8 @@ s_send_heartbeat (rpc_t *rpc)
 
 
 //  --------------------------------------------------------------------------
+//  Main RPC client thread; this is what we talk to via other methods
+
 static void *
 s_rpc_thread (void *arg)
 {

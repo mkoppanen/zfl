@@ -4,20 +4,46 @@ zfl_base(7)
 
 NAME
 ----
-zfl_base - ZFL base class
+zfl_base - base class for ZFL
 
 
 SYNOPSIS
 --------
-*zfl_base_t *zfl_base_new (void);*
-*int zfl_base_method (zfl_base_t *base);
-*int zfl_base_test (void);*
-*void zfl_base_destroy (zfl_base_t **base_p);*
-
+----
+zfl_base_t *
+    zfl_base_new (void);
+void
+    zfl_base_destroy (zfl_base_t **self_p);
+int
+    zfl_base_filler (zfl_base_t *self);
+void
+    zfl_base_filler_set (zfl_base_t *self, int newvalue);
+int
+    zfl_base_test (Bool verbose);
+----
 
 DESCRIPTION
 -----------
-The _zfl_base_ class acts as a base class for all ZFL class-oriented modules.  Inheritence is done at edit time using a portable text-based workflow called "cut and paste".
+Provides manual template for new classes, and canonical style guidelines for all
+ZFL source code.
+
+
+EXAMPLE
+-------
+.From zfl_base_test method
+----
+zfl_base_t
+    *base;
+
+base = zfl_base_new ();
+assert (base);
+
+zfl_base_filler_set (base, 123);
+assert (zfl_base_filler (base) == 123);
+
+zfl_base_destroy (&base);
+assert (base == NULL);
+----
 
 
 SEE ALSO

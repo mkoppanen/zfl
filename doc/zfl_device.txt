@@ -9,21 +9,73 @@ zfl_device - configure a device or device socket
 
 SYNOPSIS
 --------
-*zfl_device_t *zfl_device_new (void);*
-*int zfl_device_method (zfl_device_t *device);*
-*int zfl_device_test (void);*
-*void zfl_device_destroy (zfl_device_t **device_p);*
+----
+zfl_device_t *
+    zfl_device_new (char *filename);
+void
+    zfl_device_destroy (zfl_device_t **self_p);
+void *
+    zfl_device_context (zfl_device_t *self);
+Bool
+    zfl_device_verbose (zfl_device_t *self);
+char *
+    zfl_device_locate (zfl_device_t *self, int index);
+char *
+    zfl_device_property (zfl_device_t *self, char *device_name, char *property);
+void *
+    zfl_device_socket (zfl_device_t *self, char *device, char *socket_name, int type);
+int
+    zfl_device_test (Bool verbose);
+----
 
 
 DESCRIPTION
 -----------
 Used to configure 0MQ devices and their sockets. Takes configuration data
 from a zfl_config object, and implements the rfc.zeromq.org/spec:5/zdcf
-specification. Configuration data must be either in JSON or in the ZPL
-format as defined by rfc.zeromq.org/spec:4/zpl. Use this class to for
-stand-alone devices. It is not suitable for built-in devices (i.e. which
-operate as threads of larger processes). See examples/zdevice.c for a
-working example.
+specification. Use this class to for stand-alone devices. Do not use for
+built-in devices (i.e. which operate as threads of larger processes). See
+examples/zdevice.c for a working example.
+
+
+EXAMPLE
+-------
+.From zfl_device_test method
+----
+//  Create a new device from the ZPL test file
+zfl_device_t *device = zfl_device_new ("zfl_device_test.txt");
+assert (device);
+
+//  Look for device that does not exist
+void *socket = zfl_device_socket (device, "nosuch", "socket", ZMQ_SUB);
+assert (socket == NULL);
+zmq_close (socket);
+
+//  Look for existing device, configure it
+char *main_device = zfl_device_locate (device, 0);
+assert (*main_device);
+assert (streq (main_device, "main"));
+
+char *type = zfl_device_property (device, main_device, "type");
+assert (*type);
+assert (streq (type, "zmq_queue"));
+
+char *endpoint = zfl_device_property (device, main_device, "frontend/endpoint");
+assert (*endpoint);
+assert (streq (endpoint, "valid-endpoint"));
+
+//  Configure two sockets
+void *frontend = zfl_device_socket (device, main_device, "frontend", ZMQ_SUB);
+assert (frontend);
+zmq_close (frontend);
+
+void *backend = zfl_device_socket (device, main_device, "backend", ZMQ_PUB);
+assert (backend);
+zmq_close (backend);
+
+zfl_device_destroy (&device);
+assert (device == NULL);
+----
 
 
 SEE ALSO

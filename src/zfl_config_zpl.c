@@ -241,7 +241,7 @@ s_process_line (zfl_config_t *root, char *start, int lineno)
 //    |
 //    v
 //  iothreads=1-->verbose=false
-//
+
 zfl_config_t *
 zfl_config_zpl (char *zpl_string)
 {
@@ -282,7 +282,7 @@ zfl_config_zpl (char *zpl_string)
 //  --------------------------------------------------------------------------
 //  Load ZPL data from specified text file.  Returns NULL if the file does
 //  not exist or can't be read by this process.
-//
+
 zfl_config_t *
 zfl_config_zpl_file (char *filename)
 {
@@ -303,7 +303,7 @@ zfl_config_zpl_file (char *filename)
 
 //  --------------------------------------------------------------------------
 //  Selftest
-//
+
 int
 zfl_config_zpl_test (Bool verbose)
 {

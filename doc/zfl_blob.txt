@@ -4,20 +4,67 @@ zfl_blob(7)
 
 NAME
 ----
-zfl_blob - work with opaque blobs
+zfl_blob - binary long object
 
 
 SYNOPSIS
 --------
-*zfl_blob_t *zfl_blob_new (void);*
-*int zfl_blob_method (zfl_blob_t *blob);
-*int zfl_blob_test (void);*
-*void zfl_blob_destroy (zfl_blob_t **blob_p);*
+----
+zfl_blob_t *
+    zfl_blob_new (void *data, size_t size);
+void
+    zfl_blob_destroy (zfl_blob_t **self_p);
+size_t
+    zfl_blob_load (zfl_blob_t *self, FILE *file);
+int
+    zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size);
+int
+    zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size);
+void *
+    zfl_blob_data (zfl_blob_t *self);
+size_t
+    zfl_blob_size (zfl_blob_t *self);
+int
+    zfl_blob_test (Bool verbose);
+
+----
 
 
 DESCRIPTION
 -----------
-The _zfl_blob_ class works with blobs.
+Manipulates opaque binary objects including reading and writing from/to files.
+Example use case is for loading config data from stdin or file for processing
+by zfl_config.
+
+
+EXAMPLE
+-------
+.From zfl_blob_test method
+----
+zfl_blob_t
+    *blob;
+char
+    *string = "This is a string";
+FILE
+    *file;
+
+blob = zfl_blob_new (NULL, 0);
+assert (blob);
+assert (zfl_blob_size (blob) == 0);
+
+file = fopen ("zfl_blob.c", "r");
+assert (file);
+assert (zfl_blob_load (blob, file));
+fclose (file);
+
+assert (zfl_blob_size (blob) > 0);
+zfl_blob_set_data (blob, string, strlen (string));
+assert (zfl_blob_size (blob) == strlen (string));
+assert (streq ((char *) (zfl_blob_data (blob)), string));
+
+zfl_blob_destroy (&blob);
+assert (blob == NULL);
+----
 
 
 SEE ALSO

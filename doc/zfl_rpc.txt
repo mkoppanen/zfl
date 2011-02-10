@@ -1,22 +1,73 @@
 zfl_rpc(7)
-===========
+==========
 
 
 NAME
 ----
-zfl_rpc - ZFL rpc class
+zfl_rpc - client side reliable RPC
 
 
 SYNOPSIS
 --------
-*zfl_rpc_t *zfl_rpc_new (void);*
-*int zfl_rpc_test (void);*
-*void zfl_rpc_destroy (zfl_rpc_t **rpc_p);*
+----
+zfl_rpc_t *
+    zfl_rpc_new (void *zmq_context);
+void
+    zfl_rpc_destroy (zfl_rpc_t **self_p);
+void
+    zfl_rpc_connect (zfl_rpc_t *self, char *server_id, char *endpoint);
+zfl_msg_t *
+    zfl_rpc_send (zfl_rpc_t *self, zfl_msg_t **request_p);
+int
+    zfl_rpc_test (Bool verbose);
+----
 
 
 DESCRIPTION
 -----------
-To be defined.
+Client side API for implementing reliable remote procedure calls.
+Use in conjunction with the zfl_rpcd class for the server side.
+
+
+EXAMPLE
+-------
+.Example RPC client application
+----
+#include "zfl.h"
+
+int main ()
+{
+    int major, minor, patch;
+    zmq_version (&major, &minor, &patch);
+    printf ("0MQ version is %d.%d.%d\n", major, minor, patch);
+    if ((major * 1000 + minor * 100 + patch) < 2100) {
+        printf ("E: need at least version 2.1.0\n");
+        exit (EXIT_FAILURE);
+    }
+    void *context = zmq_init (1);
+    assert (context);
+
+    zfl_rpc_t *rpc = zfl_rpc_new (context);
+    assert (rpc);
+
+    zfl_rpc_connect (rpc, "master", "tcp://127.0.0.1:5001");
+    zfl_rpc_connect (rpc, "slave", "tcp://127.0.0.1:5002");
+
+    int request_nbr;
+    for (request_nbr = 0; request_nbr < 100; request_nbr++) {
+        zfl_msg_t *request = zfl_msg_new ();
+        assert (request);
+        zfl_msg_body_set (request, "REQ");
+        zfl_msg_t *reply = zfl_rpc_send (rpc, &request);
+        assert (reply);
+        assert (zfl_msg_parts (reply) > 0);
+        printf ("I: response received (%s)\n", zfl_msg_body (reply));
+        zfl_msg_destroy (&reply);
+    }
+    zfl_rpc_destroy (&rpc);
+    zmq_term (context);
+}
+----
 
 
 SEE ALSO

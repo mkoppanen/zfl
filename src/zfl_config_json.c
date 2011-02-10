@@ -118,8 +118,7 @@ s_load_element (zfl_config_t *parent, cJSON *element)
 //    |
 //    v
 //  iothreads=1-->verbose=false
-//
-//
+
 zfl_config_t *
 zfl_config_json (char *json_string)
 {
@@ -146,7 +145,7 @@ zfl_config_json (char *json_string)
 //  --------------------------------------------------------------------------
 //  Load JSON data from specified text file.  Returns NULL if the file does
 //  not exist or can't be read by this process.
-//
+
 zfl_config_t *
 zfl_config_json_file (char *filename)
 {
@@ -167,7 +166,7 @@ zfl_config_json_file (char *filename)
 
 //  --------------------------------------------------------------------------
 //  Selftest
-//
+
 int
 zfl_config_json_test (Bool verbose)
 {

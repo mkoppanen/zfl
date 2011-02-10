@@ -4,19 +4,139 @@ zfl_msg(7)
 
 NAME
 ----
-zfl_msg - placeholder
+zfl_msg - multipart 0MQ message
 
 
 SYNOPSIS
 --------
-placeholder
+----
+zfl_msg_t *
+    zfl_msg_new (void);
+void
+    zfl_msg_destroy (zfl_msg_t **self_p);
+zfl_msg_t *
+    zfl_msg_dup (zfl_msg_t *self);
+zfl_msg_t *
+    zfl_msg_recv (void *socket);
+void
+    zfl_msg_send (zfl_msg_t **self, void *socket);
+size_t
+    zfl_msg_parts (zfl_msg_t *self);
+char
+    *zfl_msg_body (zfl_msg_t *self);
+size_t
+    zfl_msg_body_size (zfl_msg_t *self);
+void
+    zfl_msg_body_set (zfl_msg_t *self, char *body);
+void
+    zfl_msg_body_fmt (zfl_msg_t *self, char *format, ...);
+void
+    zfl_msg_push (zfl_msg_t *self, char *part);
+char
+    *zfl_msg_pop (zfl_msg_t *self);
+char
+    *zfl_msg_address (zfl_msg_t *self);
+void
+    zfl_msg_wrap (zfl_msg_t *self, char *address, char *delim);
+char
+    *zfl_msg_unwrap (zfl_msg_t *self);
+void
+    zfl_msg_dump (zfl_msg_t *self);
+int
+    zfl_msg_test (int verbose);
+----
 
 
 DESCRIPTION
 -----------
-placeholder
+Multipart message class for 0MQ applications.
+
+
+EXAMPLE
+-------
+.From zfl_msg_test method
+----
+zfl_msg_t
+    *zmsg;
+int rc;
+
+//  Prepare our context and sockets
+void *context = zmq_init (1);
+
+void *output = zmq_socket (context, ZMQ_XREQ);
+rc = zmq_bind (output, "ipc://zfl_msg_selftest.ipc");
+assert (rc == 0);
+void *input = zmq_socket (context, ZMQ_XREP);
+rc = zmq_connect (input, "ipc://zfl_msg_selftest.ipc");
+assert (rc == 0);
+
+//  Test send and receive of single-part message
+zmsg = zfl_msg_new ();
+assert (zmsg);
+zfl_msg_body_set (zmsg, "Hello");
+assert (strcmp (zfl_msg_body (zmsg), "Hello") == 0);
+zfl_msg_send (&zmsg, output);
+assert (zmsg == NULL);
+
+zmsg = zfl_msg_recv (input);
+assert (zfl_msg_parts (zmsg) == 2);
+if (verbose)
+    zfl_msg_dump (zmsg);
+assert (strcmp (zfl_msg_body (zmsg), "Hello") == 0);
+
+zfl_msg_destroy (&zmsg);
+assert (zmsg == NULL);
+
+//  Test send and receive of multi-part message
+zmsg = zfl_msg_new ();
+zfl_msg_body_set (zmsg, "Hello");
+zfl_msg_wrap     (zmsg, "address1", "");
+zfl_msg_wrap     (zmsg, "address2", NULL);
+assert (zfl_msg_parts (zmsg) == 4);
+zfl_msg_send (&zmsg, output);
+
+zmsg = zfl_msg_recv (input);
+if (verbose)
+    zfl_msg_dump (zmsg);
+assert (zfl_msg_parts (zmsg) == 5);
+assert (strlen (zfl_msg_address (zmsg)) == 33);
+free (zfl_msg_unwrap (zmsg));
+assert (strcmp (zfl_msg_address (zmsg), "address2") == 0);
+zfl_msg_body_fmt (zmsg, "%c%s", 'W', "orld");
+zfl_msg_send (&zmsg, output);
+
+zmsg = zfl_msg_recv (input);
+free (zfl_msg_unwrap (zmsg));
+assert (zfl_msg_parts (zmsg) == 4);
+assert (strcmp (zfl_msg_body (zmsg), "World") == 0);
+char *part;
+part = zfl_msg_unwrap (zmsg);
+assert (strcmp (part, "address2") == 0);
+free (part);
+
+//  Pull off address 1, check that empty part was dropped
+part = zfl_msg_unwrap (zmsg);
+assert (strcmp (part, "address1") == 0);
+assert (zfl_msg_parts (zmsg) == 1);
+free (part);
+
+//  Check that message body was correctly modified
+part = zfl_msg_pop (zmsg);
+assert (strcmp (part, "World") == 0);
+assert (zfl_msg_parts (zmsg) == 0);
+free (part);
+
+zfl_msg_destroy (&zmsg);
+assert (zmsg == NULL);
+
+zmq_close (input);
+zmq_close (output);
+
+zmq_term (context);
+----
+
 
 SEE ALSO
 --------
-placeholder
+linkzfl:zfl[7]
 

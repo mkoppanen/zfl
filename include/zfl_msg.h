@@ -32,27 +32,18 @@ extern "C" {
 //  Opaque class structure
 typedef struct _zfl_msg_t zfl_msg_t;
 
-//  Constructor and destructor
 zfl_msg_t *
     zfl_msg_new (void);
 void
     zfl_msg_destroy (zfl_msg_t **self_p);
-
-//  Duplicate message
 zfl_msg_t *
     zfl_msg_dup (zfl_msg_t *self);
-
-//  Receive and send message, wrapping new/destroy
 zfl_msg_t *
     zfl_msg_recv (void *socket);
 void
     zfl_msg_send (zfl_msg_t **self, void *socket);
-
-//  Report size of message
 size_t
     zfl_msg_parts (zfl_msg_t *self);
-
-//  Read and set message body part as C string
 char
     *zfl_msg_body (zfl_msg_t *self);
 size_t
@@ -61,26 +52,18 @@ void
     zfl_msg_body_set (zfl_msg_t *self, char *body);
 void
     zfl_msg_body_fmt (zfl_msg_t *self, char *format, ...);
-
-//  Generic push/pop message part off front
 void
     zfl_msg_push (zfl_msg_t *self, char *part);
 char
     *zfl_msg_pop (zfl_msg_t *self);
-
-//  Read and set message envelopes
 char
     *zfl_msg_address (zfl_msg_t *self);
 void
     zfl_msg_wrap (zfl_msg_t *self, char *address, char *delim);
 char
     *zfl_msg_unwrap (zfl_msg_t *self);
-
-//  Dump message to stderr, for debugging and tracing
 void
     zfl_msg_dump (zfl_msg_t *self);
-
-//  Selftest for the class
 int
     zfl_msg_test (int verbose);
 
