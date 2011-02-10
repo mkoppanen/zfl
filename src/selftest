@@ -3,5 +3,5 @@ echo "Rebuilding ZFL..."
 gcc -g -D_ZMALLOC_DEBUG=1 -o zfl_selftest zfl*.c -lzmq
 export MALLOC_TRACE=mtrace.txt
 echo "Starting selftests..."
-time zfl_selftest # -v
-mtrace zfl_selftest mtrace.txt
+time ./zfl_selftest # -v
+mtrace ./zfl_selftest mtrace.txt
