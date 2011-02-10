@@ -25,7 +25,6 @@
     =========================================================================
 */
 
-#include <zmq.h>
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_blob.h"
 #include "../include/zfl_config.h"
