@@ -449,9 +449,9 @@ zfl_rpc_new (void *zmq_context)
     //  Allow any number of RPC clients to exist in our process
 	srandom ((unsigned) time (NULL));
     while (1) {
-        long id = within (0x100000000);
-        sprintf (data_endpoint, "inproc://rpc/%08lX/data", id);
-        sprintf (ctrl_endpoint, "inproc://rpc/%08lX/ctrl", id);
+        int port_number = randof (0x10000);
+        sprintf (data_endpoint, "inproc://rpc/%04X/data", port_number);
+        sprintf (ctrl_endpoint, "inproc://rpc/%04X/ctrl", port_number);
         rc = zmq_bind (self->data_socket, data_endpoint);
         if (rc == 0)
             break;

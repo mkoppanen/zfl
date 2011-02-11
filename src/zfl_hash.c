@@ -415,7 +415,7 @@ zfl_hash_test (int verbose)
 
     srandom ((unsigned) time (NULL));
     for (iteration = 0; iteration < 25000; iteration++) {
-        testnbr = within (testmax);
+        testnbr = randof (testmax);
         if (testset [testnbr].exists) {
             value = zfl_hash_lookup (hash, testset [testnbr].name);
             assert (value);
