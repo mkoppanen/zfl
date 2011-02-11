@@ -238,14 +238,13 @@
 //- System-specific include files -------------------------------------------
 
 #if (defined (__MSDOS__))
-#   if (defined (__WINDOWS__))          //  When __WINDOWS__ is defined,
-#       if (defined (FD_SETSIZE))
-#           error "winsock.h must not be included before base.h"
+#   if (defined (__WINDOWS__))
+#       if (!defined (FD_SETSIZE))
+#           define FD_SETSIZE 1024      //  Max. filehandles/sockets
 #       endif
-#       define FD_SETSIZE     1024      //  Max. filehandles/sockets
 #       include <direct.h>
 #       include <windows.h>
-#       include <winsock.h>             //  May cause trouble on VC 1.x
+#       include <winsock.h>
 #       include <process.h>
 #   endif
 #   include <malloc.h>
@@ -456,8 +455,16 @@ typedef enum {
     typedef unsigned long ulong;
     typedef unsigned int  uint;
     typedef __int64 int64_t;
+   typedef unsigned __int64 uint64_t;
 #elif (defined (__VMS__))
     typedef __int64 int64_t;
+   typedef unsigned __int64 uint64_t;
+#endif
+
+//  POSIX functions that are mispronounced in various dialects
+
+#if (defined (__WINDOWS__))
+#  define srandom srand
 #endif
 
 /*  On most systems, 'timezone' is an external long variable.  On a few, it

@@ -50,7 +50,7 @@ struct _zfl_list {
 //  List constructor
 
 zfl_list_t *
-zfl_list_new ()
+zfl_list_new (void)
 {
     zfl_list_t *self = (zfl_list_t *) zmalloc (sizeof (zfl_list_t));
     return self;

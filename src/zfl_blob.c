@@ -44,12 +44,12 @@ struct _zfl_blob_t {
 //  Constructor
 
 zfl_blob_t *
-zfl_blob_new (void *data, size_t size)
+zfl_blob_new (byte *data, size_t size)
 {
     zfl_blob_t
         *self;
 
-    self = zmalloc (sizeof (zfl_blob_t));
+    self = (zfl_blob_t *) zmalloc (sizeof (zfl_blob_t));
     if (data)
         zfl_blob_set_data (self, data, size);
 
@@ -93,7 +93,7 @@ zfl_blob_load (zfl_blob_t *self, FILE *file)
         assert (size >= 0);
 
         //  Read file data, and then reset file position
-        char *buffer = malloc (size);
+        byte *buffer = (byte *) malloc (size);
         fseek (file, 0, SEEK_SET);
         size_t rc = fread (buffer, 1, size, file);
         assert (rc == size);
@@ -117,7 +117,7 @@ zfl_blob_load (zfl_blob_t *self, FILE *file)
 //      zfl_blob_set_data (blob, object, sizeof (*object));
 
 int
-zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size)
+zfl_blob_set_data (zfl_blob_t *self, byte *data, size_t size)
 {
     assert (self);
 
@@ -125,7 +125,7 @@ zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size)
     self->dptr = NULL;          //  No data reference
     self->size = size;
     if (data) {
-        self->data = malloc (size + 1);
+        self->data = (byte *) malloc (size + 1);
         memcpy (self->data, data, size);
         self->data [size] = 0;
     }
@@ -144,7 +144,7 @@ zfl_blob_set_data (zfl_blob_t *self, void *data, size_t size)
 //      zfl_blob_set_dptr (blob, object, sizeof (*object));
 
 int
-zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size)
+zfl_blob_set_dptr (zfl_blob_t *self, byte *data, size_t size)
 {
     assert (self);
 
@@ -159,7 +159,7 @@ zfl_blob_set_dptr (zfl_blob_t *self, void *data, size_t size)
 //  --------------------------------------------------------------------------
 //  Returns pointer to blob data.
 
-void *
+byte *
 zfl_blob_data (zfl_blob_t *self)
 {
     assert (self);
@@ -202,7 +202,7 @@ zfl_blob_test (Bool verbose)
     fclose (file);
 
     assert (zfl_blob_size (blob) > 0);
-    zfl_blob_set_data (blob, string, strlen (string));
+    zfl_blob_set_data (blob, (byte *) string, strlen (string));
     assert (zfl_blob_size (blob) == strlen (string));
     assert (streq ((char *) (zfl_blob_data (blob)), string));
 

@@ -131,11 +131,11 @@ s_now (void)
     assert (rc == 0);
     return (uint64_t) tv.tv_sec * 1000000 + tv.tv_usec;
 #elif (defined (__WINDOWS__))
-	SYSTEMTIME st;
-	GetSystemTime (&st);
-	return (uint64_t) st.wSecond * 1000000 + st.wMilliseconds * 1000;
+    SYSTEMTIME st;
+    GetSystemTime (&st);
+    return (uint64_t) st.wSecond * 1000000 + st.wMilliseconds * 1000;
 #else
-#	error "zfl_rpc does not compile on this system"
+#   error "zfl_rpc does not compile on this system"
 #endif
 }
 
