@@ -251,9 +251,9 @@
 #   include <dos.h>
 #   include <io.h>
 #   include <fcntl.h>
-#   include <sys\types.h>
-#   include <sys\stat.h>
-#   include <sys\utime.h>
+#   include <sys/types.h>
+#   include <sys/stat.h>
+#   include <sys/utime.h>
 #   include <share.h>
 #   if _MSC_VER == 1500
 #       ifndef _CRT_SECURE_NO_DEPRECATE

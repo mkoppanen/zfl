@@ -39,6 +39,7 @@ AC_SUBST(LTVER)
 
 # Checks for programs.
 AC_PROG_CC
+AC_PROG_CC_C99
 AC_PROG_CXX
 AM_PROG_CC_C_O
 AC_LIBTOOL_WIN32_DLL
@@ -101,7 +102,7 @@ CPPFLAGS="-D_REENTRANT -D_THREAD_SAFE $CPPFLAGS"
 case "${host_os}" in
     *linux*)
         # Define on Linux to enable all library features
-        CPPFLAGS="-D_GNU_SOURCE $CPPFLAGS"
+        CPPFLAGS="-D_GNU_SOURCE -DLINUX $CPPFLAGS"
         AC_DEFINE(ZFL_HAVE_LINUX, 1, [Have Linux OS])
         AC_CHECK_LIB(uuid, main, ,
             [AC_MSG_ERROR([cannot link with -luuid, install uuid-dev.])])
@@ -195,7 +196,6 @@ case "${host_os}" in
             [AC_MSG_ERROR([cannot link with rpcrt4.dll.])])
         AC_CHECK_LIB(iphlpapi, main, ,
             [AC_MSG_ERROR([cannot link with iphlpapi.dll.])])
-        CFLAGS="${CFLAGS} -std=c99"
         on_mingw32="yes"
         install_man="no"
         ;;
@@ -259,7 +259,7 @@ fi
 
 # These options are GNU compiler specific.
 if test "x$gnu_compilers" = "xyes"; then
-    CPPFLAGS="-Wall $CPPFLAGS -std=c99 -DLINUX -Wno-unused"
+    CPPFLAGS="-Wall -Wno-unused $CPPFLAGS"
     if test "x$pedantic" = "xyes"; then
         CPPFLAGS="-pedantic $CPPFLAGS"
     fi
