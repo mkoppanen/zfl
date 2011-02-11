@@ -54,6 +54,31 @@ else
     gnu_compilers="no"
 fi
 
+# libzmq
+AC_ARG_WITH([libzmq],
+            [AS_HELP_STRING([--with-libzmq],
+                            [Specify libzmq prefix (default=/usr /usr/local)])],
+            [],
+            [zfl_search_libzmq="yes"])
+
+if test "x$zfl_search_libzmq" = "xyes"; then
+    if test "x${PKG_CONFIG_PATH}" != "x"; then
+        export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"
+    else
+        export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"
+    fi
+else
+    export PKG_CONFIG_PATH="${with_libzmq}:${with_libzmq}/lib/pkgconfig"
+fi
+
+PKG_CHECK_MODULES([libzmq],
+                  [libzmq],
+                  [],
+                  [AC_MSG_ERROR([libzmq not found. Use --with-libzmq to specify libzmq prefix])])
+
+CFLAGS="${libzmq_CFLAGS} ${CFLAGS}"
+LDFLAGS="${libzmq_LIBS} ${LDFLAGS}"
+
 # Checks for libraries.
 AC_CHECK_LIB([pthread], [pthread_create])
 AC_CHECK_LIB(zmq, zmq_init, ,[AC_MSG_ERROR([can't link with -lzmq, install ZeroMQ.])])
