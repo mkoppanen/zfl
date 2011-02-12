@@ -28,6 +28,7 @@
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_blob.h"
 #include "../include/zfl_config.h"
+#include "../include/zfl_config_zpl.h"
 
 //  Store name and value in zfl_config_t config
 static int

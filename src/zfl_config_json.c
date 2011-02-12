@@ -29,6 +29,7 @@
 #include "../include/zfl_prelude.h"
 #include "../include/zfl_blob.h"
 #include "../include/zfl_config.h"
+#include "../include/zfl_config_json.h"
 
 //  Import the cJSON library
 #include "import/cJSON/cJSON.h"
