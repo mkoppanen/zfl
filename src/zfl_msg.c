@@ -475,10 +475,10 @@ zfl_msg_test (int verbose)
     void *context = zmq_init (1);
 
     void *output = zmq_socket (context, ZMQ_XREQ);
-    rc = zmq_bind (output, "ipc://zfl_msg_selftest.ipc");
+   rc = zmq_bind (output, "tcp://*:5055");
     assert (rc == 0);
     void *input = zmq_socket (context, ZMQ_XREP);
-    rc = zmq_connect (input, "ipc://zfl_msg_selftest.ipc");
+   rc = zmq_connect (input, "tcp://localhost:5055");
     assert (rc == 0);
 
     //  Test send and receive of single-part message

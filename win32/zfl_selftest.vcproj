@@ -62,7 +62,7 @@
            <Tool
                Name="VCLinkerTool"
                AdditionalDependencies="zfl.lib ..\..\zeromq2\lib\libzmq.lib"
-               LinkIncremental="1"
+               LinkIncremental="2"
                GenerateDebugInformation="true"
                SubSystem="1"
                TargetMachine="1"
@@ -176,6 +176,14 @@
            <File
                RelativePath="..\src\zfl_selftest.c"
                >
+               <FileConfiguration
+                   Name="Debug|Win32"
+                   >
+                   <Tool
+                       Name="VCCLCompilerTool"
+                       CompileAs="2"
+                   />
+               </FileConfiguration>
            </File>
        </Filter>
    </Files>

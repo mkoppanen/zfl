@@ -222,6 +222,10 @@ zfl_device_socket (
             else
             if (streq (name, "option"))
                 rc = s_setsockopt (self, socket, config);
+           if (rc == -1) {
+               puts (name);
+               puts (zfl_config_string (config));
+           }
             //
             //  else ignore it, user space setting
 

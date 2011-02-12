@@ -18,7 +18,7 @@ main
             hwm = 1000
             swap = 25000000
         bind = inproc://addr1
-        bind = ipc://addr3
+        bind = tcp://*:5055
         endpoint = valid-endpoint
     backend
         bind = inproc://addr3

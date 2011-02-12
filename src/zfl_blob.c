@@ -96,7 +96,13 @@ zfl_blob_load (zfl_blob_t *self, FILE *file)
         byte *buffer = (byte *) malloc (size);
         fseek (file, 0, SEEK_SET);
         size_t rc = fread (buffer, 1, size, file);
+#if (defined (__UNIX__))
         assert (rc == size);
+#elif (defined (__WINDOWS__))
+       //  Windows will not count CRs in text files
+        assert (rc <= (size_t) size);
+       size = rc;
+#endif
         fseek (file, posn, SEEK_SET);
 
         zfl_blob_set_data (self, buffer, size);

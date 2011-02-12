@@ -72,7 +72,7 @@ static char *
 s_collect_name (char **start, int lineno)
 {
     char *readptr = *start;
-    while (isalnum (**start) || **start == '/')
+    while (isalnum ((byte) **start) || (byte) **start == '/')
         (*start)++;
 
     size_t length = *start - readptr;
@@ -93,7 +93,7 @@ static int
 s_verify_eoln (char *readptr, int lineno)
 {
     while (*readptr) {
-        if (isspace (*readptr))
+        if (isspace ((byte) *readptr))
             readptr++;
         else
         if (*readptr == '#')
@@ -118,12 +118,12 @@ s_collect_value (char **start, int lineno)
     char *readptr = *start;
     int rc = 0;
 
-    while (isspace (*readptr))
+    while (isspace ((byte) *readptr))
         readptr++;
 
     if (*readptr == '=') {
         readptr++;
-        while (isspace (*readptr))
+        while (isspace ((byte) *readptr))
             readptr++;
 
         //  If value starts with quote or apost, collect it
@@ -145,7 +145,7 @@ s_collect_value (char **start, int lineno)
             //  Collect unquoted value up to comment
             char *comment = strchr (readptr, '#');
             if (comment) {
-                while (isspace (comment [-1]))
+                while (isspace ((byte) comment [-1]))
                     comment--;
                 *comment = 0;
             }
@@ -175,7 +175,7 @@ s_process_line (zfl_config_t *root, char *start, int lineno)
 
     //  Strip whitespace off end of line
     int length = strlen (start);
-    while (isspace (start [length - 1]))
+    while (isspace ((byte) start [length - 1]))
         start [--length] = 0;
 
     //  Collect indentation level and name, if any
