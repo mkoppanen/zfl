@@ -64,7 +64,7 @@ zfl_config_new (char *name, zfl_config_t *parent)
     zfl_config_t
         *self;
 
-    self = zmalloc (sizeof (zfl_config_t));
+    self = (zfl_config_t *) zmalloc (sizeof (zfl_config_t));
     zfl_config_set_name (self, name);
     if (parent) {
         if (parent->child) {
