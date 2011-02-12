@@ -13,27 +13,29 @@
 
 **<a href="#toc2-41">Using ZFL</a>**
 &emsp;<a href="#toc3-44">Building and Installing</a>
-&emsp;<a href="#toc3-64">Linking with an Application</a>
-&emsp;<a href="#toc3-75">The Class Model</a>
-&emsp;<a href="#toc3-108">ZFL Classes</a>
-&emsp;<a href="#toc3-124">Predefined Macros</a>
-&emsp;<a href="#toc3-165">Error Handling</a>
+&emsp;<a href="#toc3-66">Linking with an Application</a>
+&emsp;<a href="#toc3-77">The Class Model</a>
+&emsp;<a href="#toc3-110">ZFL Classes</a>
+&emsp;<a href="#toc3-126">Predefined Macros</a>
+&emsp;<a href="#toc3-167">Error Handling</a>
 
-**<a href="#toc2-170">Design Ideology</a>**
-&emsp;<a href="#toc3-173">The Problem with C</a>
-&emsp;<a href="#toc3-182">A Simple Class Model</a>
-&emsp;<a href="#toc3-209">Naming Style</a>
-&emsp;<a href="#toc3-218">Containers</a>
-&emsp;<a href="#toc3-230">Inheritance</a>
-&emsp;<a href="#toc3-239">Portability</a>
-&emsp;<a href="#toc3-265">Technical Aspects</a>
+**<a href="#toc2-172">Design Ideology</a>**
+&emsp;<a href="#toc3-175">The Problem with C</a>
+&emsp;<a href="#toc3-184">A Simple Class Model</a>
+&emsp;<a href="#toc3-211">Naming Style</a>
+&emsp;<a href="#toc3-220">Containers</a>
+&emsp;<a href="#toc3-232">Inheritance</a>
+&emsp;<a href="#toc3-241">Portability</a>
+&emsp;<a href="#toc3-267">Technical Aspects</a>
 
-**<a href="#toc2-281">Under the Hood</a>**
-&emsp;<a href="#toc3-284">Adding a New Class</a>
-&emsp;<a href="#toc3-295">Coding Style</a>
-&emsp;<a href="#toc3-300">Porting ZFL</a>
-&emsp;<a href="#toc3-313">Memory Leak Testing</a>
-&emsp;<a href="#toc3-326">This Document</a>
+**<a href="#toc2-283">Under the Hood</a>**
+&emsp;<a href="#toc3-286">Adding a New Class</a>
+&emsp;<a href="#toc3-297">Coding Style</a>
+&emsp;<a href="#toc3-305">Assertions</a>
+&emsp;<a href="#toc3-323">Documentation</a>
+&emsp;<a href="#toc3-328">Porting ZFL</a>
+&emsp;<a href="#toc3-341">Memory Leak Testing</a>
+&emsp;<a href="#toc3-354">This Document</a>
 
 <A name="toc2-11" title="Overview" />
 ## Overview
@@ -81,14 +83,16 @@ ZFL uses autotools for packaging. To build from git (all example commands are fo
     sudo make install
     sudo ldconfig
 
-You will need the pkg-config, libtool, and autoreconf packages. Set the LD_LIBRARY_PATH to /usr/local/libs unless you install elsewhere.
+You will need the pkg-config, libtool, and autoreconf packages. Set the LD_LIBRARY_PATH to /usr/local/libs unless you install elsewhere. On FreeBSD, you may need to specify the default directories for configure:
+
+    CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib" ./configure
 
 After building, you can run the ZFL selftests:
 
     cd src
     ./zfl_selftest
 
-<A name="toc3-64" title="Linking with an Application" />
+<A name="toc3-66" title="Linking with an Application" />
 ### Linking with an Application
 
 Include `zfl.h` in your application and link with libzfl. Here is a typical gcc link command:
@@ -99,7 +103,7 @@ You should read `zfl.h`. This file includes `zmq.h` and the system header files 
 
     c -lzfl -lzmq -l myapp
 
-<A name="toc3-75" title="The Class Model" />
+<A name="toc3-77" title="The Class Model" />
 ### The Class Model
 
 ZFL consists of classes, each class consisting of a .h and a .c. Classes may depend on other classes.
@@ -132,7 +136,7 @@ Private/static functions in a class are named `s_functionname` and are not expor
 
 All classes have a test method called `zfl_classname_test`.
 
-<A name="toc3-108" title="ZFL Classes" />
+<A name="toc3-110" title="ZFL Classes" />
 ### ZFL Classes
 
 These are the existing ZFL classes:
@@ -148,7 +152,7 @@ These are the existing ZFL classes:
 * zfl_rpc - client side reliable RPC
 * zfl_thread - work with operating system threads
 
-<A name="toc3-124" title="Predefined Macros" />
+<A name="toc3-126" title="Predefined Macros" />
 ### Predefined Macros
 
 The file zfl_prelude.h defines a number of macros including these:
@@ -189,15 +193,15 @@ The file zfl_prelude.h defines a number of macros including these:
     #    define FALSE       0
     #endif
 
-<A name="toc3-165" title="Error Handling" />
+<A name="toc3-167" title="Error Handling" />
 ### Error Handling
 
 Functions that create or search objects return object references success and NULL on failure.  Functions that perform work return 0 on success and -1 on failure.
 
-<A name="toc2-170" title="Design Ideology" />
+<A name="toc2-172" title="Design Ideology" />
 ## Design Ideology
 
-<A name="toc3-173" title="The Problem with C" />
+<A name="toc3-175" title="The Problem with C" />
 ### The Problem with C
 
 C has the significant advantage of being a small language that, if we take a little care with formatting and naming, can be easily interchanged between developers. Every C developer will use much the same 90% of the language. Larger languages like C++ provide powerful abstractions like STL containers but at the cost of interchange. Every C++ developer will use a different 20% of the language.
@@ -206,7 +210,7 @@ The huge problem with C is that any realistic application needs packages of func
 
 The answer to this, as we learned from building enterprise-level C applications at iMatix from 1995-2005, is to create our own fully portable, high-quality libraries of pre-packaged functionality, in C. Doing this right solves both the requirements of richness of the language, and of portability of the final applications.
 
-<A name="toc3-182" title="A Simple Class Model" />
+<A name="toc3-184" title="A Simple Class Model" />
 ### A Simple Class Model
 
 C has no standard API style. It is one thing to write a useful component, but something else to provide an API that is consistent and obvious across many components. We learned from building [OpenAMQ](http://www.openamq.org), a messaging client and server of 0.5M LoC, that a consistent model for extending C makes life for the application developer much easier.
@@ -233,7 +237,7 @@ No model is fully consistent, and classes can define their own rules if it helps
 
 * While every class has a _destroy method that is the formal destructor, some methods may also act as destructors. For example, a method that sends an object may also destroy the object (so that ownership of any buffers can passed to background threads). Such methods take the same "pointer to a reference" argument as the _destroy method.
 
-<A name="toc3-209" title="Naming Style" />
+<A name="toc3-211" title="Naming Style" />
 ### Naming Style
 
 ZFL aims for short, consistent names, following the theory that names we use most often should be shortest. Classes get one-word names, unless they are part of a family of classes in which case they may be two words, the first being the family name. Methods, similarly, get one-word names and we aim for consistency across classes (so a method that does something semantically similar in two classes will get the same name in both). So the canonical name for any method is:
@@ -242,7 +246,7 @@ ZFL aims for short, consistent names, following the theory that names we use mos
 
 And the reader can easily parse this without needing special syntax to separate the class name from the method name.
 
-<A name="toc3-218" title="Containers" />
+<A name="toc3-220" title="Containers" />
 ### Containers
 
 After a long experiment with containers, we've decided that we need exactly two containers:
@@ -254,7 +258,7 @@ These are zfl_list and zfl_hash, respectively. Both store void pointers, with no
 
 We assume that at some point we'll need to switch to a doubly-linked list.
 
-<A name="toc3-230" title="Inheritance" />
+<A name="toc3-232" title="Inheritance" />
 ### Inheritance
 
 ZFL provides two ways to do inheritance from base classes to higher level classes. First, by code copying. You may laugh but it works. The zfl_base class defines a basic syntactic structure. If we decide to change some of the ground rules shared by all classes, we modify the zfl_base class and then we manually make the same modifications in all other ZFL classes. Obviously as the number of classes in ZFL grows this becomes progressively harder, which is good: we don't want the basics to change more than they need to.
@@ -263,7 +267,7 @@ The second way is by straight encapsulation. For example if I want to make a spe
 
 Writing such code by hand may seem laborious but when we work with ruthlessly consistent style and semantics, it is easy, safe, and often the shortest path from problem to solution.
 
-<A name="toc3-239" title="Portability" />
+<A name="toc3-241" title="Portability" />
 ### Portability
 
 Creating a portable C application can be rewarding in terms of maintaining a single code base across many platforms, and keeping (expensive) system-specific knowledge separate from application developers. In most projects (like ØMQ core), there is no portability layer and application code does conditional compilation for all mixes of platforms. This leads to quite messy code.
@@ -289,7 +293,7 @@ An example of the last:
 
 ZFL uses the GNU autotools system, so non-portable code can use the macros this defines. It can also use macros defined by the zfl_prelude.h header file.
 
-<A name="toc3-265" title="Technical Aspects" />
+<A name="toc3-267" title="Technical Aspects" />
 ### Technical Aspects
 
 * *Thread safety*: the use of opaque structures is thread safe, though ØMQ applications should not share state between threads in any case.
@@ -305,10 +309,10 @@ ZFL uses the GNU autotools system, so non-portable code can use the macros this 
     zfl_selftest
     mtrace zfl_selftest mtrace.txt
 
-<A name="toc2-281" title="Under the Hood" />
+<A name="toc2-283" title="Under the Hood" />
 ## Under the Hood
 
-<A name="toc3-284" title="Adding a New Class" />
+<A name="toc3-286" title="Adding a New Class" />
 ### Adding a New Class
 
 If you define a new ZFL class `myclass` you need to:
@@ -319,12 +323,38 @@ If you define a new ZFL class `myclass` you need to:
 * Add a reference documentation to 'doc/zfl_myclass.txt'.
 * Add myclass to 'src/Makefile.am` and `doc/Makefile.am`.
 
-<A name="toc3-295" title="Coding Style" />
+<A name="toc3-297" title="Coding Style" />
 ### Coding Style
 
-In general the zfl_base class defines the style for the whole library. The overriding rule for coding style is consistency.
+In general the zfl_base class defines the style for the whole library. The overriding rule for coding style is consistency. We use the C99 standard for syntax including principally:
 
-<A name="toc3-300" title="Porting ZFL" />
+* The // comment style.
+* Variables mixed with code.
+
+<A name="toc3-305" title="Assertions" />
+### Assertions
+
+We use assertions heavily to catch bad argument values. The ZFL classes do not attempt to validate arguments and report errors; bad arguments are treated as fatal application programming errors.
+
+We also use assertions heavily on calls to system functions that are never supposed to fail, where failure is to be treated as a fatal non-recoverable error (e.g. running out of memory).
+
+Assertion code should always take this form:
+
+    int rc = some_function (arguments);
+    assert (rc == 0);
+
+Rather than the side-effect form:
+
+    assert (some_function (arguments) == 0);
+
+Since assertions may be removed by an optimizing compiler.
+
+<A name="toc3-323" title="Documentation" />
+### Documentation
+
+Each ZFL class has its own man page in the doc directory. The contents of the man page are cut/paste from the class header and source files. Please maintain the doc file as you add new methods or modify the class test method (which for most classes acts as the EXAMPLE code).
+
+<A name="toc3-328" title="Porting ZFL" />
 ### Porting ZFL
 
 When you try ZFL on an OS that it's not been used on (ever, or for a while), you will hit code that does not compile. In some cases the patches are trivial, in other cases (usually when porting to Windows), the work needed to build equivalent functionality may be quite heavy. In any case, the benefit is that once ported, the functionality is available to all applications.
@@ -337,7 +367,7 @@ Before attempting to patch code for portability, please read the `zfl_prelude.h`
 
 The canonical 'standard operating system' for all ZFL code is Linux, gcc, POSIX.
 
-<A name="toc3-313" title="Memory Leak Testing" />
+<A name="toc3-341" title="Memory Leak Testing" />
 ### Memory Leak Testing
 
 To test against memory leaks we use the mtrace tool under Linux. The zfl_selftest.c program calls MALLOC_TRACE, which zfl_prelude.h sets to mtrace() under Linux. This is how we build and run the selftests with mtrace:
@@ -350,7 +380,7 @@ To test against memory leaks we use the mtrace tool under Linux. The zfl_selftes
 
 Note that mtrace is not threadsafe and will not work consistently in multithreaded applications or test cases. All test cases should therefore be single-threaded.
 
-<A name="toc3-326" title="This Document" />
+<A name="toc3-354" title="This Document" />
 ### This Document
 
 This document is originally at README.txt and is built using [gitdown](http://github.com/imatix/gitdown).
