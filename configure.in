@@ -56,6 +56,23 @@ fi
 
 # Checks for libraries.
 AC_CHECK_LIB([pthread], [pthread_create])
+
+# zmq location
+AC_ARG_WITH([libzmq],
+            [AS_HELP_STRING([--with-libzmq],
+                            [Specify libzmq prefix])],
+            [zfl_search_libzmq="yes"],
+            [])
+
+if test "x$zfl_search_libzmq" = "xyes"; then
+    if test -r "${with_libzmq}/include/zmq.h"; then
+        CFLAGS="-I${with_libzmq}/include ${CFLAGS}"
+        LDFLAGS="-L${with_libzmq}/lib ${LDFLAGS}"
+    else
+        AC_MSG_ERROR([${with_libzmq}/include/zmq.h not found. Please check libzmq prefix])
+    fi
+fi
+
 AC_CHECK_LIB(zmq, zmq_init, ,[AC_MSG_ERROR([can't link with -lzmq, install ZeroMQ.])])
 
 # Extra CXXFLAGS are appended at the end of CXXFLAGS for libzfl.
@@ -104,8 +121,6 @@ case "${host_os}" in
         # Define on Linux to enable all library features
         CPPFLAGS="-D_GNU_SOURCE -DLINUX $CPPFLAGS"
         AC_DEFINE(ZFL_HAVE_LINUX, 1, [Have Linux OS])
-        AC_CHECK_LIB(uuid, main, ,
-            [AC_MSG_ERROR([cannot link with -luuid, install uuid-dev.])])
         ;;
     *solaris*)
         # Define on Solaris to enable all library features
@@ -114,8 +129,6 @@ case "${host_os}" in
         AC_CHECK_LIB(socket, main)
         AC_CHECK_LIB(nsl, main)
         AC_CHECK_LIB(rt, main)
-        AC_CHECK_LIB(uuid, main, ,
-            [AC_MSG_ERROR([cannot link with -luuid, install uuid-dev.])])
         AC_MSG_CHECKING([whether atomic operations can be used])
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
             [[#include <atomic.h>]],
@@ -203,11 +216,6 @@ case "${host_os}" in
         # Define on Cygwin to enable all library features
         CPPFLAGS="-D_GNU_SOURCE $CPPFLAGS"
         AC_DEFINE(ZFL_HAVE_CYGWIN, 1, [Have Cygwin])
-        # Cygwin provides libuuid as part of the e2fsprogs package, and somewhat
-        # uselessly installs the library in /usr/lib/e2fsprogs
-        LDFLAGS="${LDFLAGS} -L/usr/lib/e2fsprogs"
-        AC_CHECK_LIB(uuid, uuid_generate, ,
-            [AC_MSG_ERROR([cannot link with -luuid, install the e2fsprogs package.])])
         ;;
     *)
         AC_MSG_ERROR([unsupported system: ${host_os}.])
