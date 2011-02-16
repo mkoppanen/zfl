@@ -10,4 +10,4 @@ for i in zfl_*.c; do
 done
 
 cd ..
-gcovr --xml --output=coverage.xml -e import/cJSON/cJSON.c -r src/
+gcovr --xml --output=src/coverage.xml -e import/cJSON/cJSON.c -r src/
