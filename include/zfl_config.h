@@ -71,8 +71,6 @@ int
     zfl_config_execute (zfl_config_t *self, zfl_config_fct handler, void *arg);
 int
     zfl_config_dump (zfl_config_t *self);
-int
-    zfl_config_test (Bool verbose);
 
 #ifdef __cplusplus
 }

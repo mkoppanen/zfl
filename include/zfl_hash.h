@@ -53,8 +53,6 @@ size_t
     zfl_hash_size (zfl_hash_t *self);
 int
     zfl_hash_apply (zfl_hash_t *self, zfl_hash_apply_fn *callback, void *argument);
-void
-    zfl_hash_test (int verbose);
 
 #ifdef __cplusplus
 }

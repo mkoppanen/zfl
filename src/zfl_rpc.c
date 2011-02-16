@@ -529,39 +529,3 @@ zfl_rpc_send (zfl_rpc_t *self, zfl_msg_t **request_p)
     zfl_msg_t *reply = zfl_msg_recv (self->data_socket);
     return reply;
 }
-
-
-//  --------------------------------------------------------------------------
-//  Selftest
-
-int
-zfl_rpc_test (Bool verbose)
-{
-    zfl_rpc_t
-        *rpc;
-
-    printf (" * zfl_rpc: ");
-
-    int major, minor, patch;
-    zmq_version (&major, &minor, &patch);
-    if ((major * 1000 + minor * 100 + patch) < 2100) {
-        printf ("E: need at least 0MQ version 2.1.0\n");
-        exit (EXIT_FAILURE);
-    }
-    void *context = zmq_init (1);
-    assert (context);
-
-    rpc = zfl_rpc_new (context);
-    assert (rpc);
-    zfl_rpc_connect (rpc, "master", "tcp://127.0.0.1:5001");
-    zfl_rpc_connect (rpc, "slave", "tcp://127.0.0.1:5002");
-
-    //  Don't actually send any data since the server won't be there
-
-    zfl_rpc_destroy (&rpc);
-    assert (rpc == NULL);
-
-    zmq_term (context);
-    printf ("OK\n");
-    return 0;
-}

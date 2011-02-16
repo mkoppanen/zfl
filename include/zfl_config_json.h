@@ -34,8 +34,6 @@ zfl_config_t *
     zfl_config_json (char *json_string);
 zfl_config_t *
     zfl_config_json_file (char *filename);
-int
-    zfl_config_json_test (Bool verbose);
 
 #ifdef __cplusplus
 }

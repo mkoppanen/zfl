@@ -478,38 +478,3 @@ zfl_rpcd_send (zfl_rpcd_t *self, zfl_msg_t **msg_p)
     if (self)
         zfl_msg_send (msg_p, self->data_socket);
 }
-
-
-//  --------------------------------------------------------------------------
-//  Selftest
-
-int
-zfl_rpcd_test (Bool verbose)
-{
-    zfl_rpcd_t
-        *rpcd;
-
-    printf (" * zfl_rpcd: ");
-
-    int major, minor, patch;
-    zmq_version (&major, &minor, &patch);
-    if ((major * 1000 + minor * 100 + patch) < 2100) {
-        printf ("E: need at least 0MQ version 2.1.0\n");
-        exit (EXIT_FAILURE);
-    }
-    void *context = zmq_init (1);
-    assert (context);
-
-    rpcd = zfl_rpcd_new (context, "master");
-    assert (rpcd);
-    zfl_rpcd_bind (rpcd, "tcp://*:5001");
-
-    //  Don't actually wait for input since the client won't be there
-
-    zfl_rpcd_destroy (&rpcd);
-    assert (rpcd == NULL);
-
-    zmq_term (context);
-    printf ("OK\n");
-    return 0;
-}

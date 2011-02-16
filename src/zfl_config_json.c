@@ -162,23 +162,3 @@ zfl_config_json_file (char *filename)
     else
         return NULL;
 }
-
-
-//  --------------------------------------------------------------------------
-//  Selftest
-
-int
-zfl_config_json_test (Bool verbose)
-{
-    printf (" * zfl_config_json: ");
-
-    zfl_config_t *config = zfl_config_json_file ("zfl_config_test.json");
-    if (verbose) {
-        puts ("");
-        zfl_config_save (config, "-");
-    }
-    zfl_config_destroy (&config);
-
-    printf ("OK\n");
-    return 0;
-}

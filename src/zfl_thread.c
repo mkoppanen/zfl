@@ -108,31 +108,3 @@ zfl_thread_cancel (zfl_thread_t *self)
 {
     return 0;
 }
-
-
-//  --------------------------------------------------------------------------
-//  Selftest
-
-static void *
-test_thread (void *args) {
-    assert (streq ((char *) args, "HELLO"));
-    return NULL;
-}
-
-int
-zfl_thread_test (Bool verbose)
-{
-    zfl_thread_t
-        *thread;
-
-    printf (" * zfl_thread: ");
-    thread = zfl_thread_new (test_thread, "HELLO");
-    assert (thread);
-    zfl_thread_wait (thread);
-
-    zfl_thread_destroy (&thread);
-    assert (thread == NULL);
-
-    printf ("OK\n");
-    return 0;
-}

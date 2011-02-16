@@ -48,8 +48,6 @@ zfl_list_t *
     zfl_list_copy (zfl_list_t *self);
 size_t
     zfl_list_size (zfl_list_t *self);
-void
-    zfl_list_test (int verbose);
 
 #ifdef __cplusplus
 }

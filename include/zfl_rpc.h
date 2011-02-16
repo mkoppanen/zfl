@@ -39,8 +39,6 @@ void
     zfl_rpc_connect (zfl_rpc_t *self, char *server_id, char *endpoint);
 zfl_msg_t *
     zfl_rpc_send (zfl_rpc_t *self, zfl_msg_t **request_p);
-int
-    zfl_rpc_test (Bool verbose);
 
 #ifdef __cplusplus
 }

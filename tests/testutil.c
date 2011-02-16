@@ -1,8 +1,8 @@
 /*  =========================================================================
-    zfl_device.h - ZFL device class
+    testutil.c - testing utility functions
 
     -------------------------------------------------------------------------
-    Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
+    Copyright (c) 1991-2011 iMatix Corporation <www.imatix.com>
     Copyright other contributors as noted in the AUTHORS file.
 
     This file is part of the ZeroMQ Function Library: http://zfl.zeromq.org
@@ -22,33 +22,16 @@
     =========================================================================
 */
 
-#ifndef __ZFL_DEVICE_H_INCLUDED__
-#define __ZFL_DEVICE_H_INCLUDED__
+#include "testutil.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int zfl_test_runner (int argc, char *argv [], zfl_test_function f)
+{
+    Bool verbose;
 
-//  Opaque class structure
-typedef struct _zfl_device_t zfl_device_t;
+    if (argc == 2 && streq (argv [1], "-v"))
+        verbose = TRUE;
+    else
+        verbose = FALSE;
 
-zfl_device_t *
-    zfl_device_new (char *filename);
-void
-    zfl_device_destroy (zfl_device_t **self_p);
-void *
-    zfl_device_context (zfl_device_t *self);
-Bool
-    zfl_device_verbose (zfl_device_t *self);
-char *
-    zfl_device_locate (zfl_device_t *self, int index);
-char *
-    zfl_device_property (zfl_device_t *self, char *device_name, char *property);
-void *
-    zfl_device_socket (zfl_device_t *self, char *device, char *socket_name, int type);
-
-#ifdef __cplusplus
+    return f (verbose);
 }
-#endif
-
-#endif

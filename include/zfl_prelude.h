@@ -662,5 +662,4 @@ static inline void *
 #   define ZFL_EXPORT
 #endif
 
-
 #endif

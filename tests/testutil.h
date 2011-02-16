@@ -1,5 +1,7 @@
 /*  =========================================================================
-    zfl_device.h - ZFL device class
+    testutil.h - run selftests
+
+    Utilities for running tests
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,33 +24,25 @@
     =========================================================================
 */
 
-#ifndef __ZFL_DEVICE_H_INCLUDED__
-#define __ZFL_DEVICE_H_INCLUDED__
+#ifndef __ZFL_TEST_H__
+# define __ZFL_TEST_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "../include/zfl_prelude.h"
+#include "../include/zfl_base.h"
+#include "../include/zfl_blob.h"
+#include "../include/zfl_config.h"
+#include "../include/zfl_config_json.h"
+#include "../include/zfl_config_zpl.h"
+#include "../include/zfl_device.h"
+#include "../include/zfl_hash.h"
+#include "../include/zfl_list.h"
+#include "../include/zfl_msg.h"
+#include "../include/zfl_rpc.h"
+#include "../include/zfl_rpcd.h"
+#include "../include/zfl_thread.h"
 
-//  Opaque class structure
-typedef struct _zfl_device_t zfl_device_t;
+typedef int (*zfl_test_function)(Bool verbose);
 
-zfl_device_t *
-    zfl_device_new (char *filename);
-void
-    zfl_device_destroy (zfl_device_t **self_p);
-void *
-    zfl_device_context (zfl_device_t *self);
-Bool
-    zfl_device_verbose (zfl_device_t *self);
-char *
-    zfl_device_locate (zfl_device_t *self, int index);
-char *
-    zfl_device_property (zfl_device_t *self, char *device_name, char *property);
-void *
-    zfl_device_socket (zfl_device_t *self, char *device, char *socket_name, int type);
+int zfl_test_runner (int argc, char *argv [], zfl_test_function f);
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* __ZFL_TEST_H__ */

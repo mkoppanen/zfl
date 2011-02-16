@@ -1,5 +1,7 @@
 /*  =========================================================================
-    zfl_device.h - ZFL device class
+    zfl_tests.c - run selftests
+
+    Runs all selftests.
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,33 +24,24 @@
     =========================================================================
 */
 
-#ifndef __ZFL_DEVICE_H_INCLUDED__
-#define __ZFL_DEVICE_H_INCLUDED__
+#include "testutil.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int
+zfl_config_zpl_test (Bool verbose)
+{
+    zfl_config_t *config = zfl_config_zpl_file ("zfl_config_test.txt");
+    assert (config);
+    if (verbose) {
+        puts ("");
+        zfl_config_save (config, "-");
+    }
+    zfl_config_destroy (&config);
 
-//  Opaque class structure
-typedef struct _zfl_device_t zfl_device_t;
-
-zfl_device_t *
-    zfl_device_new (char *filename);
-void
-    zfl_device_destroy (zfl_device_t **self_p);
-void *
-    zfl_device_context (zfl_device_t *self);
-Bool
-    zfl_device_verbose (zfl_device_t *self);
-char *
-    zfl_device_locate (zfl_device_t *self, int index);
-char *
-    zfl_device_property (zfl_device_t *self, char *device_name, char *property);
-void *
-    zfl_device_socket (zfl_device_t *self, char *device, char *socket_name, int type);
-
-#ifdef __cplusplus
+    return 0;
 }
-#endif
 
-#endif
+int main (int argc, char *argv [])
+{
+    MALLOC_TRACE
+    zfl_test_runner (argc, argv, zfl_config_zpl_test);
+}

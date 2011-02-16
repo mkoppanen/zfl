@@ -1,5 +1,7 @@
 /*  =========================================================================
-    zfl_device.h - ZFL device class
+    zfl_tests.c - run selftests
+
+    Runs all selftests.
 
     -------------------------------------------------------------------------
     Copyright (c) 1991-2010 iMatix Corporation <www.imatix.com>
@@ -22,33 +24,41 @@
     =========================================================================
 */
 
-#ifndef __ZFL_DEVICE_H_INCLUDED__
-#define __ZFL_DEVICE_H_INCLUDED__
+#include <zmq.h>
+#include "testutil.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int
+zfl_rpc_test (Bool verbose)
+{
+    zfl_rpc_t
+        *rpc;
 
-//  Opaque class structure
-typedef struct _zfl_device_t zfl_device_t;
+    int major, minor, patch;
+    zmq_version (&major, &minor, &patch);
+    if ((major * 1000 + minor * 100 + patch) < 2100) {
+        printf ("E: need at least 0MQ version 2.1.0\n");
+        exit (EXIT_FAILURE);
+    }
+    void *context = zmq_init (1);
+    assert (context);
 
-zfl_device_t *
-    zfl_device_new (char *filename);
-void
-    zfl_device_destroy (zfl_device_t **self_p);
-void *
-    zfl_device_context (zfl_device_t *self);
-Bool
-    zfl_device_verbose (zfl_device_t *self);
-char *
-    zfl_device_locate (zfl_device_t *self, int index);
-char *
-    zfl_device_property (zfl_device_t *self, char *device_name, char *property);
-void *
-    zfl_device_socket (zfl_device_t *self, char *device, char *socket_name, int type);
+    rpc = zfl_rpc_new (context);
+    assert (rpc);
+    zfl_rpc_connect (rpc, "master", "tcp://127.0.0.1:5001");
+    zfl_rpc_connect (rpc, "slave", "tcp://127.0.0.1:5002");
 
-#ifdef __cplusplus
+    //  Don't actually send any data since the server won't be there
+
+    zfl_rpc_destroy (&rpc);
+    assert (rpc == NULL);
+
+    zmq_term (context);
+    return 0;
 }
-#endif
 
-#endif
+
+int main (int argc, char *argv [])
+{
+    MALLOC_TRACE
+    zfl_test_runner (argc, argv, zfl_rpc_test);
+}

@@ -34,13 +34,10 @@ libzfl_la_SOURCES = \
     zfl_thread.c
 
 INCLUDES = -I$(top_srcdir)/include
-bin_PROGRAMS = zfl_selftest
-zfl_selftest_LDADD = $(top_builddir)/src/libzfl.la
-zfl_selftest_SOURCES = zfl_selftest.c
+
 
 if ON_MINGW
-libzfl_la_LDFLAGS = -no-undefined -avoid-version -version-info @LTVER@ @LIBZFL_EXTRA_LDFLAGS@
+libzfl_la_LDFLAGS = -no-undefined -avoid-version -version-info @LTVER@
 else
-libzfl_la_LDFLAGS = -version-info @LTVER@ @LIBZFL_EXTRA_LDFLAGS@
+libzfl_la_LDFLAGS = -version-info @LTVER@
 endif
-

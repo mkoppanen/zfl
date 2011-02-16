@@ -182,39 +182,3 @@ zfl_blob_size (zfl_blob_t *self)
     assert (self);
     return self->size;
 }
-
-
-//  --------------------------------------------------------------------------
-//  Selftest
-
-int
-zfl_blob_test (Bool verbose)
-{
-    zfl_blob_t
-        *blob;
-    char
-        *string = "This is a string";
-    FILE
-        *file;
-
-    printf (" * zfl_blob: ");
-    blob = zfl_blob_new (NULL, 0);
-    assert (blob);
-    assert (zfl_blob_size (blob) == 0);
-
-    file = fopen ("zfl_blob.c", "r");
-    assert (file);
-    assert (zfl_blob_load (blob, file));
-    fclose (file);
-
-    assert (zfl_blob_size (blob) > 0);
-    zfl_blob_set_data (blob, (byte *) string, strlen (string));
-    assert (zfl_blob_size (blob) == strlen (string));
-    assert (streq ((char *) (zfl_blob_data (blob)), string));
-
-    zfl_blob_destroy (&blob);
-    assert (blob == NULL);
-
-    printf ("OK\n");
-    return 0;
-}

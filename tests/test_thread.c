@@ -24,46 +24,32 @@
     =========================================================================
 */
 
-#include "../include/zfl_prelude.h"
-#include "../include/zfl_base.h"
-#include "../include/zfl_blob.h"
-#include "../include/zfl_config.h"
-#include "../include/zfl_config_json.h"
-#include "../include/zfl_config_zpl.h"
-#include "../include/zfl_device.h"
-#include "../include/zfl_hash.h"
-#include "../include/zfl_list.h"
-#include "../include/zfl_msg.h"
-#include "../include/zfl_rpc.h"
-#include "../include/zfl_rpcd.h"
-#include "../include/zfl_thread.h"
+#include "testutil.h"
+
+static void *
+test_thread (void *args) {
+    assert (streq ((char *) args, "HELLO"));
+    return NULL;
+}
+
+int
+zfl_thread_test (Bool verbose)
+{
+    zfl_thread_t
+        *thread;
+
+    thread = zfl_thread_new (test_thread, "HELLO");
+    assert (thread);
+    zfl_thread_wait (thread);
+
+    zfl_thread_destroy (&thread);
+    assert (thread == NULL);
+
+    return 0;
+}
 
 int main (int argc, char *argv [])
 {
-    //  Enable malloc tracing if the platform supports it
     MALLOC_TRACE
-
-    Bool verbose;
-    if (argc == 2 && streq (argv [1], "-v"))
-        verbose = TRUE;
-    else
-        verbose = FALSE;
-
-    printf ("Running ZFL self tests...\n");
-
-    zfl_base_test (verbose);
-    zfl_blob_test (verbose);
-    zfl_config_test (verbose);
-    zfl_config_json_test (verbose);
-    zfl_config_zpl_test (verbose);
-    zfl_device_test (verbose);
-    zfl_hash_test (verbose);
-    zfl_list_test (verbose);
-    zfl_msg_test (verbose);
-    zfl_rpc_test (verbose);
-    zfl_rpcd_test (verbose);
-    zfl_thread_test (verbose);
-
-    printf ("Tests passed OK\n");
-    return 0;
+    zfl_test_runner (argc, argv, zfl_thread_test);
 }

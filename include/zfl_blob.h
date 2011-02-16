@@ -46,8 +46,6 @@ byte *
     zfl_blob_data (zfl_blob_t *self);
 size_t
     zfl_blob_size (zfl_blob_t *self);
-int
-    zfl_blob_test (Bool verbose);
 
 #ifdef __cplusplus
 }

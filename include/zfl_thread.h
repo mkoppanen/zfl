@@ -40,8 +40,6 @@ int
     zfl_thread_wait (zfl_thread_t *self);
 int
     zfl_thread_cancel (zfl_thread_t *self);
-int
-    zfl_thread_test (Bool verbose);
 
 #ifdef __cplusplus
 }

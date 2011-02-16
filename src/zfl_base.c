@@ -92,26 +92,3 @@ zfl_base_filler_set (zfl_base_t *self, int newvalue)
     self->filler = newvalue;
 }
 
-
-//  --------------------------------------------------------------------------
-//  Selftest
-
-int
-zfl_base_test (Bool verbose)
-{
-    zfl_base_t
-        *base;
-
-    printf (" * zfl_base: ");
-    base = zfl_base_new ();
-    assert (base);
-
-    zfl_base_filler_set (base, 123);
-    assert (zfl_base_filler (base) == 123);
-
-    zfl_base_destroy (&base);
-    assert (base == NULL);
-
-    printf ("OK\n");
-    return 0;
-}

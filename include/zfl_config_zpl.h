@@ -34,8 +34,6 @@ zfl_config_t *
     zfl_config_zpl (char *zpl_string);
 zfl_config_t *
     zfl_config_zpl_file (char *filename);
-int
-    zfl_config_zpl_test (Bool verbose);
 
 #ifdef __cplusplus
 }

@@ -40,8 +40,6 @@ int
     zfl_base_filler (zfl_base_t *self);
 void
     zfl_base_filler_set (zfl_base_t *self, int newvalue);
-int
-    zfl_base_test (Bool verbose);
 
 #ifdef __cplusplus
 }

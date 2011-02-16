@@ -64,8 +64,6 @@ char
     *zfl_msg_unwrap (zfl_msg_t *self);
 void
     zfl_msg_dump (zfl_msg_t *self);
-int
-    zfl_msg_test (int verbose);
 
 #ifdef __cplusplus
 }
